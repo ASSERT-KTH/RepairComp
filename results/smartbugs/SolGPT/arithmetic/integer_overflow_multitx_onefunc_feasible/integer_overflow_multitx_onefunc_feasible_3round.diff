@@ -1,0 +1,45 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/arithmetic/integer_overflow_multitx_onefunc_feasible.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/arithmetic/integer_overflow_multitx_onefunc_feasible/integer_overflow_multitx_onefunc_feasible_3round.sol
+@@ -1,12 +1,3 @@
+-/*
+
+- * @source: https://github.com/ConsenSys/evm-analyzer-benchmark-suite
+
+- * @author: Suhabe Bugrara
+
+- * @vulnerable_at_lines: 22
+
+- */
+
+-
+
+-//Multi-transactional, single function
+
+-//Arithmetic instruction reachable
+
+-
+
+ pragma solidity ^0.4.23;
+
+ 
+
+ contract IntegerOverflowMultiTxOneFuncFeasible {
+
+@@ -18,7 +9,8 @@
+             initialized = 1;
+
+             return;
+
+         }
+
+-        // <yes> <report> ARITHMETIC
+
++
+
++        require(input <= count, "Input must be less than or equal to count");
+
+         count -= input;
+
+     }
+
+ }

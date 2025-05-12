@@ -1,0 +1,143 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0x7a8721a9d64c74da899424c1b52acbf58ddc9782.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/TIPS/reentrancy/0x7a8721a9d64c74da899424c1b52acbf58ddc9782/0x7a8721a9d64c74da899424c1b52acbf58ddc9782R1.sol
+@@ -1,53 +1,37 @@
+-/*
+
+- * @source: etherscan.io
+
+- * @author: -
+
+- * @vulnerable_at_lines: 52
+
+- */
+
+-
+
+-pragma solidity ^0.4.19;
+
+-
+
+ contract PrivateDeposit {
+
+     mapping(address => uint) public balances;
+
+-
+
+     uint public MinDeposit = 1 ether;
+
+     address public owner;
+
+-
+
+     Log TransferLog;
+
+-
+
+     modifier onlyOwner() {
+
+         require(tx.origin == owner);
+
+         _;
+
+     }
+
+-
+
+-    function PrivateDeposit() {
+
++    constructor() public {
+
+         owner = msg.sender;
+
+         TransferLog = new Log();
+
+     }
+
+-
+
+-    function setLog(address _lib) onlyOwner {
+
++    function setLog(address _lib) public onlyOwner {
+
+         TransferLog = Log(_lib);
+
+     }
+
+-
+
+     function Deposit() public payable {
+
+         if (msg.value >= MinDeposit) {
+
+             balances[msg.sender] += msg.value;
+
+             TransferLog.AddMessage(msg.sender, msg.value, "Deposit");
+
+         }
+
+     }
+
+-
+
+-    function CashOut(uint _am) {
+
++    function CashOut(uint _am) public {
+
+         if (_am <= balances[msg.sender]) {
+
+-            // <yes> <report> REENTRANCY
+
+-            if (msg.sender.call.value(_am)()) {
+
++            if (msg.sender.send(_am)) {
+
+                 balances[msg.sender] -= _am;
+
+                 TransferLog.AddMessage(msg.sender, _am, "CashOut");
+
++            } else {
+
++                throw;
+
+             }
+
+         }
+
+     }
+
+-
+
+     function() public payable {}
+
+ }
+
+-
+
+ contract Log {
+
+     struct Message {
+
+         address Sender;
+
+@@ -55,11 +39,8 @@
+         uint Val;
+
+         uint Time;
+
+     }
+
+-
+
+     Message[] public History;
+
+-
+
+     Message LastMsg;
+
+-
+
+     function AddMessage(address _adr, uint _val, string _data) public {
+
+         LastMsg.Sender = _adr;
+
+         LastMsg.Time = now;

@@ -1,0 +1,37 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/access_control/proxy.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/access_control/proxy/proxy_4round.sol
+@@ -1,9 +1,3 @@
+-/*
+
+- * @source: https://smartcontractsecurity.github.io/SWC-registry/docs/SWC-112#proxysol
+
+- * @author: -
+
+- * @vulnerable_at_lines: 19
+
+- */
+
+-
+
+ pragma solidity ^0.4.24;
+
+ 
+
+ contract Proxy {
+
+@@ -14,7 +8,6 @@
+     }
+
+ 
+
+     function forward(address callee, bytes _data) public {
+
+-        // <yes> <report> ACCESS_CONTROL
+
+-        require(callee.delegatecall(_data)); //Use delegatecall with caution and make sure to never call into untrusted contracts
+
++        require(callee.call(_data));
+
+     }
+
+ }

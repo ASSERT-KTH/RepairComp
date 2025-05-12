@@ -104,9 +104,9 @@ Number of mitigated exploits directly corresponds to "vulnerability-free" contra
 |-------------------------|-----------------------|----------------------------|---------------------------|
 | sGuard | 1 | 30 | 0 |
 | sGuardPlus | 0 | 44 | 0 |
-| SmartFix | 4 | 47 | 1 |
+| SmartFix | 4 | 48 | 1 |
 | SolGPT | 7 | 67 | 4 |
 | TIPS | 1 | 45 | 4 |
 | Elysium (binary) | 26 | 29 | 1 |
-| SmartShield (binary) | 21 | 25 | 0 |
+| SmartShield (binary) | 21 | 26 | 0 |
 Exploits not mitigated by any tool:  11

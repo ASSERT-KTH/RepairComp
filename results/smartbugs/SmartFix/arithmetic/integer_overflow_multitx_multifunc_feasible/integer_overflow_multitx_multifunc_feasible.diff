@@ -1,0 +1,16 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/arithmetic/integer_overflow_multitx_multifunc_feasible.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/arithmetic/integer_overflow_multitx_multifunc_feasible/integer_overflow_multitx_multifunc_feasible.sol
+@@ -22,6 +22,7 @@
+             return;
+
+         }
+
+         // <yes> <report> ARITHMETIC
+
++        require((count >= input)); /* <FIX> Insert:BC */
+
+         count -= input;
+
+     }
+
+ }

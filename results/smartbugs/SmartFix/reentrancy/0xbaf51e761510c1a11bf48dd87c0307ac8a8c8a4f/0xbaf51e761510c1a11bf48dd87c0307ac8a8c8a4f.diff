@@ -1,0 +1,53 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0xbaf51e761510c1a11bf48dd87c0307ac8a8c8a4f.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/reentrancy/0xbaf51e761510c1a11bf48dd87c0307ac8a8c8a4f/0xbaf51e761510c1a11bf48dd87c0307ac8a8c8a4f.sol
+@@ -19,6 +19,9 @@
+ 
+
+     function Deposit() public payable {
+
+         if (msg.value > MinDeposit) {
+
++            require(
+
++                ((balances[msg.sender] + msg.value) >= balances[msg.sender])
+
++            ); /* <FIX> Insert:BC */
+
+             balances[msg.sender] += msg.value;
+
+             TransferLog.AddMessage(msg.sender, msg.value, "Deposit");
+
+         }
+
+@@ -27,10 +30,14 @@
+     function CashOut(uint _am) public payable {
+
+         if (_am <= balances[msg.sender]) {
+
+             // <yes> <report> REENTRANCY
+
++            balances[msg.sender] = (balances[msg.sender] -
+
++                _am); /* <FIX> Move */
+
+             if (msg.sender.call.value(_am)()) {
+
+-                balances[msg.sender] -= _am;
+
++                /* <FIX> Move: balances[msg.sender]-=_am; */
+
+                 TransferLog.AddMessage(msg.sender, _am, "CashOut");
+
+-            }
+
++            } else {
+
++                revert();
+
++            } /* <FIX> add revert */
+
+         }
+
+     }
+
+ 

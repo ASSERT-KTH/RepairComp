@@ -1,0 +1,70 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/arithmetic/integer_overflow_multitx_onefunc_feasible.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/arithmetic/integer_overflow_multitx_onefunc_feasible/integer_overflow_multitx_onefunc_feasible.sol
+@@ -1,24 +1,19 @@
+-/*
+
+- * @source: https://github.com/ConsenSys/evm-analyzer-benchmark-suite
+
+- * @author: Suhabe Bugrara
+
+- * @vulnerable_at_lines: 22
+
+- */
+
+-
+
+-//Multi-transactional, single function
+
+-//Arithmetic instruction reachable
+
+-
+
+-pragma solidity ^0.4.23;
+
+-
+
+-contract IntegerOverflowMultiTxOneFuncFeasible {
+
++contract sGuardPlus {
+
++    constructor() internal {}
+
++    function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++        assert(b <= a);
+
++        return a - b;
+
++    }
+
++}
+
++contract IntegerOverflowMultiTxOneFuncFeasible is sGuardPlus {
+
+     uint256 private initialized = 0;
+
+     uint256 public count = 1;
+
+-
+
+     function run(uint256 input) public {
+
+         if (initialized == 0) {
+
+             initialized = 1;
+
+             return;
+
+         }
+
+-        // <yes> <report> ARITHMETIC
+
+-        count -= input;
+
++
+
++        count = sub_uint256(count, input);
+
+     }
+
+ }

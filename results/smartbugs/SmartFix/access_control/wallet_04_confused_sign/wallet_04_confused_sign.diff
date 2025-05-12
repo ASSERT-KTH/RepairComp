@@ -1,0 +1,22 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/access_control/wallet_04_confused_sign.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/access_control/wallet_04_confused_sign/wallet_04_confused_sign.sol
+@@ -27,7 +27,9 @@
+ 
+
+     function withdraw(uint256 amount) public {
+
+         // <yes> <report> ACCESS_CONTROL
+
+-        require(amount >= balances[msg.sender]);
+
++        require(
+
++            (amount <= balances[msg.sender])
+
++        ); /* <FIX> Replace: "(amount >= balances[msg.sender])" => "(amount <= balances[msg.sender])" */
+
+         msg.sender.transfer(amount);
+
+         balances[msg.sender] -= amount;
+
+     }

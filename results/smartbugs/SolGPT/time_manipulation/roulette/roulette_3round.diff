@@ -1,0 +1,72 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/time_manipulation/roulette.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/time_manipulation/roulette/roulette_3round.sol
+@@ -1,25 +1,19 @@
+-/*
+
+- * @source: https://github.com/sigp/solidity-security-blog
+
+- * @author: -
+
+- * @vulnerable_at_lines: 18,20
+
+- */
+
+-
+
+ pragma solidity ^0.4.25;
+
+ 
+
+ contract Roulette {
+
+-    uint public pastBlockTime; // Forces one bet per block
+
++    uint public pastBlockTime;
+
+ 
+
+-    constructor() public payable {} // initially fund contract
+
++    constructor() public payable {}
+
+ 
+
+-    // fallback function used to make a bet
+
+     function() public payable {
+
+-        require(msg.value == 10 ether); // must send 10 ether to play
+
+-        // <yes> <report> TIME_MANIPULATION
+
+-        require(now != pastBlockTime); // only 1 transaction per block
+
+-        // <yes> <report> TIME_MANIPULATION
+
+-        pastBlockTime = now;
+
+-        if (now % 15 == 0) {
+
+-            // winner
+
++        require(msg.value == 10 ether);
+
++
+
++        require(now > pastBlockTime);
+
++
+
++        pastBlockTime = now + 1; // Increment pastBlockTime to avoid reusing the same block time
+
++
+
++        if (block.number % 15 == 0) {
+
++            // Use block.number instead of now for randomness
+
+             msg.sender.transfer(this.balance);
+
+         }
+
+     }

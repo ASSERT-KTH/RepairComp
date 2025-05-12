@@ -1,0 +1,18 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/access_control/incorrect_constructor_name2.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/access_control/incorrect_constructor_name2/incorrect_constructor_name2.sol
+@@ -14,7 +14,7 @@
+         _;
+
+     }
+
+     // <yes> <report> ACCESS_CONTROL
+
+-    function missing() public {
+
++    /* <FIX> Change to Cnstr: */ constructor() public {
+
+         owner = msg.sender;
+
+     }
+
+ 

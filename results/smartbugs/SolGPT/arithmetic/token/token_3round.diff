@@ -1,0 +1,43 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/arithmetic/token.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/arithmetic/token/token_3round.sol
+@@ -1,9 +1,3 @@
+-/*
+
+- * @source: https://github.com/sigp/solidity-security-blog
+
+- * @author: Steve Marx
+
+- * @vulnerable_at_lines: 20,22
+
+- */
+
+-
+
+ pragma solidity ^0.4.18;
+
+ 
+
+ contract Token {
+
+@@ -15,9 +9,8 @@
+     }
+
+ 
+
+     function transfer(address _to, uint _value) public returns (bool) {
+
+-        // <yes> <report> ARITHMETIC
+
+-        require(balances[msg.sender] - _value >= 0);
+
+-        // <yes> <report> ARITHMETIC
+
++        require(balances[msg.sender] >= _value); // Check if sender has enough balance to transfer
+
++
+
+         balances[msg.sender] -= _value;
+
+         balances[_to] += _value;
+
+         return true;

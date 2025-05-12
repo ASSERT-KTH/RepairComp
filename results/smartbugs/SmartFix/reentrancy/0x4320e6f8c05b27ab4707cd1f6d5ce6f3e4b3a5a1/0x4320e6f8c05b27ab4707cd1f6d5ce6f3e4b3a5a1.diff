@@ -1,0 +1,53 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0x4320e6f8c05b27ab4707cd1f6d5ce6f3e4b3a5a1.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/reentrancy/0x4320e6f8c05b27ab4707cd1f6d5ce6f3e4b3a5a1/0x4320e6f8c05b27ab4707cd1f6d5ce6f3e4b3a5a1.sol
+@@ -30,6 +30,9 @@
+     }
+
+ 
+
+     function Deposit() public payable {
+
++        require(
+
++            ((balances[msg.sender] + msg.value) >= balances[msg.sender])
+
++        ); /* <FIX> Insert:BC */
+
+         balances[msg.sender] += msg.value;
+
+         Log.AddMessage(msg.sender, msg.value, "Put");
+
+     }
+
+@@ -37,10 +40,14 @@
+     function Collect(uint _am) public payable {
+
+         if (balances[msg.sender] >= MinSum && balances[msg.sender] >= _am) {
+
+             // <yes> <report> REENTRANCY
+
++            balances[msg.sender] = (balances[msg.sender] -
+
++                _am); /* <FIX> Move */
+
+             if (msg.sender.call.value(_am)()) {
+
+-                balances[msg.sender] -= _am;
+
++                /* <FIX> Move: balances[msg.sender]-=_am; */
+
+                 Log.AddMessage(msg.sender, _am, "Collect");
+
+-            }
+
++            } else {
+
++                revert();
+
++            } /* <FIX> add revert */
+
+         }
+
+     }
+
+ 

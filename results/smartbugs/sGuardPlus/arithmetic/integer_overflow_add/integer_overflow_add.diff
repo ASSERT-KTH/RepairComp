@@ -1,0 +1,64 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/arithmetic/integer_overflow_add.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/arithmetic/integer_overflow_add/integer_overflow_add.sol
+@@ -1,19 +1,14 @@
+-/*
+
+- * @source: https://github.com/ConsenSys/evm-analyzer-benchmark-suite/blob/master/benchmarks/integer_overflow_add.sol
+
+- * @author: -
+
+- * @vulnerable_at_lines: 17
+
+- */
+
+-
+
+-//Single transaction overflow
+
+-//Post-transaction effect: overflow escapes to publicly-readable storage
+
+-
+
+-pragma solidity ^0.4.19;
+
+-
+
+-contract IntegerOverflowAdd {
+
+-    uint public count = 1;
+
+-
+
+-    function run(uint256 input) public {
+
+-        // <yes> <report> ARITHMETIC
+
+-        count += input;
+
++contract sGuardPlus {
+
++    constructor() internal {}
+
++    function add_uint(uint a, uint b) internal pure returns (uint) {
+
++        uint c = a + b;
+
++        assert(c >= a);
+
++        return c;
+
+     }
+
+ }
+
++contract IntegerOverflowAdd is sGuardPlus {
+
++    uint public count = 1;
+
++    function run(uint256 input) public {
+
++        count = add_uint(count, input);
+
++    }
+
++}

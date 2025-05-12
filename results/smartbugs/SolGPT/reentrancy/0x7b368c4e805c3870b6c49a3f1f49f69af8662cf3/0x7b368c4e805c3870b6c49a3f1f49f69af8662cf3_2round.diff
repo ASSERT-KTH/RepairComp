@@ -1,0 +1,167 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0x7b368c4e805c3870b6c49a3f1f49f69af8662cf3.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/reentrancy/0x7b368c4e805c3870b6c49a3f1f49f69af8662cf3/0x7b368c4e805c3870b6c49a3f1f49f69af8662cf3_2round.sol
+@@ -1,49 +1,41 @@
+-/*
+
+- * @source: etherscan.io
+
+- * @author: -
+
+- * @vulnerable_at_lines: 29
+
+- */
+
+-
+
+ pragma solidity ^0.4.25;
+
+ 
+
+ contract W_WALLET {
+
+-    function Put(uint _unlockTime) public payable {
+
+-        var acc = Acc[msg.sender];
+
+-        acc.balance += msg.value;
+
+-        acc.unlockTime = _unlockTime > now ? _unlockTime : now;
+
+-        LogFile.AddMessage(msg.sender, msg.value, "Put");
+
+-    }
+
+-
+
+-    function Collect(uint _am) public payable {
+
+-        var acc = Acc[msg.sender];
+
+-        if (
+
+-            acc.balance >= MinSum && acc.balance >= _am && now > acc.unlockTime
+
+-        ) {
+
+-            // <yes> <report> REENTRANCY
+
+-            if (msg.sender.call.value(_am)()) {
+
+-                acc.balance -= _am;
+
+-                LogFile.AddMessage(msg.sender, _am, "Collect");
+
+-            }
+
+-        }
+
+-    }
+
+-
+
+-    function() public payable {
+
+-        Put(0);
+
+-    }
+
+-
+
+     struct Holder {
+
+         uint unlockTime;
+
+         uint balance;
+
+     }
+
+ 
+
+     mapping(address => Holder) public Acc;
+
+-
+
+     Log LogFile;
+
+-
+
+     uint public MinSum = 1 ether;
+
+ 
+
+     function W_WALLET(address log) public {
+
+         LogFile = Log(log);
+
++    }
+
++
+
++    function Put(uint _unlockTime) public payable {
+
++        Holder storage acc = Acc[msg.sender];
+
++        acc.balance += msg.value;
+
++        acc.unlockTime = _unlockTime > now ? _unlockTime : now;
+
++        LogFile.AddMessage(msg.sender, msg.value, "Put");
+
++    }
+
++
+
++    function Collect(uint _am) public {
+
++        Holder storage acc = Acc[msg.sender];
+
++        require(
+
++            acc.balance >= MinSum && acc.balance >= _am && now > acc.unlockTime,
+
++            "Insufficient balance or unlock time not reached"
+
++        );
+
++
+
++        acc.balance -= _am;
+
++        LogFile.AddMessage(msg.sender, _am, "Collect");
+
++
+
++        require(msg.sender.call.value(_am)(), "Transfer failed");
+
++    }
+
++
+
++    function() public payable {
+
++        Put(0);
+
+     }
+
+ }
+
+ 
+
+@@ -56,8 +48,7 @@
+     }
+
+ 
+
+     Message[] public History;
+
+-
+
+-    Message LastMsg;
+
++    Message public LastMsg;
+
+ 
+
+     function AddMessage(address _adr, uint _val, string _data) public {
+
+         LastMsg.Sender = _adr;

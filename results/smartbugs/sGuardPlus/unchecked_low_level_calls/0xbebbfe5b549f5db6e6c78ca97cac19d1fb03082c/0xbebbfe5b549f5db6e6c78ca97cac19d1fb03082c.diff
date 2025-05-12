@@ -1,0 +1,69 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0xbebbfe5b549f5db6e6c78ca97cac19d1fb03082c.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/unchecked_low_level_calls/0xbebbfe5b549f5db6e6c78ca97cac19d1fb03082c/0xbebbfe5b549f5db6e6c78ca97cac19d1fb03082c.sol
+@@ -1,11 +1,6 @@
+-/*
+
+- * @source: etherscan.io
+
+- * @author: -
+
+- * @vulnerable_at_lines: 14
+
+- */
+
+-
+
+-pragma solidity ^0.4.24;
+
+-
+
++contract sGuardPlus {
+
++    constructor() internal {}
+
++}
+
+ contract Proxy {
+
+     modifier onlyOwner() {
+
+         if (msg.sender == Owner) _;
+
+@@ -14,16 +9,15 @@
+     function transferOwner(address _owner) public onlyOwner {
+
+         Owner = _owner;
+
+     }
+
++
+
+     function proxy(address target, bytes data) public payable {
+
+-        // <yes> <report> UNCHECKED_LL_CALLS
+
+-        target.call.value(msg.value)(data);
+
++        bool __sent_result100 = target.call.value(msg.value)(data);
+
++        require(__sent_result100);
+
+     }
+
+ }
+
+-
+
+ contract VaultProxy is Proxy {
+
+     address public Owner;
+
+     mapping(address => uint256) public Deposits;
+
+-
+
+     function() public payable {}
+
+ 
+
+     function Vault() public payable {

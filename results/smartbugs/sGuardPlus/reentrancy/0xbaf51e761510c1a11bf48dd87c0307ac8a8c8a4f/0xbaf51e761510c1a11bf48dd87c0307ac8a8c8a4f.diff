@@ -1,0 +1,127 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0xbaf51e761510c1a11bf48dd87c0307ac8a8c8a4f.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/reentrancy/0xbaf51e761510c1a11bf48dd87c0307ac8a8c8a4f/0xbaf51e761510c1a11bf48dd87c0307ac8a8c8a4f.sol
+@@ -1,19 +1,21 @@
+-/*
+
+- * @source: etherscan.io
+
+- * @author: -
+
+- * @vulnerable_at_lines: 41
+
+- */
+
++contract sGuardPlus {
+
++    constructor() internal {
+
++        __lock_modifier0_lock = false;
+
++    }
+
+ 
+
+-pragma solidity ^0.4.19;
+
+-
+
+-contract ETH_VAULT {
+
++    bool private __lock_modifier0_lock;
+
++    modifier __lock_modifier0() {
+
++        require(!__lock_modifier0_lock);
+
++        __lock_modifier0_lock = true;
+
++        _;
+
++        __lock_modifier0_lock = false;
+
++    }
+
++}
+
++contract ETH_VAULT is sGuardPlus {
+
+     mapping(address => uint) public balances;
+
+-
+
+     uint public MinDeposit = 1 ether;
+
+-
+
+     Log TransferLog;
+
+-
+
+-    function ETH_VAULT(address _log) public {
+
++    constructor(address _log) public {
+
+         TransferLog = Log(_log);
+
+     }
+
+ 
+
+@@ -24,9 +26,8 @@
+         }
+
+     }
+
+ 
+
+-    function CashOut(uint _am) public payable {
+
++    function CashOut(uint _am) public payable __lock_modifier0 {
+
+         if (_am <= balances[msg.sender]) {
+
+-            // <yes> <report> REENTRANCY
+
+             if (msg.sender.call.value(_am)()) {
+
+                 balances[msg.sender] -= _am;
+
+                 TransferLog.AddMessage(msg.sender, _am, "CashOut");
+
+@@ -36,7 +37,6 @@
+ 
+
+     function() public payable {}
+
+ }
+
+-
+
+ contract Log {
+
+     struct Message {
+
+         address Sender;
+
+@@ -44,11 +44,8 @@
+         uint Val;
+
+         uint Time;
+
+     }
+
+-
+
+     Message[] public History;
+
+-
+
+     Message LastMsg;
+
+-
+
+     function AddMessage(address _adr, uint _val, string _data) public {
+
+         LastMsg.Sender = _adr;
+
+         LastMsg.Time = now;

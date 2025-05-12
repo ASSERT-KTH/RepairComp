@@ -1,0 +1,42 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/arithmetic/timelock.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/arithmetic/timelock/timelock.sol
+@@ -12,12 +12,20 @@
+     mapping(address => uint) public lockTime;
+
+ 
+
+     function deposit() public payable {
+
++        require(
+
++            ((balances[msg.sender] + msg.value) >= balances[msg.sender])
+
++        ); /* <FIX> Insert:BC */
+
+         balances[msg.sender] += msg.value;
+
++        require(((now + 604800) >= now)); /* <FIX> Insert:BC */
+
+         lockTime[msg.sender] = now + 1 weeks;
+
+     }
+
+ 
+
+     function increaseLockTime(uint _secondsToIncrease) public {
+
+         // <yes> <report> ARITHMETIC
+
++        require(
+
++            ((lockTime[msg.sender] + _secondsToIncrease) >=
+
++                lockTime[msg.sender])
+
++        ); /* <FIX> Insert:BC */
+
+         lockTime[msg.sender] += _secondsToIncrease;
+
+     }
+
+ 

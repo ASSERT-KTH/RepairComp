@@ -1,0 +1,136 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0xb5e1b1ee15c6fa0e48fce100125569d430f1bd12.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/reentrancy/0xb5e1b1ee15c6fa0e48fce100125569d430f1bd12/0xb5e1b1ee15c6fa0e48fce100125569d430f1bd12.sol
+@@ -1,12 +1,33 @@
++contract sGuard {
+
++    function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++        assert(b <= a);
+
++        return a - b;
+
++    }
+
++
+
++    bool internal locked_;
+
++    constructor() internal {
+
++        locked_ = false;
+
++    }
+
++    modifier nonReentrant_() {
+
++        require(!locked_);
+
++        locked_ = true;
+
++        _;
+
++        locked_ = false;
+
++    }
+
++
+
++    function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++        uint256 c = a + b;
+
++        assert(c >= a);
+
++        return c;
+
++    }
+
++}
+
+ /*
+
+  * @source: etherscan.io
+
+  * @author: -
+
+  * @vulnerable_at_lines: 40
+
+  */
+
+ 
+
+-pragma solidity ^0.4.19;
+
+-
+
+-contract Private_Bank {
+
++contract Private_Bank is sGuard {
+
+     mapping(address => uint) public balances;
+
+ 
+
+     uint public MinDeposit = 1 ether;
+
+@@ -17,18 +38,18 @@
+         TransferLog = Log(_log);
+
+     }
+
+ 
+
+-    function Deposit() public payable {
+
++    function Deposit() public payable nonReentrant_ {
+
+         if (msg.value > MinDeposit) {
+
+-            balances[msg.sender] += msg.value;
+
++            balances[msg.sender] = add_uint256(balances[msg.sender], msg.value);
+
+             TransferLog.AddMessage(msg.sender, msg.value, "Deposit");
+
+         }
+
+     }
+
+ 
+
+-    function CashOut(uint _am) public payable {
+
++    function CashOut(uint _am) public payable nonReentrant_ {
+
+         if (_am <= balances[msg.sender]) {
+
+             // <yes> <report> REENTRANCY
+
+             if (msg.sender.call.value(_am)()) {
+
+-                balances[msg.sender] -= _am;
+
++                balances[msg.sender] = sub_uint256(balances[msg.sender], _am);
+
+                 TransferLog.AddMessage(msg.sender, _am, "CashOut");
+
+             }
+
+         }
+
+@@ -37,7 +58,7 @@
+     function() public payable {}
+
+ }
+
+ 
+
+-contract Log {
+
++contract Log is sGuard {
+
+     struct Message {
+
+         address Sender;
+
+         string Data;

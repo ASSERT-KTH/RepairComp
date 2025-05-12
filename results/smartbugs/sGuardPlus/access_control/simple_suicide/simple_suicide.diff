@@ -1,0 +1,56 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/access_control/simple_suicide.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/access_control/simple_suicide/simple_suicide.sol
+@@ -1,15 +1,16 @@
+-/*
+
+- * @source: https://github.com/SmartContractSecurity/SWC-registry/blob/master/test_cases/unprotected_critical_functions/simple_suicide.sol
+
+- * @author: -
+
+- * @vulnerable_at_lines: 12,13
+
+- */
+
++contract sGuardPlus {
+
++    constructor() internal {
+
++        __owner = msg.sender;
+
++    }
+
+ 
+
+-//added prgma version
+
+-pragma solidity ^0.4.0;
+
+-
+
+-contract SimpleSuicide {
+
+-    // <yes> <report> ACCESS_CONTROL
+
+-    function sudicideAnyone() {
+
++    address private __owner;
+
++    modifier __onlyOwner() {
+
++        require(msg.sender == __owner);
+
++        _;
+
++    }
+
++}
+
++contract SimpleSuicide is sGuardPlus {
+
++    function sudicideAnyone() __onlyOwner {
+
+         selfdestruct(msg.sender);
+
+     }
+
+ }

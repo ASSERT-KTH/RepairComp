@@ -1,0 +1,65 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/access_control/wallet_02_refund_nosub.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/access_control/wallet_02_refund_nosub/wallet_02_refund_nosub_1round.sol
+@@ -1,15 +1,4 @@
+-/*
+
+- * @source: https://smartcontractsecurity.github.io/SWC-registry/docs/SWC-105#wallet-02-refund-nosubsol
+
+- * @author: -
+
+- * @vulnerable_at_lines: 36
+
+- */
+
+-
+
+ pragma solidity ^0.4.24;
+
+-
+
+-/* User can add pay in and withdraw Ether.
+
+-    Unfortunately the developer forgot set the user's balance to 0 when refund() is called.
+
+-    An attacker can pay in a small amount of Ether and call refund() repeatedly to empty the contract.
+
+- */
+
+ 
+
+ contract Wallet {
+
+     address creator;
+
+@@ -32,14 +21,12 @@
+     }
+
+ 
+
+     function refund() public {
+
+-        // <yes> <report> ACCESS_CONTROL
+
+         msg.sender.transfer(balances[msg.sender]);
+
++        balances[msg.sender] = 0;
+
+     }
+
+-
+
+-    // In an emergency the owner can migrate  allfunds to a different address.
+
+ 
+
+     function migrateTo(address to) public {
+
+         require(creator == msg.sender);
+
+-        to.transfer(this.balance);
+
++        to.transfer(address(this).balance);
+
+     }
+
+ }

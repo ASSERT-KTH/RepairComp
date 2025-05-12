@@ -1,0 +1,22 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/access_control/mycontract.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/access_control/mycontract/mycontract.sol
+@@ -16,7 +16,9 @@
+ 
+
+     function sendTo(address receiver, uint amount) public {
+
+         // <yes> <report> ACCESS_CONTROL
+
+-        require(tx.origin == owner);
+
++        require(
+
++            msg.sender == owner
+
++        ); /* <FIX> Replace: "tx.origin" => "msg.sender" */
+
+         receiver.transfer(amount);
+
+     }
+
+ }

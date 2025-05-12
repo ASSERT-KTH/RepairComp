@@ -1,0 +1,119 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0x23a91059fdc9579a9fbd0edc5f2ea0bfdb70deb4.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/TIPS/reentrancy/0x23a91059fdc9579a9fbd0edc5f2ea0bfdb70deb4/0x23a91059fdc9579a9fbd0edc5f2ea0bfdb70deb4R1.sol
+@@ -1,42 +1,28 @@
+-/*
+
+- * @source: etherscan.io
+
+- * @author: -
+
+- * @vulnerable_at_lines: 38
+
+- */
+
+-
+
+-pragma solidity ^0.4.19;
+
+-
+
+ contract PrivateBank {
+
+     mapping(address => uint) public balances;
+
+-
+
+     uint public MinDeposit = 1 ether;
+
+-
+
+     Log TransferLog;
+
+-
+
+-    function PrivateBank(address _log) {
+
++    constructor(address _log) public {
+
+         TransferLog = Log(_log);
+
+     }
+
+-
+
+     function Deposit() public payable {
+
+         if (msg.value >= MinDeposit) {
+
+             balances[msg.sender] += msg.value;
+
+             TransferLog.AddMessage(msg.sender, msg.value, "Deposit");
+
+         }
+
+     }
+
+-
+
+-    function CashOut(uint _am) {
+
++    function CashOut(uint _am) public {
+
+         if (_am <= balances[msg.sender]) {
+
+-            // <yes> <report> REENTRANCY
+
+-            if (msg.sender.call.value(_am)()) {
+
++            if (msg.sender.send(_am)) {
+
+                 balances[msg.sender] -= _am;
+
+                 TransferLog.AddMessage(msg.sender, _am, "CashOut");
+
++            } else {
+
++                throw;
+
+             }
+
+         }
+
+     }
+
+-
+
+     function() public payable {}
+
+ }
+
+-
+
+ contract Log {
+
+     struct Message {
+
+         address Sender;
+
+@@ -44,11 +30,8 @@
+         uint Val;
+
+         uint Time;
+
+     }
+
+-
+
+     Message[] public History;
+
+-
+
+     Message LastMsg;
+
+-
+
+     function AddMessage(address _adr, uint _val, string _data) public {
+
+         LastMsg.Sender = _adr;
+
+         LastMsg.Time = now;

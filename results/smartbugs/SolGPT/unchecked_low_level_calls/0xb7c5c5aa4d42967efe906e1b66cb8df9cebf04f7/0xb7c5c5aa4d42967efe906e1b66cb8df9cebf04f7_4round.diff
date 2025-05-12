@@ -1,0 +1,57 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0xb7c5c5aa4d42967efe906e1b66cb8df9cebf04f7.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/unchecked_low_level_calls/0xb7c5c5aa4d42967efe906e1b66cb8df9cebf04f7/0xb7c5c5aa4d42967efe906e1b66cb8df9cebf04f7_4round.sol
+@@ -1,17 +1,4 @@
+-/*
+
+- * @source: etherscan.io
+
+- * @author: -
+
+- * @vulnerable_at_lines: 25
+
+- */
+
+-
+
+ pragma solidity ^0.4.23;
+
+-
+
+-/*
+
+-!!! THIS CONTRACT IS EXPLOITABLE AND FOR EDUCATIONAL PURPOSES ONLY !!!
+
+-
+
+-This smart contract allows a user to (insecurely) store funds
+
+-in this smart contract and withdraw them at any later point in time
+
+-*/
+
+ 
+
+ contract keepMyEther {
+
+     mapping(address => uint256) public balances;
+
+@@ -21,8 +8,8 @@
+     }
+
+ 
+
+     function withdraw() public {
+
+-        // <yes> <report> UNCHECKED_LL_CALLS
+
+-        msg.sender.call.value(balances[msg.sender])();
+
++        uint256 balance = balances[msg.sender];
+
+         balances[msg.sender] = 0;
+
++        msg.sender.transfer(balance);
+
+     }
+
+ }
