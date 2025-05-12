@@ -1,0 +1,18 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/access_control/wallet_03_wrong_constructor.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/access_control/wallet_03_wrong_constructor/wallet_03_wrong_constructor.sol
+@@ -16,7 +16,7 @@
+     mapping(address => uint256) balances;
+
+ 
+
+     // <yes> <report> ACCESS_CONTROL
+
+-    function initWallet() public {
+
++    /* <FIX> Change to Cnstr: */ constructor() public {
+
+         creator = msg.sender;
+
+     }
+
+ 

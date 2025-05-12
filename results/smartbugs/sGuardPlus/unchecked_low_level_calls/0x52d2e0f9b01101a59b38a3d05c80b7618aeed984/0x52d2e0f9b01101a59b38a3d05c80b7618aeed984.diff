@@ -1,0 +1,84 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0x52d2e0f9b01101a59b38a3d05c80b7618aeed984.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/unchecked_low_level_calls/0x52d2e0f9b01101a59b38a3d05c80b7618aeed984/0x52d2e0f9b01101a59b38a3d05c80b7618aeed984.sol
+@@ -1,30 +1,30 @@
+-/*
+
+- * @source: etherscan.io
+
+- * @author: -
+
+- * @vulnerable_at_lines: 27
+
+- */
+
+-
+
+-pragma solidity ^0.4.19;
+
++contract sGuardPlus {
+
++    constructor() internal {}
+
++}
+
+ contract Token {
+
+     function transfer(address _to, uint _value) returns (bool success);
+
+     function balanceOf(address _owner) constant returns (uint balance);
+
+ }
+
+ contract EtherGet {
+
+     address owner;
+
+-    function EtherGet() {
+
++    constructor() {
+
+         owner = msg.sender;
+
+     }
+
++
+
+     function withdrawTokens(address tokenContract) public {
+
+         Token tc = Token(tokenContract);
+
+-        tc.transfer(owner, tc.balanceOf(this));
+
++        bool __sent_result100 = tc.transfer(owner, tc.balanceOf(this));
+
++        require(__sent_result100);
+
+     }
+
++
+
+     function withdrawEther() public {
+
+         owner.transfer(this.balance);
+
+     }
+
++
+
+     function getTokens(uint num, address addr) public {
+
+         for (uint i = 0; i < num; i++) {
+
+-            // <yes> <report> UNCHECKED_LL_CALLS
+
+-            addr.call.value(0 wei)();
+
++            bool __sent_result102 = addr.call.value(0 wei)();
+
++            require(__sent_result102);
+
+         }
+
+     }
+
+ }

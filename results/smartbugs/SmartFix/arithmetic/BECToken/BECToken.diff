@@ -1,0 +1,22 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/arithmetic/BECToken.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/arithmetic/BECToken/BECToken.sol
+@@ -287,6 +287,10 @@
+     ) public whenNotPaused returns (bool) {
+
+         uint cnt = _receivers.length;
+
+         // <yes> <report> ARITHMETIC
+
++        require(
+
++            ((uint256(cnt) == 0) ||
+
++                (((uint256(cnt) * _value) / uint256(cnt)) == _value))
+
++        ); /* <FIX> Insert:BC */
+
+         uint256 amount = uint256(cnt) * _value;
+
+         require(cnt > 0 && cnt <= 20);
+
+         require(_value > 0 && balances[msg.sender] >= amount);

@@ -1,0 +1,57 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/arithmetic/tokensalechallenge.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/arithmetic/tokensalechallenge/tokensalechallenge.sol
+@@ -20,8 +20,16 @@
+ 
+
+     function buy(uint256 numTokens) public payable {
+
+         // <yes> <report> ARITHMETIC
+
++        require(
+
++            ((numTokens == 0) ||
+
++                (((numTokens * PRICE_PER_TOKEN) / numTokens) ==
+
++                    PRICE_PER_TOKEN))
+
++        ); /* <FIX> Insert:BC */
+
+         require(msg.value == numTokens * PRICE_PER_TOKEN);
+
+         // <yes> <report> ARITHMETIC
+
++        require(
+
++            ((balanceOf[msg.sender] + numTokens) >= balanceOf[msg.sender])
+
++        ); /* <FIX> Insert:BC */
+
+         balanceOf[msg.sender] += numTokens;
+
+     }
+
+ 
+
+@@ -30,6 +38,11 @@
+ 
+
+         balanceOf[msg.sender] -= numTokens;
+
+         // <yes> <report> ARITHMETIC
+
++        require(
+
++            ((numTokens == 0) ||
+
++                (((numTokens * PRICE_PER_TOKEN) / numTokens) ==
+
++                    PRICE_PER_TOKEN))
+
++        ); /* <FIX> Insert:BC */
+
+         msg.sender.transfer(numTokens * PRICE_PER_TOKEN);
+
+     }
+
+ }

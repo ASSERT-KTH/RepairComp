@@ -1,0 +1,60 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/arithmetic/overflow_single_tx.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/arithmetic/overflow_single_tx/overflow_single_tx.sol
+@@ -15,6 +15,7 @@
+     // ADD overflow with result stored in state variable.
+
+     function overflowaddtostate(uint256 input) public {
+
+         // <yes> <report> ARITHMETIC
+
++        require(((count + input) >= count)); /* <FIX> Insert:BC */
+
+         count += input;
+
+     }
+
+ 
+
+@@ -27,12 +28,14 @@
+     // Underflow with result stored in state variable.
+
+     function underflowtostate(uint256 input) public {
+
+         // <yes> <report> ARITHMETIC
+
++        require((count >= input)); /* <FIX> Insert:BC */
+
+         count -= input;
+
+     }
+
+ 
+
+     // ADD Overflow, no effect on state.
+
+     function overflowlocalonly(uint256 input) public {
+
+         // <yes> <report> ARITHMETIC
+
++        require(((count + input) >= count)); /* <FIX> Insert:BC */
+
+         uint res = count + input;
+
+     }
+
+ 
+
+@@ -45,6 +48,7 @@
+     // Underflow, no effect on state.
+
+     function underflowlocalonly(uint256 input) public {
+
+         // <yes> <report> ARITHMETIC
+
++        require((count >= input)); /* <FIX> Insert:BC */
+
+         uint res = count - input;
+
+     }
+
+ }

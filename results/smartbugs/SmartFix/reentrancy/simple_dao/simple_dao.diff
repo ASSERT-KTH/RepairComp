@@ -1,0 +1,38 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/simple_dao.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/reentrancy/simple_dao/simple_dao.sol
+@@ -10,14 +10,17 @@
+     mapping(address => uint) public credit;
+
+ 
+
+     function donate(address to) payable {
+
++        require(((credit[to] + msg.value) >= credit[to])); /* <FIX> Insert:BC */
+
+         credit[to] += msg.value;
+
+     }
+
+ 
+
+     function withdraw(uint amount) {
+
+         if (credit[msg.sender] >= amount) {
+
+             // <yes> <report> REENTRANCY
+
++            credit[msg.sender] = (credit[msg.sender] - amount); /* <FIX> Move */
+
+             bool res = msg.sender.call.value(amount)();
+
+-            credit[msg.sender] -= amount;
+
++            require(res); /* <FIX> Insert */
+
++            /* <FIX> Move: credit[msg.sender]-=amount; */
+
+         }
+
+     }
+
+ 

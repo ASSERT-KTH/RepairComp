@@ -1,0 +1,180 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0x627fa62ccbb1c1b04ffaecd72a53e37fc0e17839.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/TIPS/unchecked_low_level_calls/0x627fa62ccbb1c1b04ffaecd72a53e37fc0e17839/0x627fa62ccbb1c1b04ffaecd72a53e37fc0e17839R1U1.sol
+@@ -1,30 +1,20 @@
+-/*
+
+- * @source: etherscan.io
+
+- * @author: -
+
+- * @vulnerable_at_lines: 44
+
+- */
+
+-
+
+-pragma solidity ^0.4.19;
+
+-
+
+ contract Ownable {
+
+     address newOwner;
+
+     address owner = msg.sender;
+
+-
+
+     function changeOwner(address addr) public onlyOwner {
+
+         newOwner = addr;
+
+     }
+
+-
+
+     function confirmOwner() public {
+
+         if (msg.sender == newOwner) {
+
+             owner = newOwner;
+
+         }
+
+     }
+
+-
+
+     modifier onlyOwner() {
+
+-        if (owner == msg.sender) _;
+
++        if (owner == msg.sender) {
+
++            _;
+
++        }
+
+     }
+
+ }
+
+-
+
+ contract Token is Ownable {
+
+     address owner = msg.sender;
+
+     function WithdrawToken(
+
+@@ -32,31 +22,28 @@
+         uint256 amount,
+
+         address to
+
+     ) public onlyOwner {
+
+-        // <yes> <report> UNCHECKED_LL_CALLS
+
+-        token.call(bytes4(sha3("transfer(address,uint256)")), to, amount);
+
++        if (
+
++            !token.call(bytes4(sha3("transfer(address,uint256)")), to, amount)
+
++        ) {
+
++            throw;
+
++        }
+
+     }
+
+ }
+
+-
+
+ contract TokenBank is Token {
+
+     uint public MinDeposit;
+
+     mapping(address => uint) public Holders;
+
+-
+
+-    ///Constructor
+
+     function initTokenBank() public {
+
+         owner = msg.sender;
+
+         MinDeposit = 1 ether;
+
+     }
+
+-
+
+-    function() payable {
+
++    function() public payable {
+
+         Deposit();
+
+     }
+
+-
+
+-    function Deposit() payable {
+
++    function Deposit() public payable {
+
+         if (msg.value > MinDeposit) {
+
+             Holders[msg.sender] += msg.value;
+
+         }
+
+     }
+
+-
+
+     function WitdrawTokenToHolder(
+
+         address _to,
+
+         address _token,
+
+@@ -67,14 +54,15 @@
+             WithdrawToken(_token, _amount, _to);
+
+         }
+
+     }
+
+-
+
+     function WithdrawToHolder(
+
+         address _addr,
+
+         uint _wei
+
+     ) public payable onlyOwner {
+
+         if (Holders[_addr] > 0) {
+
+-            if (_addr.call.value(_wei)()) {
+
++            if (_addr.send(_wei)) {
+
+                 Holders[_addr] -= _wei;
+
++            } else {
+
++                throw;
+
+             }
+
+         }
+
+     }

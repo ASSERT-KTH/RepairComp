@@ -1,0 +1,58 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/access_control/phishable.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/access_control/phishable/phishable.sol
+@@ -1,23 +1,16 @@
+-/*
+
+- * @source: https://github.com/sigp/solidity-security-blog
+
+- * @author: -
+
+- * @vulnerable_at_lines: 20
+
+- */
+
+-
+
+-pragma solidity ^0.4.22;
+
+-
+
++contract sGuardPlus {
+
++    constructor() internal {}
+
++}
+
+ contract Phishable {
+
+     address public owner;
+
+-
+
+     constructor(address _owner) {
+
+         owner = _owner;
+
+     }
+
+ 
+
+-    function() public payable {} // collect ether
+
++    function() public payable {}
+
+ 
+
+     function withdrawAll(address _recipient) public {
+
+-        // <yes> <report> ACCESS_CONTROL
+
+-        require(tx.origin == owner);
+
++        require(msg.sender == owner);
+
+         _recipient.transfer(this.balance);
+
+     }
+
+ }

@@ -1,0 +1,70 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/reentrancy_dao.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/reentrancy/reentrancy_dao/reentrancy_dao.sol
+@@ -1,20 +1,23 @@
+-/*
+
+- * @source: https://github.com/ConsenSys/evm-analyzer-benchmark-suite
+
+- * @author: Suhabe Bugrara
+
+- * @vulnerable_at_lines: 18
+
+- */
+
++contract sGuardPlus {
+
++    constructor() internal {
+
++        __lock_modifier0_lock = false;
+
++    }
+
+ 
+
+-pragma solidity ^0.4.19;
+
+-
+
+-contract ReentrancyDAO {
+
++    bool private __lock_modifier0_lock;
+
++    modifier __lock_modifier0() {
+
++        require(!__lock_modifier0_lock);
+
++        __lock_modifier0_lock = true;
+
++        _;
+
++        __lock_modifier0_lock = false;
+
++    }
+
++}
+
++contract ReentrancyDAO is sGuardPlus {
+
+     mapping(address => uint) credit;
+
+     uint balance;
+
+-
+
+-    function withdrawAll() public {
+
++    function withdrawAll() public __lock_modifier0 {
+
+         uint oCredit = credit[msg.sender];
+
+         if (oCredit > 0) {
+
+             balance -= oCredit;
+
+-            // <yes> <report> REENTRANCY
+
+             bool callResult = msg.sender.call.value(oCredit)();
+
+             require(callResult);
+
+             credit[msg.sender] = 0;

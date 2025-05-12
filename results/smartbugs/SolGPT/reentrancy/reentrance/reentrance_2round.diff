@@ -1,0 +1,77 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/reentrance.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/reentrancy/reentrance/reentrance_2round.sol
+@@ -1,13 +1,8 @@
+-/*
+
+- * @source: https://ethernaut.zeppelin.solutions/level/0xf70706db003e94cfe4b5e27ffd891d5c81b39488
+
+- * @author: Alejandro Santander
+
+- * @vulnerable_at_lines: 24
+
+- */
+
+-
+
+ pragma solidity ^0.4.18;
+
+ 
+
+ contract Reentrance {
+
+     mapping(address => uint) public balances;
+
++    mapping(address => bool) locked;
+
+ 
+
+     function donate(address _to) public payable {
+
+         balances[_to] += msg.value;
+
+@@ -18,13 +13,16 @@
+     }
+
+ 
+
+     function withdraw(uint _amount) public {
+
+-        if (balances[msg.sender] >= _amount) {
+
+-            // <yes> <report> REENTRANCY
+
+-            if (msg.sender.call.value(_amount)()) {
+
+-                _amount;
+
+-            }
+
+-            balances[msg.sender] -= _amount;
+
+-        }
+
++        require(!locked[msg.sender]);
+
++        require(balances[msg.sender] >= _amount);
+
++
+
++        locked[msg.sender] = true;
+
++        uint balance = balances[msg.sender];
+
++        balances[msg.sender] -= _amount;
+
++        msg.sender.transfer(_amount);
+
++        locked[msg.sender] = false;
+
++
+
++        assert(balances[msg.sender] == balance - _amount);
+
+     }
+
+ 
+
+     function() public payable {}

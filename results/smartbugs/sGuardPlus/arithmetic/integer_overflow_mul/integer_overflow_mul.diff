@@ -1,0 +1,70 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/arithmetic/integer_overflow_mul.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/arithmetic/integer_overflow_mul/integer_overflow_mul.sol
+@@ -1,19 +1,17 @@
+-/*
+
+- * @source: https://github.com/SmartContractSecurity/SWC-registry/blob/master/test_cases/integer_overflow_and_underflow/integer_overflow_mul.sol
+
+- * @author: -
+
+- * @vulnerable_at_lines: 17
+
+- */
+
+-
+
+-//Single transaction overflow
+
+-//Post-transaction effect: overflow escapes to publicly-readable storage
+
+-
+
+-pragma solidity ^0.4.19;
+
+-
+
+-contract IntegerOverflowMul {
+
+-    uint public count = 2;
+
+-
+
+-    function run(uint256 input) public {
+
+-        // <yes> <report> ARITHMETIC
+
+-        count *= input;
+
++contract sGuardPlus {
+
++    constructor() internal {}
+
++    function mul_uint(uint a, uint b) internal pure returns (uint) {
+
++        if (a == 0) {
+
++            return 0;
+
++        }
+
++        uint c = a * b;
+
++        assert(c / a == b);
+
++        return c;
+
+     }
+
+ }
+
++contract IntegerOverflowMul is sGuardPlus {
+
++    uint public count = 2;
+
++    function run(uint256 input) public {
+
++        count = mul_uint(count, input);
+
++    }
+
++}

@@ -1,0 +1,16 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/arithmetic/integer_overflow_add.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/arithmetic/integer_overflow_add/integer_overflow_add.sol
+@@ -14,6 +14,7 @@
+ 
+
+     function run(uint256 input) public {
+
+         // <yes> <report> ARITHMETIC
+
++        require(((count + input) >= count)); /* <FIX> Insert:BC */
+
+         count += input;
+
+     }
+
+ }

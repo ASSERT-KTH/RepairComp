@@ -1,0 +1,87 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/reentrancy_simple.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/reentrancy/reentrancy_simple/reentrancy_simple.sol
+@@ -1,14 +1,18 @@
+-/*
+
+- * @source: https://github.com/trailofbits/not-so-smart-contracts/blob/master/reentrancy/Reentrancy.sol
+
+- * @author: -
+
+- * @vulnerable_at_lines: 24
+
+- */
+
++contract sGuardPlus {
+
++    constructor() internal {
+
++        __lock_modifier0_lock = false;
+
++    }
+
+ 
+
+-pragma solidity ^0.4.15;
+
+-
+
+-contract Reentrance {
+
++    bool private __lock_modifier0_lock;
+
++    modifier __lock_modifier0() {
+
++        require(!__lock_modifier0_lock);
+
++        __lock_modifier0_lock = true;
+
++        _;
+
++        __lock_modifier0_lock = false;
+
++    }
+
++}
+
++contract Reentrance is sGuardPlus {
+
+     mapping(address => uint) userBalance;
+
+-
+
+     function getBalance(address u) constant returns (uint) {
+
+         return userBalance[u];
+
+     }
+
+@@ -17,13 +21,11 @@
+         userBalance[msg.sender] += msg.value;
+
+     }
+
+ 
+
+-    function withdrawBalance() {
+
+-        // send userBalance[msg.sender] ethers to msg.sender
+
+-        // if mgs.sender is a contract, it will call its fallback function
+
+-        // <yes> <report> REENTRANCY
+
++    function withdrawBalance() __lock_modifier0 {
+
+         if (!(msg.sender.call.value(userBalance[msg.sender])())) {
+
+             throw;
+
+         }
+
++
+
+         userBalance[msg.sender] = 0;
+
+     }
+
+ }

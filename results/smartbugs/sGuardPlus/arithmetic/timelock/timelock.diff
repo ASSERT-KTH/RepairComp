@@ -1,0 +1,76 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/arithmetic/timelock.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/arithmetic/timelock/timelock.sol
+@@ -1,24 +1,24 @@
+-/*
+
+- * @source: https://github.com/sigp/solidity-security-blog
+
+- * @author: -
+
+- * @vulnerable_at_lines: 22
+
+- */
+
+-
+
+-//added pragma version
+
+-pragma solidity ^0.4.10;
+
+-
+
+-contract TimeLock {
+
++contract sGuardPlus {
+
++    constructor() internal {}
+
++    function add_uint(uint a, uint b) internal pure returns (uint) {
+
++        uint c = a + b;
+
++        assert(c >= a);
+
++        return c;
+
++    }
+
++}
+
++contract TimeLock is sGuardPlus {
+
+     mapping(address => uint) public balances;
+
+     mapping(address => uint) public lockTime;
+
+-
+
+     function deposit() public payable {
+
+         balances[msg.sender] += msg.value;
+
+         lockTime[msg.sender] = now + 1 weeks;
+
+     }
+
+ 
+
+     function increaseLockTime(uint _secondsToIncrease) public {
+
+-        // <yes> <report> ARITHMETIC
+
+-        lockTime[msg.sender] += _secondsToIncrease;
+
++        lockTime[msg.sender] = add_uint(
+
++            lockTime[msg.sender],
+
++            _secondsToIncrease
+
++        );
+
+     }
+
+ 
+
+     function withdraw() public {

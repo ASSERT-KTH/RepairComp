@@ -1,0 +1,59 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/etherstore.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/reentrancy/etherstore/etherstore.sol
+@@ -13,6 +13,9 @@
+     mapping(address => uint256) public balances;
+
+ 
+
+     function depositFunds() public payable {
+
++        require(
+
++            ((balances[msg.sender] + msg.value) >= balances[msg.sender])
+
++        ); /* <FIX> Insert:BC */
+
+         balances[msg.sender] += msg.value;
+
+     }
+
+ 
+
+@@ -21,10 +24,17 @@
+         // limit the withdrawal
+
+         require(_weiToWithdraw <= withdrawalLimit);
+
+         // limit the time allowed to withdraw
+
++        require(
+
++            ((lastWithdrawTime[msg.sender] + 604800) >=
+
++                lastWithdrawTime[msg.sender])
+
++        ); /* <FIX> Insert:BC */
+
+         require(now >= lastWithdrawTime[msg.sender] + 1 weeks);
+
+         // <yes> <report> REENTRANCY
+
++        balances[msg.sender] = (balances[msg.sender] -
+
++            _weiToWithdraw); /* <FIX> Move */
+
++        lastWithdrawTime[msg.sender] = now; /* <FIX> Move */
+
+         require(msg.sender.call.value(_weiToWithdraw)());
+
+-        balances[msg.sender] -= _weiToWithdraw;
+
+-        lastWithdrawTime[msg.sender] = now;
+
++        /* <FIX> Move: balances[msg.sender] -= _weiToWithdraw; */
+
++        /* <FIX> Move: lastWithdrawTime[msg.sender] = now; */
+
+     }
+
+ }

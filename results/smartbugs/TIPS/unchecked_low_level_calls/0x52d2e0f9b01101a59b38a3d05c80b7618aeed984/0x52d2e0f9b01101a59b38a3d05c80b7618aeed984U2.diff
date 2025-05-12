@@ -1,0 +1,61 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0x52d2e0f9b01101a59b38a3d05c80b7618aeed984.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/TIPS/unchecked_low_level_calls/0x52d2e0f9b01101a59b38a3d05c80b7618aeed984/0x52d2e0f9b01101a59b38a3d05c80b7618aeed984U2.sol
+@@ -1,17 +1,10 @@
+-/*
+
+- * @source: etherscan.io
+
+- * @author: -
+
+- * @vulnerable_at_lines: 27
+
+- */
+
+-
+
+-pragma solidity ^0.4.19;
+
+ contract Token {
+
+-    function transfer(address _to, uint _value) returns (bool success);
+
+-    function balanceOf(address _owner) constant returns (uint balance);
+
++    function transfer(address _to, uint _value) public returns (bool success);
+
++    function balanceOf(address _owner) public view returns (uint balance);
+
+ }
+
+ contract EtherGet {
+
+     address owner;
+
+-    function EtherGet() {
+
++    constructor() public {
+
+         owner = msg.sender;
+
+     }
+
+     function withdrawTokens(address tokenContract) public {
+
+@@ -23,8 +16,7 @@
+     }
+
+     function getTokens(uint num, address addr) public {
+
+         for (uint i = 0; i < num; i++) {
+
+-            // <yes> <report> UNCHECKED_LL_CALLS
+
+-            addr.call.value(0 wei)();
+
++            addr.transfer(0 wei);
+
+         }
+
+     }
+
+ }

@@ -1,0 +1,54 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/access_control/mycontract.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/access_control/mycontract/mycontract_2round.sol
+@@ -1,22 +1,16 @@
+-/*
+
+- * @source: https://consensys.github.io/smart-contract-best-practices/recommendations/#avoid-using-txorigin
+
+- * @author: Consensys Diligence
+
+- * @vulnerable_at_lines: 20
+
+- * Modified by Gerhard Wagner
+
+- */
+
+-
+
+ pragma solidity ^0.4.24;
+
+ 
+
+ contract MyContract {
+
+     address owner;
+
+ 
+
+-    function MyContract() public {
+
++    constructor() public {
+
+         owner = msg.sender;
+
+     }
+
+ 
+
+     function sendTo(address receiver, uint amount) public {
+
+-        // <yes> <report> ACCESS_CONTROL
+
+-        require(tx.origin == owner);
+
++        require(msg.sender == owner);
+
++        require(receiver != address(0)); // Check if receiver address is valid
+
++        require(amount > 0); // Check if amount is greater than 0
+
+         receiver.transfer(amount);
+
+     }
+
+ }

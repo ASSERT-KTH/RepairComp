@@ -1,0 +1,65 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/reentrancy_bonus.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/reentrancy/reentrancy_bonus/reentrancy_bonus.sol
+@@ -1,3 +1,14 @@
++contract SmartFix {
+
++    bool public _locked = false;
+
++
+
++    modifier _nonReentrant() {
+
++        require(!_locked);
+
++        _locked = true;
+
++        _;
+
++        _locked = false;
+
++    }
+
++}
+
++
+
+ /*
+
+  * @source: https://consensys.github.io/smart-contract-best-practices/known_attacks/
+
+  * @author: consensys
+
+@@ -6,13 +17,15 @@
+ 
+
+ pragma solidity ^0.4.24;
+
+ 
+
+-contract Reentrancy_bonus {
+
++contract Reentrancy_bonus is SmartFix {
+
+     // INSECURE
+
+     mapping(address => uint) private userBalances;
+
+     mapping(address => bool) private claimedBonus;
+
+     mapping(address => uint) private rewardsForA;
+
+ 
+
+-    function withdrawReward(address recipient) public {
+
++    function withdrawReward(
+
++        address recipient
+
++    ) public _nonReentrant /* <FIX> Add Modifier:NR */ {
+
+         uint amountToWithdraw = rewardsForA[recipient];
+
+         rewardsForA[recipient] = 0;
+
+         (bool success, ) = recipient.call.value(amountToWithdraw)("");

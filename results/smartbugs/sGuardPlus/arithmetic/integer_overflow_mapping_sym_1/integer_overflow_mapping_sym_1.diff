@@ -1,0 +1,60 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/arithmetic/integer_overflow_mapping_sym_1.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/arithmetic/integer_overflow_mapping_sym_1/integer_overflow_mapping_sym_1.sol
+@@ -1,18 +1,13 @@
+-/*
+
+- * @source: https://github.com/SmartContractSecurity/SWC-registry/blob/master/test_cases/integer_overflow_and_underflow/integer_overflow_mapping_sym_1.sol
+
+- * @author: -
+
+- * @vulnerable_at_lines: 16
+
+- */
+
+-
+
+-//Single transaction overflow
+
+-
+
+-pragma solidity ^0.4.11;
+
+-
+
+-contract IntegerOverflowMappingSym1 {
+
+-    mapping(uint256 => uint256) map;
+
+-
+
+-    function init(uint256 k, uint256 v) public {
+
+-        // <yes> <report> ARITHMETIC
+
+-        map[k] -= v;
+
++contract sGuardPlus {
+
++    constructor() internal {}
+
++    function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++        assert(b <= a);
+
++        return a - b;
+
+     }
+
+ }
+
++contract IntegerOverflowMappingSym1 is sGuardPlus {
+
++    mapping(uint256 => uint256) map;
+
++    function init(uint256 k, uint256 v) public {
+
++        map[k] = sub_uint256(map[k], v);
+
++    }
+
++}

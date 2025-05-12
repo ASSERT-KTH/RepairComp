@@ -1,0 +1,166 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0x01f8c4e3fa3edeb29e514cba738d87ce8c091d3f.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/reentrancy/0x01f8c4e3fa3edeb29e514cba738d87ce8c091d3f/0x01f8c4e3fa3edeb29e514cba738d87ce8c091d3f.sol
+@@ -1,12 +1,33 @@
++contract sGuard {
+
++    function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++        assert(b <= a);
+
++        return a - b;
+
++    }
+
++
+
++    bool internal locked_;
+
++    constructor() internal {
+
++        locked_ = false;
+
++    }
+
++    modifier nonReentrant_() {
+
++        require(!locked_);
+
++        locked_ = true;
+
++        _;
+
++        locked_ = false;
+
++    }
+
++
+
++    function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++        uint256 c = a + b;
+
++        assert(c >= a);
+
++        return c;
+
++    }
+
++}
+
+ /*
+
+  * @source: etherscan.io
+
+  * @author: -
+
+  * @vulnerable_at_lines: 54
+
+  */
+
+ 
+
+-pragma solidity ^0.4.19;
+
+-
+
+-contract PERSONAL_BANK {
+
++contract PERSONAL_BANK is sGuard {
+
+     mapping(address => uint256) public balances;
+
+ 
+
+     uint public MinSum = 1 ether;
+
+@@ -15,30 +36,30 @@
+ 
+
+     bool intitalized;
+
+ 
+
+-    function SetMinSum(uint _val) public {
+
++    function SetMinSum(uint _val) public nonReentrant_ {
+
+         if (intitalized) revert();
+
+         MinSum = _val;
+
+     }
+
+ 
+
+-    function SetLogFile(address _log) public {
+
++    function SetLogFile(address _log) public nonReentrant_ {
+
+         if (intitalized) revert();
+
+         Log = LogFile(_log);
+
+     }
+
+ 
+
+-    function Initialized() public {
+
++    function Initialized() public nonReentrant_ {
+
+         intitalized = true;
+
+     }
+
+ 
+
+-    function Deposit() public payable {
+
+-        balances[msg.sender] += msg.value;
+
++    function Deposit() public payable nonReentrant_ {
+
++        balances[msg.sender] = add_uint256(balances[msg.sender], msg.value);
+
+         Log.AddMessage(msg.sender, msg.value, "Put");
+
+     }
+
+ 
+
+-    function Collect(uint _am) public payable {
+
++    function Collect(uint _am) public payable nonReentrant_ {
+
+         if (balances[msg.sender] >= MinSum && balances[msg.sender] >= _am) {
+
+             // <yes> <report> REENTRANCY
+
+             if (msg.sender.call.value(_am)()) {
+
+-                balances[msg.sender] -= _am;
+
++                balances[msg.sender] = sub_uint256(balances[msg.sender], _am);
+
+                 Log.AddMessage(msg.sender, _am, "Collect");
+
+             }
+
+         }
+
+@@ -49,7 +70,7 @@
+     }
+
+ }
+
+ 
+
+-contract LogFile {
+
++contract LogFile is sGuard {
+
+     struct Message {
+
+         address Sender;
+
+         string Data;

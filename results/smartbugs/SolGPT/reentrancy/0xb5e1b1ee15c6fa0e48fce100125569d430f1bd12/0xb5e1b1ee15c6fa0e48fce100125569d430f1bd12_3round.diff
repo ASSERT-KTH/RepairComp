@@ -1,0 +1,132 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0xb5e1b1ee15c6fa0e48fce100125569d430f1bd12.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/reentrancy/0xb5e1b1ee15c6fa0e48fce100125569d430f1bd12/0xb5e1b1ee15c6fa0e48fce100125569d430f1bd12_3round.sol
+@@ -1,16 +1,8 @@
+-/*
+
+- * @source: etherscan.io
+
+- * @author: -
+
+- * @vulnerable_at_lines: 40
+
+- */
+
+-
+
+ pragma solidity ^0.4.19;
+
+ 
+
+ contract Private_Bank {
+
+     mapping(address => uint) public balances;
+
+-
+
+     uint public MinDeposit = 1 ether;
+
+-
+
+     Log TransferLog;
+
+ 
+
+     function Private_Bank(address _log) {
+
+@@ -18,19 +10,18 @@
+     }
+
+ 
+
+     function Deposit() public payable {
+
+-        if (msg.value > MinDeposit) {
+
+-            balances[msg.sender] += msg.value;
+
+-            TransferLog.AddMessage(msg.sender, msg.value, "Deposit");
+
+-        }
+
++        require(msg.value > MinDeposit);
+
++        balances[msg.sender] += msg.value;
+
++        TransferLog.AddMessage(msg.sender, msg.value, "Deposit");
+
+     }
+
+ 
+
+-    function CashOut(uint _am) public payable {
+
+-        if (_am <= balances[msg.sender]) {
+
+-            // <yes> <report> REENTRANCY
+
+-            if (msg.sender.call.value(_am)()) {
+
+-                balances[msg.sender] -= _am;
+
+-                TransferLog.AddMessage(msg.sender, _am, "CashOut");
+
+-            }
+
++    function CashOut(uint _am) public {
+
++        require(_am <= balances[msg.sender]);
+
++        balances[msg.sender] -= _am;
+
++        if (msg.sender.call.value(_am)()) {
+
++            TransferLog.AddMessage(msg.sender, _am, "CashOut");
+
++        } else {
+
++            balances[msg.sender] += _am; // revert the balance if the call fails
+
+         }
+
+     }
+
+ 
+
+@@ -47,13 +38,12 @@
+ 
+
+     Message[] public History;
+
+ 
+
+-    Message LastMsg;
+
+-
+
+     function AddMessage(address _adr, uint _val, string _data) public {
+
+-        LastMsg.Sender = _adr;
+
+-        LastMsg.Time = now;
+
+-        LastMsg.Val = _val;
+
+-        LastMsg.Data = _data;
+
+-        History.push(LastMsg);
+
++        Message memory newMessage;
+
++        newMessage.Sender = _adr;
+
++        newMessage.Time = now;
+
++        newMessage.Val = _val;
+
++        newMessage.Data = _data;
+
++        History.push(newMessage);
+
+     }
+
+ }

@@ -1,0 +1,90 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0xb7c5c5aa4d42967efe906e1b66cb8df9cebf04f7.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/unchecked_low_level_calls/0xb7c5c5aa4d42967efe906e1b66cb8df9cebf04f7/0xb7c5c5aa4d42967efe906e1b66cb8df9cebf04f7.sol
+@@ -1,28 +1,25 @@
+-/*
+
+- * @source: etherscan.io
+
+- * @author: -
+
+- * @vulnerable_at_lines: 25
+
+- */
+
++contract sGuardPlus {
+
++    constructor() internal {
+
++        __lock_modifier0_lock = false;
+
++    }
+
+ 
+
+-pragma solidity ^0.4.23;
+
+-
+
+-/*
+
+-!!! THIS CONTRACT IS EXPLOITABLE AND FOR EDUCATIONAL PURPOSES ONLY !!!
+
+-
+
+-This smart contract allows a user to (insecurely) store funds
+
+-in this smart contract and withdraw them at any later point in time
+
+-*/
+
+-
+
+-contract keepMyEther {
+
++    bool private __lock_modifier0_lock;
+
++    modifier __lock_modifier0() {
+
++        require(!__lock_modifier0_lock);
+
++        __lock_modifier0_lock = true;
+
++        _;
+
++        __lock_modifier0_lock = false;
+
++    }
+
++}
+
++contract keepMyEther is sGuardPlus {
+
+     mapping(address => uint256) public balances;
+
+-
+
+     function() public payable {
+
+         balances[msg.sender] += msg.value;
+
+     }
+
+ 
+
+-    function withdraw() public {
+
+-        // <yes> <report> UNCHECKED_LL_CALLS
+
+-        msg.sender.call.value(balances[msg.sender])();
+
++    function withdraw() public __lock_modifier0 {
+
++        bool __sent_result100 = msg.sender.call.value(balances[msg.sender])();
+
++        require(__sent_result100);
+
+         balances[msg.sender] = 0;
+
+     }
+
+ }

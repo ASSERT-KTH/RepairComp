@@ -1,0 +1,153 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0x7a8721a9d64c74da899424c1b52acbf58ddc9782.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/reentrancy/0x7a8721a9d64c74da899424c1b52acbf58ddc9782/0x7a8721a9d64c74da899424c1b52acbf58ddc9782.sol
+@@ -1,12 +1,33 @@
++contract sGuard {
+
++    function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++        assert(b <= a);
+
++        return a - b;
+
++    }
+
++
+
++    bool internal locked_;
+
++    constructor() internal {
+
++        locked_ = false;
+
++    }
+
++    modifier nonReentrant_() {
+
++        require(!locked_);
+
++        locked_ = true;
+
++        _;
+
++        locked_ = false;
+
++    }
+
++
+
++    function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++        uint256 c = a + b;
+
++        assert(c >= a);
+
++        return c;
+
++    }
+
++}
+
+ /*
+
+  * @source: etherscan.io
+
+  * @author: -
+
+  * @vulnerable_at_lines: 52
+
+  */
+
+ 
+
+-pragma solidity ^0.4.19;
+
+-
+
+-contract PrivateDeposit {
+
++contract PrivateDeposit is sGuard {
+
+     mapping(address => uint) public balances;
+
+ 
+
+     uint public MinDeposit = 1 ether;
+
+@@ -15,7 +36,7 @@
+     Log TransferLog;
+
+ 
+
+     modifier onlyOwner() {
+
+-        require(tx.origin == owner);
+
++        require(msg.sender == owner);
+
+         _;
+
+     }
+
+ 
+
+@@ -28,18 +49,18 @@
+         TransferLog = Log(_lib);
+
+     }
+
+ 
+
+-    function Deposit() public payable {
+
++    function Deposit() public payable nonReentrant_ {
+
+         if (msg.value >= MinDeposit) {
+
+-            balances[msg.sender] += msg.value;
+
++            balances[msg.sender] = add_uint256(balances[msg.sender], msg.value);
+
+             TransferLog.AddMessage(msg.sender, msg.value, "Deposit");
+
+         }
+
+     }
+
+ 
+
+-    function CashOut(uint _am) {
+
++    function CashOut(uint _am) nonReentrant_ {
+
+         if (_am <= balances[msg.sender]) {
+
+             // <yes> <report> REENTRANCY
+
+             if (msg.sender.call.value(_am)()) {
+
+-                balances[msg.sender] -= _am;
+
++                balances[msg.sender] = sub_uint256(balances[msg.sender], _am);
+
+                 TransferLog.AddMessage(msg.sender, _am, "CashOut");
+
+             }
+
+         }
+
+@@ -48,7 +69,7 @@
+     function() public payable {}
+
+ }
+
+ 
+
+-contract Log {
+
++contract Log is sGuard {
+
+     struct Message {
+
+         address Sender;
+
+         string Data;

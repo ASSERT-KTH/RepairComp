@@ -1,0 +1,156 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0x4e73b32ed6c35f570686b89848e5f39f20ecc106.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/reentrancy/0x4e73b32ed6c35f570686b89848e5f39f20ecc106/0x4e73b32ed6c35f570686b89848e5f39f20ecc106_3round.sol
+@@ -1,32 +1,23 @@
+-/*
+
+- * @source: etherscan.io
+
+- * @author: -
+
+- * @vulnerable_at_lines: 54
+
+- */
+
+-
+
+ pragma solidity ^0.4.19;
+
+ 
+
+ contract PRIVATE_ETH_CELL {
+
+     mapping(address => uint256) public balances;
+
+-
+
+     uint public MinSum;
+
+-
+
+     LogFile Log;
+
+-
+
+-    bool intitalized;
+
++    bool initialized;
+
+ 
+
+     function SetMinSum(uint _val) public {
+
+-        require(!intitalized);
+
++        require(!initialized);
+
+         MinSum = _val;
+
+     }
+
+ 
+
+     function SetLogFile(address _log) public {
+
+-        require(!intitalized);
+
++        require(!initialized);
+
+         Log = LogFile(_log);
+
+     }
+
+ 
+
+     function Initialized() public {
+
+-        intitalized = true;
+
++        initialized = true;
+
+     }
+
+ 
+
+     function Deposit() public payable {
+
+@@ -34,14 +25,13 @@
+         Log.AddMessage(msg.sender, msg.value, "Put");
+
+     }
+
+ 
+
+-    function Collect(uint _am) public payable {
+
+-        if (balances[msg.sender] >= MinSum && balances[msg.sender] >= _am) {
+
+-            // <yes> <report> REENTRANCY
+
+-            if (msg.sender.call.value(_am)()) {
+
+-                balances[msg.sender] -= _am;
+
+-                Log.AddMessage(msg.sender, _am, "Collect");
+
+-            }
+
+-        }
+
++    function Collect(uint _am) public {
+
++        require(balances[msg.sender] >= MinSum && balances[msg.sender] >= _am);
+
++
+
++        balances[msg.sender] -= _am;
+
++        Log.AddMessage(msg.sender, _am, "Collect");
+
++
+
++        require(msg.sender.call.value(_am)());
+
+     }
+
+ 
+
+     function() public payable {
+
+@@ -59,13 +49,12 @@
+ 
+
+     Message[] public History;
+
+ 
+
+-    Message LastMsg;
+
+-
+
+     function AddMessage(address _adr, uint _val, string _data) public {
+
+-        LastMsg.Sender = _adr;
+
+-        LastMsg.Time = now;
+
+-        LastMsg.Val = _val;
+
+-        LastMsg.Data = _data;
+
+-        History.push(LastMsg);
+
++        Message memory newMessage;
+
++        newMessage.Sender = _adr;
+
++        newMessage.Time = now;
+
++        newMessage.Val = _val;
+
++        newMessage.Data = _data;
+
++        History.push(newMessage);
+
+     }
+
+ }

@@ -1,0 +1,49 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/reentrancy_simple.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/reentrancy/reentrancy_simple/reentrancy_simple.sol
+@@ -14,6 +14,9 @@
+     }
+
+ 
+
+     function addToBalance() payable {
+
++        require(
+
++            ((userBalance[msg.sender] + msg.value) >= userBalance[msg.sender])
+
++        ); /* <FIX> Insert:BC */
+
+         userBalance[msg.sender] += msg.value;
+
+     }
+
+ 
+
+@@ -21,9 +24,12 @@
+         // send userBalance[msg.sender] ethers to msg.sender
+
+         // if mgs.sender is a contract, it will call its fallback function
+
+         // <yes> <report> REENTRANCY
+
+-        if (!(msg.sender.call.value(userBalance[msg.sender])())) {
+
++        uint256 tmp__1 = userBalance[msg.sender]; /* <FIX> Insert */
+
++        userBalance[msg.sender] = 0; /* <FIX> Move */
+
++        if (!(msg.sender.call.value(tmp__1)())) {
+
++            /* <FIX> Replace: "userBalance[msg.sender]" => "tmp__1" */
+
+             throw;
+
+         }
+
+-        userBalance[msg.sender] = 0;
+
++        /* <FIX> Move: userBalance[msg.sender] = 0; */
+
+     }
+
+ }

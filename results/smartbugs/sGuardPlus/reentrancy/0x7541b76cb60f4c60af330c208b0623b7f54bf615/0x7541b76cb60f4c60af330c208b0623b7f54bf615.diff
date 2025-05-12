@@ -1,0 +1,141 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0x7541b76cb60f4c60af330c208b0623b7f54bf615.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/reentrancy/0x7541b76cb60f4c60af330c208b0623b7f54bf615/0x7541b76cb60f4c60af330c208b0623b7f54bf615.sol
+@@ -1,12 +1,17 @@
+-/*
+
+- * @source: etherscan.io
+
+- * @author: -
+
+- * @vulnerable_at_lines: 29
+
+- */
+
++contract sGuardPlus {
+
++    constructor() internal {
+
++        __lock_modifier0_lock = false;
+
++    }
+
+ 
+
+-pragma solidity ^0.4.25;
+
+-
+
+-contract U_BANK {
+
++    bool private __lock_modifier0_lock;
+
++    modifier __lock_modifier0() {
+
++        require(!__lock_modifier0_lock);
+
++        __lock_modifier0_lock = true;
+
++        _;
+
++        __lock_modifier0_lock = false;
+
++    }
+
++}
+
++contract U_BANK is sGuardPlus {
+
+     function Put(uint _unlockTime) public payable {
+
+         var acc = Acc[msg.sender];
+
+         acc.balance += msg.value;
+
+@@ -14,12 +19,11 @@
+         LogFile.AddMessage(msg.sender, msg.value, "Put");
+
+     }
+
+ 
+
+-    function Collect(uint _am) public payable {
+
++    function Collect(uint _am) public payable __lock_modifier0 {
+
+         var acc = Acc[msg.sender];
+
+         if (
+
+             acc.balance >= MinSum && acc.balance >= _am && now > acc.unlockTime
+
+         ) {
+
+-            // <yes> <report> REENTRANCY
+
+             if (msg.sender.call.value(_am)()) {
+
+                 acc.balance -= _am;
+
+                 LogFile.AddMessage(msg.sender, _am, "Collect");
+
+@@ -35,18 +39,13 @@
+         uint unlockTime;
+
+         uint balance;
+
+     }
+
+-
+
+     mapping(address => Holder) public Acc;
+
+-
+
+     Log LogFile;
+
+-
+
+     uint public MinSum = 2 ether;
+
+-
+
+-    function U_BANK(address log) public {
+
++    constructor(address log) public {
+
+         LogFile = Log(log);
+
+     }
+
+ }
+
+-
+
+ contract Log {
+
+     struct Message {
+
+         address Sender;
+
+@@ -54,11 +53,8 @@
+         uint Val;
+
+         uint Time;
+
+     }
+
+-
+
+     Message[] public History;
+
+-
+
+     Message LastMsg;
+
+-
+
+     function AddMessage(address _adr, uint _val, string _data) public {
+
+         LastMsg.Sender = _adr;
+
+         LastMsg.Time = now;
