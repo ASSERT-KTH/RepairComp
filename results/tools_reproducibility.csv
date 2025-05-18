@@ -1,4 +1,4 @@
-tool,installation,execution,faults,github issue,emails
+tool,installation,execution,faults,github-issue,emails
 Aroc,yes,yes,na,na,na
 SCRepair,no,no,missing/unknown python modules,https://github.com/xiaoly8/SCRepair/issues/2
 sGuard,yes,yes,na,na,na
@@ -11,7 +11,7 @@ TIPS,yes,yes,na,na,na
 ACFIX,yes,no,missing python modules & tool was under develepment when we tested it,na,emailed the authors about it
 RLRep,yes,no,missing modules & training does not update the model correctly,https://github.com/Anonymous123xx/RLRep/issues/2 https://github.com/Anonymous123xx/RLRep/issues/5
 sGuard+,yes,yes,na,na,na
-vFix,no,,todo,https://github.com/vfixresearch/vFix/issues/1,
+vFix,yes,no,missing documentation details on input report format,https://github.com/vfixresearch/vFix/issues/1
 ContractTinker,yes,yes but only for given examples,undocumented dependencies and input report formats,https://github.com/CheWang09/LLM4SMAPR/issues/2,emailed the authors about it
 SmartShield,yes,yes,na,na,na
 Elysium,yes,yes,na,na,na
