@@ -1,0 +1,174 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/time_manipulation/governmental_survey.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/time_manipulation/governmental_survey/governmental_survey_4round.sol
+@@ -1,53 +1,46 @@
+-/*
+
+- * @source: http://blockchain.unica.it/projects/ethereum-survey/attacks.html#governmental
+
+- * @author: -
+
+- * @vulnerable_at_lines: 27
+
+- */
+
+-
+
+-//added pragma version
+
+ pragma solidity ^0.4.0;
+
+ 
+
+ contract Governmental {
+
+-  address public owner;
+
+-  address public lastInvestor;
+
+-  uint public jackpot = 1 ether;
+
+-  uint public lastInvestmentTimestamp;
+
+-  uint public ONE_MINUTE = 1 minutes;
+
++    address public owner;
+
++    address public lastInvestor;
+
++    uint public jackpot = 1 ether;
+
++    uint public lastInvestmentTimestamp;
+
++    uint public ONE_MINUTE = 1 minutes;
+
+ 
+
+-  function Governmental() {
+
+-    owner = msg.sender;
+
+-    if (msg.value<1 ether) throw;
+
+-  }
+
++    function Governmental() {
+
++        owner = msg.sender;
+
++        require(msg.value >= 1 ether);
+
++    }
+
+ 
+
+-  function invest() {
+
+-    if (msg.value<jackpot/2) throw;
+
+-    lastInvestor = msg.sender;
+
+-    jackpot += msg.value/2;
+
+-    // <yes> <report> TIME_MANIPULATION
+
+-    lastInvestmentTimestamp = block.timestamp;
+
+-  }
+
++    function invest() {
+
++        require(msg.value >= jackpot/2);
+
++        lastInvestor = msg.sender;
+
++        jackpot += msg.value/2;
+
+ 
+
+-  function resetInvestment() {
+
+-    if (block.timestamp < lastInvestmentTimestamp+ONE_MINUTE)
+
+-      throw;
+
++        lastInvestmentTimestamp = block.timestamp;
+
++    }
+
+ 
+
+-    lastInvestor.send(jackpot);
+
+-    owner.send(this.balance-1 ether);
+
++    function resetInvestment() {
+
++        require(block.timestamp >= lastInvestmentTimestamp + ONE_MINUTE);
+
+ 
+
+-    lastInvestor = 0;
+
+-    jackpot = 1 ether;
+
+-    lastInvestmentTimestamp = 0;
+
+-  }
+
++        if (lastInvestor != address(0)) {
+
++            lastInvestor.transfer(jackpot);
+
++        }
+
++        owner.transfer(this.balance - 1 ether);
+
++
+
++        lastInvestor = address(0);
+
++        jackpot = 1 ether;
+
++        lastInvestmentTimestamp = 0;
+
++    }
+
+ }
+
+ 
+
+ contract Attacker {
+
+ 
+
+-  function attack(address target, uint count) {
+
+-    if (0<=count && count<1023) {
+
+-      this.attack.gas(msg.gas-2000)(target, count+1);
+
++    function attack(address target, uint count) {
+
++        if (count < 1023) {
+
++            this.attack.gas(msg.gas - 2000)(target, count + 1);
+
++        } else {
+
++            Governmental(target).resetInvestment();
+
++        }
+
+     }
+
+-    else {
+
+-      Governmental(target).resetInvestment();
+
+-    }
+
+-  }
+
+-}
+
++}

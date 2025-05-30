@@ -1,0 +1,155 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/time_manipulation/lottopollo.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/time_manipulation/lottopollo/lottopollo.sol
+@@ -1,33 +1,46 @@
+-/*
+
+- * @source: https://github.com/seresistvanandras/EthBench/blob/master/Benchmark/Simple/timestampdependent.sol
+
+- * @author: -
+
+- * @vulnerable_at_lines: 13,27
+
+- */
+
+ 
+
+-pragma solidity ^0.4.0;
+
+-contract lottopollo {
+
+-  address leader;
+
+-  uint    timestamp;
+
+-  function payOut(uint rand) internal {
+
+-    // <yes> <report> TIME MANIPULATION
+
+-    if ( rand> 0 && now - rand > 24 hours ) {
+
+-      msg.sender.send( msg.value );
+
++                        contract sGuardPlus {
+
++                                constructor() internal {
+
++                                        
+
++                                        
+
++                                }
+
++                                
+
++                                
+
++                                
+
++                                
+
++                        }
+
++                contract lottopollo  {
+
++address     leader;
+
++uint     timestamp;
+
++function payOut (uint    rand) internal  {
+
++if (rand>0&&now-rand>24 hours)
+
++{
+
++bool     __sent_result102 = msg.sender.send(msg.value);
+
++require(__sent_result102);
+
++if (this.balance>0)
+
++{
+
++bool     __sent_result104 = leader.send(this.balance);
+
++require(__sent_result104);
+
++}
+
+ 
+
+-      if ( this.balance > 0 ) {
+
+-        leader.send( this.balance );
+
+-      }
+
+-    }
+
+-    else if ( msg.value >= 1 ether ) {
+
+-      leader = msg.sender;
+
+-      timestamp = rand;
+
+-    }
+
+-  }
+
+-  function randomGen() constant returns (uint randomNumber) {
+
+-      // <yes> <report> TIME MANIPULATION
+
+-      return block.timestamp;   
+
+-    }
+
+-  function draw(uint seed){
+
+-    uint randomNumber=randomGen(); 
+
+-    payOut(randomNumber);
+
+-  }
+
+-}
++}
+
++ else 
+
++if (msg.value>=1 ether)
+
++{
+
++leader=msg.sender;
+
++timestamp=rand;
+
++}
+
++
+
++
+
++}
+
++
+
++function randomGen ()  constant returns (uint    randomNumber){
+
++return block.timestamp;
+
++}
+
++
+
++function draw (uint    seed)   {
+
++uint     randomNumber = randomGen();
+
++payOut(randomNumber);
+
++}
+
++
+
++}

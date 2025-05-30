@@ -1,0 +1,31 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/other/crypto_roulette.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/other/crypto_roulette/crypto_roulette.sol
+@@ -31,6 +31,7 @@
+ 
+
+     function shuffle() internal {
+
+         // randomly set secretNumber with a value between 1 and 20
+
++        require((block.number >= 1)); /* <FIX> Insert:BC */
+
+         secretNumber = uint8(sha3(now, block.blockhash(block.number-1))) % 20 + 1;
+
+     }
+
+ 
+
+@@ -52,6 +53,7 @@
+     }
+
+ 
+
+     function kill() public {
+
++        require(((lastPlayed + 86400) >= lastPlayed)); /* <FIX> Insert:BC */
+
+         if (msg.sender == ownerAddr && now > lastPlayed + 1 days) {
+
+             suicide(msg.sender);
+
+         }

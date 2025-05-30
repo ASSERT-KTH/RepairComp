@@ -1,6 +1,6 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/bad_randomness/old_blockhash.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/bad_randomness/old_blockhash/old_blockhash_1round.sol
-@@ -1,13 +1,5 @@
+@@ -1,18 +1,10 @@
 -/*
 
 - * @source: https://github.com/SmartContractSecurity/SWC-registry/blob/master/test_cases/weak_randomness/old_blockhash.sol
@@ -23,11 +23,37 @@
 
  contract PredictTheBlockHashChallenge {
 
-     struct guess {
+ 
 
-         uint block;
+-    struct guess{
 
-@@ -29,12 +21,13 @@
+-      uint block;
+
+-      bytes32 guess;
+
++    struct guess {
+
++        uint block;
+
++        bytes32 guess;
+
+     }
+
+ 
+
+     mapping(address => guess) guesses;
+
+@@ -26,17 +18,18 @@
+         require(msg.value == 1 ether);
+
+ 
+
+         guesses[msg.sender].guess = hash;
+
+-        guesses[msg.sender].block  = block.number + 1;
+
++        guesses[msg.sender].block = block.number + 1;
+
      }
 
  
@@ -57,3 +83,7 @@
          }
 
      }
+
+-}
+
++}

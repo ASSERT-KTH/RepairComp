@@ -1,39 +1,39 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/reentrancy_simple.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/reentrancy/reentrancy_simple/reentrancy_simple.sol
-@@ -1,23 +1,42 @@
-+contract sGuard {
+@@ -1,23 +1,40 @@
++contract sGuard{
 
-+    function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
++  function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
 
-+        uint256 c = a + b;
++    uint256 c = a + b;
 
-+        assert(c >= a);
++    assert(c >= a);
 
-+        return c;
++    return c;
 
-+    }
++  }
 
-+
++  
 
-+    bool internal locked_;
++  bool internal locked_;
 
-+    constructor() internal {
++  constructor() internal {
 
-+        locked_ = false;
++    locked_ = false;
 
-+    }
++  }
 
-+    modifier nonReentrant_() {
++  modifier nonReentrant_() {
 
-+        require(!locked_);
++    require(!locked_);
 
-+        locked_ = true;
++    locked_ = true;
 
-+        _;
++    _;
 
-+        locked_ = false;
++    locked_ = false;
 
-+    }
++  }
 
 +}
 
@@ -49,50 +49,44 @@
 
  
 
--pragma solidity ^0.4.15;
-
--
-
--contract Reentrance {
-
-+contract Reentrance is sGuard {
-
-     mapping(address => uint) userBalance;
+- pragma solidity ^0.4.15;
 
  
 
-     function getBalance(address u) constant returns (uint) {
+- contract Reentrance {
 
-         return userBalance[u];
++ contract Reentrance  is sGuard {
 
-     }
-
- 
-
--    function addToBalance() payable {
-
--        userBalance[msg.sender] += msg.value;
-
-+    function addToBalance() payable nonReentrant_ {
-
-+        userBalance[msg.sender] = add_uint256(
-
-+            userBalance[msg.sender],
-
-+            msg.value
-
-+        );
-
-     }
+      mapping (address => uint) userBalance;
 
  
 
--    function withdrawBalance() {
+      function getBalance(address u) constant returns(uint){
 
-+    function withdrawBalance() nonReentrant_ {
+          return userBalance[u];
 
-         // send userBalance[msg.sender] ethers to msg.sender
+      }
 
-         // if mgs.sender is a contract, it will call its fallback function
+ 
 
-         // <yes> <report> REENTRANCY
+-     function addToBalance() payable{
+
+-         userBalance[msg.sender] += msg.value;
+
++      function addToBalance() nonReentrant_  payable{
+
++         userBalance[msg.sender] = add_uint256(userBalance[msg.sender], msg.value);
+
+      }
+
+ 
+
+-     function withdrawBalance(){
+
++      function withdrawBalance() nonReentrant_ {
+
+          // send userBalance[msg.sender] ethers to msg.sender
+
+          // if mgs.sender is a contract, it will call its fallback function
+
+          // <yes> <report> REENTRANCY

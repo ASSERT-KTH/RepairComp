@@ -1,9 +1,9 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0xb11b2fed6c9354f7aa2f658d3b4d7b31d8a13b77.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/unchecked_low_level_calls/0xb11b2fed6c9354f7aa2f658d3b4d7b31d8a13b77/0xb11b2fed6c9354f7aa2f658d3b4d7b31d8a13b77.sol
-@@ -1,11 +1,6 @@
+@@ -1,42 +1,60 @@
 -/*
 
-- * @source: etherscan.io
+- * @source: etherscan.io 
 
 - * @author: -
 
@@ -11,59 +11,183 @@
 
 - */
 
--
+ 
 
 -pragma solidity ^0.4.24;
 
--
++                        contract sGuardPlus {
 
-+contract sGuardPlus {
++                                constructor() internal {
 
-+    constructor() internal {}
++                                        
 
-+}
++                                        
 
- contract Proxy {
++                                }
 
-     modifier onlyOwner() {
++                                
 
-         if (msg.sender == Owner) _;
++                                
 
-@@ -14,16 +9,15 @@
-     function transferOwner(address _owner) public onlyOwner {
++                                
 
-         Owner = _owner;
++                                
 
-     }
++                        }
 
-+
++                contract Proxy  {
 
-     function proxy(address target, bytes data) public payable {
++modifier onlyOwner {
+
++if (msg.sender==Owner)
+
++_;
+
+ 
+
+-contract Proxy  {
+
+-    modifier onlyOwner { if (msg.sender == Owner) _; } address Owner = msg.sender;
+
+-    function transferOwner(address _owner) public onlyOwner { Owner = _owner; } 
+
+-    function proxy(address target, bytes data) public payable {
 
 -        // <yes> <report> UNCHECKED_LL_CALLS
 
 -        target.call.value(msg.value)(data);
 
-+        bool __sent_result100 = target.call.value(msg.value)(data);
+-    }
 
-+        require(__sent_result100);
++}
 
-     }
++address     Owner = msg.sender;
+
++function transferOwner (address    _owner) public onlyOwner  {
+
++Owner=_owner;
 
  }
 
--
+ 
+
++function proxy (address    target,bytes    data) public payable {
+
++bool     __sent_result100 = target.call.value(msg.value)(data);
+
++require(__sent_result100);
+
++}
+
++
+
++}
 
  contract DepositProxy is Proxy {
 
-     address public Owner;
+-    address public Owner;
 
-     mapping(address => uint256) public Deposits;
+-    mapping (address => uint256) public Deposits;
 
--
++address  public   Owner;
 
-     function() public payable {}
++mapping (address  => uint256 ) public   Deposits;
+
++function () public payable {
+
++}
 
  
 
-     function Vault() public payable {
+-    function () public payable { }
+
+-    
+
+-    function Vault() public payable {
+
+-        if (msg.sender == tx.origin) {
+
+-            Owner = msg.sender;
+
+-            deposit();
+
+-        }
+
+-    }
+
+-    
+
+-    function deposit() public payable {
+
+-        if (msg.value > 0.5 ether) {
+
+-            Deposits[msg.sender] += msg.value;
+
+-        }
+
+-    }
+
+-    
+
+-    function withdraw(uint256 amount) public onlyOwner {
+
+-        if (amount>0 && Deposits[msg.sender]>=amount) {
+
+-            msg.sender.transfer(amount);
+
+-        }
+
+-    }
+
+-}
++function Vault () public payable {
+
++if (msg.sender==tx.origin)
+
++{
+
++Owner=msg.sender;
+
++deposit();
+
++}
+
++
+
++}
+
++
+
++function deposit () public payable {
+
++if (msg.value>0.5 ether)
+
++{
+
++Deposits[msg.sender]+=msg.value;
+
++}
+
++
+
++}
+
++
+
++function withdraw (uint256    amount) public onlyOwner  {
+
++if (amount>0&&Deposits[msg.sender]>=amount)
+
++{
+
++msg.sender.transfer(amount);
+
++}
+
++
+
++}
+
++
+
++}

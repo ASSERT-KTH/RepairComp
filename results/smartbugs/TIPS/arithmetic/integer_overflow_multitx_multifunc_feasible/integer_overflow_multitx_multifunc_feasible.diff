@@ -1,0 +1,82 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/arithmetic/integer_overflow_multitx_multifunc_feasible.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/TIPS/arithmetic/integer_overflow_multitx_multifunc_feasible/integer_overflow_multitx_multifunc_feasible.sol
+@@ -1,27 +1,14 @@
+-/*
+
+- * @source: https://github.com/ConsenSys/evm-analyzer-benchmark-suite
+
+- * @author: Suhabe Bugrara
+
+- * @vulnerable_at_lines: 25
+
+- */
+
+-
+
+-//Multi-transactional, multi-function
+
+-//Arithmetic instruction reachable
+
+-
+
+-pragma solidity ^0.4.23;
+
+-
+
+ contract IntegerOverflowMultiTxMultiFuncFeasible {
+
+-    uint256 private initialized = 0;
+
+-    uint256 public count = 1;
+
+-
+
+-    function init() public {
+
+-        initialized = 1;
+
+-    }
+
+-
+
+-    function run(uint256 input) {
+
+-        if (initialized == 0) {
+
+-            return;
+
+-        }
+
+-        // <yes> <report> ARITHMETIC
+
+-        count -= input;
+
+-    }
+
+-}
+
++	uint256 private initialized = 0;
+
++	uint256 public count = 1;
+
++	function init() public {
+
++	initialized = 1;
+
++	}
+
++	function run(uint256 input) public {
+
++	if(initialized == 0){
+
++	return ;
+
++	}
+
++	count -= input;
+
++	}
+
++	
+
++}

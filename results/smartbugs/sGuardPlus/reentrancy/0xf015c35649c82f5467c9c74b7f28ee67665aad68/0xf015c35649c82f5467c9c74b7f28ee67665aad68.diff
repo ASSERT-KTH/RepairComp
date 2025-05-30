@@ -1,9 +1,9 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0xf015c35649c82f5467c9c74b7f28ee67665aad68.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/reentrancy/0xf015c35649c82f5467c9c74b7f28ee67665aad68/0xf015c35649c82f5467c9c74b7f28ee67665aad68.sol
-@@ -1,12 +1,17 @@
+@@ -1,85 +1,76 @@
 -/*
 
-- * @source: etherscan.io
+- * @source: etherscan.io 
 
 - * @author: -
 
@@ -11,131 +11,299 @@
 
 - */
 
-+contract sGuardPlus {
-
-+    constructor() internal {
-
-+        __lock_modifier0_lock = false;
-
-+    }
-
  
 
 -pragma solidity ^0.4.25;
 
 -
 
--contract MY_BANK {
+-contract MY_BANK
 
-+    bool private __lock_modifier0_lock;
+-{
 
-+    modifier __lock_modifier0() {
+-    function Put(uint _unlockTime)
 
-+        require(!__lock_modifier0_lock);
+-    public
 
-+        __lock_modifier0_lock = true;
+-    payable
 
-+        _;
+-    {
 
-+        __lock_modifier0_lock = false;
+-        var acc = Acc[msg.sender];
 
-+    }
+-        acc.balance += msg.value;
 
-+}
+-        acc.unlockTime = _unlockTime>now?_unlockTime:now;
 
-+contract MY_BANK is sGuardPlus {
+-        LogFile.AddMessage(msg.sender,msg.value,"Put");
 
-     function Put(uint _unlockTime) public payable {
+-    }
 
-         var acc = Acc[msg.sender];
+-
 
-         acc.balance += msg.value;
+-    function Collect(uint _am)
 
-@@ -14,12 +19,11 @@
-         LogFile.AddMessage(msg.sender, msg.value, "Put");
+-    public
 
-     }
+-    payable
 
- 
+-    {
 
--    function Collect(uint _am) public payable {
+-        var acc = Acc[msg.sender];
 
-+    function Collect(uint _am) public payable __lock_modifier0 {
+-        if( acc.balance>=MinSum && acc.balance>=_am && now>acc.unlockTime)
 
-         var acc = Acc[msg.sender];
-
-         if (
-
-             acc.balance >= MinSum && acc.balance >= _am && now > acc.unlockTime
-
-         ) {
+-        {
 
 -            // <yes> <report> REENTRANCY
 
-             if (msg.sender.call.value(_am)()) {
+-            if(msg.sender.call.value(_am)())
 
-                 acc.balance -= _am;
+-            {
 
-                 LogFile.AddMessage(msg.sender, _am, "Collect");
+-                acc.balance-=_am;
 
-@@ -35,18 +39,13 @@
-         uint unlockTime;
+-                LogFile.AddMessage(msg.sender,_am,"Collect");
 
-         uint balance;
+-            }
 
-     }
+-        }
 
--
-
-     mapping(address => Holder) public Acc;
+-    }
 
 -
 
-     Log LogFile;
+-    function() 
+
+-    public 
+
+-    payable
+
+-    {
+
+-        Put(0);
+
+-    }
 
 -
 
-     uint public MinSum = 1 ether;
+-    struct Holder   
+
+-    {
+
+-        uint unlockTime;
+
+-        uint balance;
+
+-    }
 
 -
 
--    function MY_BANK(address log) public {
+-    mapping (address => Holder) public Acc;
 
-+    constructor(address log) public {
+-
 
-         LogFile = Log(log);
+-    Log LogFile;
 
-     }
+-
+
+-    uint public MinSum = 1 ether;    
+
+-
+
+-    function MY_BANK(address log) public{
+
+-        LogFile = Log(log);
+
+-    }
+
++                        contract sGuardPlus {
+
++                                constructor() internal {
+
++                                        __lock_modifier0_lock = false;
+
++                                        
+
++                                }
+
++                                
+
++                                
+
++                bool private __lock_modifier0_lock;
+
++                modifier __lock_modifier0() {
+
++                        require(!__lock_modifier0_lock);
+
++                        __lock_modifier0_lock = true;
+
++                        _;
+
++                        __lock_modifier0_lock = false;
+
++                        
+
++                }
+
++                
+
++                                
+
++                                
+
++                        }
+
++                contract MY_BANK is sGuardPlus {
+
++function Put (uint    _unlockTime) public payable {
+
++var     acc = Acc[msg.sender];
+
++acc.balance+=msg.value;
+
++acc.unlockTime=_unlockTime>now ? _unlockTime : now;
+
++LogFile.AddMessage(msg.sender, msg.value, "Put");
 
  }
 
--
+ 
 
- contract Log {
++function Collect (uint    _am) public __lock_modifier0 payable {
 
-     struct Message {
++var     acc = Acc[msg.sender];
 
-         address Sender;
++if (acc.balance>=MinSum&&acc.balance>=_am&&now>acc.unlockTime)
 
-@@ -54,11 +53,8 @@
-         uint Val;
++{
 
-         uint Time;
++if (msg.sender.call.value(_am)())
 
-     }
++{
 
--
++acc.balance-=_am;
 
-     Message[] public History;
++LogFile.AddMessage(msg.sender, _am, "Collect");
 
--
++}
 
-     Message LastMsg;
+ 
 
--
+-contract Log 
 
-     function AddMessage(address _adr, uint _val, string _data) public {
+-{
 
-         LastMsg.Sender = _adr;
+-    struct Message
 
-         LastMsg.Time = now;
+-    {
+
+-        address Sender;
+
+-        string  Data;
+
+-        uint Val;
+
+-        uint  Time;
+
+-    }
+
++}
+
+ 
+
+-    Message[] public History;
+
++}
+
+ 
+
+-    Message LastMsg;
+
++function () public payable {
+
++Put(0);
+
++}
+
+ 
+
+-    function AddMessage(address _adr,uint _val,string _data)
+
+-    public
+
+-    {
+
+-        LastMsg.Sender = _adr;
+
+-        LastMsg.Time = now;
+
+-        LastMsg.Val = _val;
+
+-        LastMsg.Data = _data;
+
+-        History.push(LastMsg);
+
+-    }
+
+-}
++struct Holder {
+
++uint     unlockTime;
+
++uint     balance;
+
++}
+
++mapping (address  => Holder ) public   Acc;
+
++Log     LogFile;
+
++uint  public   MinSum = 1 ether;
+
++constructor (address    log) public  {
+
++LogFile=Log(log);
+
++}
+
++
+
++}
+
++contract Log  {
+
++struct Message {
+
++address     Sender;
+
++string     Data;
+
++uint     Val;
+
++uint     Time;
+
++}
+
++Message [] public   History;
+
++Message     LastMsg;
+
++function AddMessage (address    _adr,uint    _val,string    _data) public  {
+
++LastMsg.Sender=_adr;
+
++LastMsg.Time=now;
+
++LastMsg.Val=_val;
+
++LastMsg.Data=_data;
+
++History.push(LastMsg);
+
++}
+
++
+
++}

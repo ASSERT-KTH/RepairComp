@@ -1,0 +1,36 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/reentrancy_dao.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/reentrancy/reentrancy_dao/reentrancy_dao.sol
+@@ -15,14 +15,16 @@
+         if (oCredit > 0) {
+
+             balance -= oCredit;
+
+             // <yes> <report> REENTRANCY
+
++            credit[msg.sender] = 0; /* <FIX> Move */
+
+             bool callResult = msg.sender.call.value(oCredit)();
+
+             require (callResult);
+
+-            credit[msg.sender] = 0;
+
++            /* <FIX> Move: credit[msg.sender] = 0; */
+
+         }
+
+     }
+
+ 
+
+     function deposit() public payable {
+
+         credit[msg.sender] += msg.value;
+
++        require(((balance + msg.value) >= balance)); /* <FIX> Insert:BC */
+
+         balance += msg.value;
+
+     }
+
+ }

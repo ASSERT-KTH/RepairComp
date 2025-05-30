@@ -1,6 +1,6 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/reentrancy_simple.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/reentrancy/reentrancy_simple/reentrancy_simple.sol
-@@ -1,14 +1,18 @@
+@@ -1,29 +1,39 @@
 -/*
 
 - * @source: https://github.com/trailofbits/not-so-smart-contracts/blob/master/reentrancy/Reentrancy.sol
@@ -11,77 +11,118 @@
 
 - */
 
-+contract sGuardPlus {
-
-+    constructor() internal {
-
-+        __lock_modifier0_lock = false;
-
-+    }
-
  
 
--pragma solidity ^0.4.15;
+- pragma solidity ^0.4.15;
 
--
++                        contract sGuardPlus {
 
--contract Reentrance {
++                                constructor() internal {
 
-+    bool private __lock_modifier0_lock;
++                                        __lock_modifier0_lock = false;
 
-+    modifier __lock_modifier0() {
++                                        
 
-+        require(!__lock_modifier0_lock);
++                                }
 
-+        __lock_modifier0_lock = true;
++                                
 
-+        _;
++                                
 
-+        __lock_modifier0_lock = false;
++                bool private __lock_modifier0_lock;
 
-+    }
++                modifier __lock_modifier0() {
+
++                        require(!__lock_modifier0_lock);
+
++                        __lock_modifier0_lock = true;
+
++                        _;
+
++                        __lock_modifier0_lock = false;
+
++                        
+
++                }
+
++                
+
++                                
+
++                                
+
++                        }
+
++                contract Reentrance is sGuardPlus {
+
++mapping (address  => uint )    userBalance;
+
++function getBalance (address    u)  constant returns (uint    ){
+
++return userBalance[u];
 
 +}
 
-+contract Reentrance is sGuardPlus {
+ 
 
-     mapping(address => uint) userBalance;
+- contract Reentrance {
 
--
+-     mapping (address => uint) userBalance;
 
-     function getBalance(address u) constant returns (uint) {
++function addToBalance ()  payable {
 
-         return userBalance[u];
++userBalance[msg.sender]+=msg.value;
 
-     }
-
-@@ -17,13 +21,11 @@
-         userBalance[msg.sender] += msg.value;
-
-     }
++}
 
  
 
--    function withdrawBalance() {
+-     function getBalance(address u) constant returns(uint){
 
--        // send userBalance[msg.sender] ethers to msg.sender
+-         return userBalance[u];
 
--        // if mgs.sender is a contract, it will call its fallback function
+-     }
 
--        // <yes> <report> REENTRANCY
++function withdrawBalance ()  __lock_modifier0  {
 
-+    function withdrawBalance() __lock_modifier0 {
++if ( ! (msg.sender.call.value(userBalance[msg.sender])()))
 
-         if (!(msg.sender.call.value(userBalance[msg.sender])())) {
++{
 
-             throw;
++throw;}
 
-         }
+ 
 
-+
+-     function addToBalance() payable{
 
-         userBalance[msg.sender] = 0;
+-         userBalance[msg.sender] += msg.value;
 
-     }
+-     }
 
- }
++userBalance[msg.sender]=0;
+
++}
+
+ 
+
+-     function withdrawBalance(){
+
+-         // send userBalance[msg.sender] ethers to msg.sender
+
+-         // if mgs.sender is a contract, it will call its fallback function
+
+-         // <yes> <report> REENTRANCY
+
+-         if( ! (msg.sender.call.value(userBalance[msg.sender])() ) ){
+
+-             throw;
+
+-         }
+
+-         userBalance[msg.sender] = 0;
+
+-     }
+
+- }
+
++}

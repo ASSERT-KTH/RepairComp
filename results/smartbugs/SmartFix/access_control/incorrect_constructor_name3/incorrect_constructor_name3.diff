@@ -7,12 +7,12 @@
 
      // <yes> <report> ACCESS_CONTROL
 
--    function Constructor() public {
+-    function Constructor()
 
-+    /* <FIX> Change to Cnstr: */ constructor() public {
++     /* <FIX> Change to Cnstr: */ constructor()
+
+         public
+
+     {
 
          owner = msg.sender;
-
-     }
-
- 

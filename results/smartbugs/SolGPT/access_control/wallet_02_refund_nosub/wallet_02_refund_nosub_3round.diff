@@ -1,6 +1,6 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/access_control/wallet_02_refund_nosub.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/access_control/wallet_02_refund_nosub/wallet_02_refund_nosub_3round.sol
-@@ -1,19 +1,7 @@
+@@ -1,46 +1,34 @@
 -/*
 
 - * @source: https://smartcontractsecurity.github.io/SWC-registry/docs/SWC-105#wallet-02-refund-nosubsol
@@ -11,13 +11,21 @@
 
 - */
 
--
++pragma solidity ^0.4.24;
 
- pragma solidity ^0.4.24;
+ 
 
--
+- pragma solidity ^0.4.24;
 
--/* User can add pay in and withdraw Ether.
++contract Wallet {
+
++    address creator;
+
++    mapping(address => uint256) balances;
+
+ 
+
+- /* User can add pay in and withdraw Ether.
 
 -    Unfortunately the developer forgot set the user's balance to 0 when refund() is called.
 
@@ -25,30 +33,49 @@
 
 - */
 
- 
++    constructor() public {
 
- contract Wallet {
++        creator = msg.sender;
 
-     address creator;
-
--
-
-     mapping(address => uint256) balances;
++    }
 
  
 
-     constructor() public {
+- contract Wallet {
 
-@@ -32,14 +20,15 @@
-     }
+-     address creator;
+
++    function deposit() public payable {
+
++        assert(balances[msg.sender] + msg.value > balances[msg.sender]);
+
++        balances[msg.sender] += msg.value;
+
++    }
 
  
 
-     function refund() public {
+-     mapping(address => uint256) balances;
 
--        // <yes> <report> ACCESS_CONTROL
++    function withdraw(uint256 amount) public {
 
--        msg.sender.transfer(balances[msg.sender]);
++        require(amount <= balances[msg.sender]);
+
++        msg.sender.transfer(amount);
+
++        balances[msg.sender] -= amount;
+
++    }
+
+ 
+
+-     constructor() public {
+
+-         creator = msg.sender;
+
+-     }
+
++    function refund() public {
 
 +        require(balances[msg.sender] > 0);
 
@@ -58,24 +85,66 @@
 
 +        msg.sender.transfer(balance);
 
-     }
-
--
-
--    // In an emergency the owner can migrate  allfunds to a different address.
++    }
 
  
 
-     function migrateTo(address to) public {
+-     function deposit() public payable {
 
-         require(creator == msg.sender);
+-         assert(balances[msg.sender] + msg.value > balances[msg.sender]);
 
--        to.transfer(this.balance);
+-         balances[msg.sender] += msg.value;
+
+-     }
+
+-
+
+-     function withdraw(uint256 amount) public {
+
+-         require(amount <= balances[msg.sender]);
+
+-         msg.sender.transfer(amount);
+
+-         balances[msg.sender] -= amount;
+
+-     }
+
+-
+
+-     function refund() public {
+
+-         // <yes> <report> ACCESS_CONTROL
+
+-         msg.sender.transfer(balances[msg.sender]);
+
+-     }
+
+-
+
+-     // In an emergency the owner can migrate  allfunds to a different address.
+
+-
+
+-     function migrateTo(address to) public {
+
+-         require(creator == msg.sender);
+
+-         to.transfer(this.balance);
+
+-     }
+
+-
+
+- }
+
++    function migrateTo(address to) public {
+
++        require(creator == msg.sender);
 
 +        uint256 balance = address(this).balance;
 
 +        to.transfer(balance);
 
-     }
++    }
 
- }
++}

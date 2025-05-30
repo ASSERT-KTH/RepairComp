@@ -1,0 +1,105 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/access_control/rubixi.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/access_control/rubixi/rubixi.sol
+@@ -20,7 +20,7 @@
+ 
+
+          //Sets creator
+
+          // <yes> <report> ACCESS_CONTROL
+
+-         function DynamicPyramid() {
+
++          /* <FIX> Change to Cnstr: */ constructor() {
+
+                  creator = msg.sender; //anyone can call this
+
+          }
+
+ 
+
+@@ -44,6 +44,7 @@
+          function init() private {
+
+                  //Ensures only tx with value of 1 ether or greater are processed and added to pyramid
+
+                  if (msg.value < 1 ether) {
+
++                         require(((collectedFees + msg.value) >= collectedFees)); /* <FIX> Insert:BC */
+
+                          collectedFees += msg.value;
+
+                          return;
+
+                  }
+
+@@ -65,7 +66,10 @@
+                  else if (participants.length == 25) pyramidMultiplier = 150;
+
+ 
+
+                  // collect fees and update contract balance
+
++                 require((100 >= _fee)); /* <FIX> Insert:BC */
+
+                  balance += (msg.value * (100 - _fee)) / 100;
+
++                 require(((collectedFees + ((msg.value * _fee) / 100)) >= collectedFees)); /* <FIX> Insert:BC */
+
++                 require(((msg.value == 0) || (((msg.value * _fee) / msg.value) == _fee))); /* <FIX> Insert:BC */
+
+                  collectedFees += (msg.value * _fee) / 100;
+
+ 
+
+                  //Pays earlier participiants if balance sufficient
+
+@@ -87,6 +91,7 @@
+          }
+
+ 
+
+          function collectFeesInEther(uint _amt) onlyowner {
+
++                 require(((_amt == 0) || (((_amt * 1000000000000000000) / _amt) == 1000000000000000000))); /* <FIX> Insert:BC */
+
+                  _amt *= 1 ether;
+
+                  if (_amt > collectedFees) collectAllFees();
+
+ 
+
+@@ -99,8 +104,10 @@
+          function collectPercentOfFees(uint _pcent) onlyowner {
+
+                  if (collectedFees == 0 || _pcent > 100) throw;
+
+ 
+
++                 require((((collectedFees / 100) == 0) || ((((collectedFees / 100) * _pcent) / (collectedFees / 100)) == _pcent))); /* <FIX> Insert:BC */
+
+                  uint feesToCollect = collectedFees / 100 * _pcent;
+
+                  creator.send(feesToCollect);
+
++                 require((collectedFees >= feesToCollect)); /* <FIX> Insert:BC */
+
+                  collectedFees -= feesToCollect;
+
+          }
+
+ 
+
+@@ -150,6 +157,7 @@
+          }
+
+ 
+
+          function numberOfParticipantsWaitingForPayout() constant returns(uint count) {
+
++                 require((participants.length >= payoutOrder)); /* <FIX> Insert:BC */
+
+                  count = participants.length - payoutOrder;
+
+          }
+
+ 

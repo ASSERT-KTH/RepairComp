@@ -1,0 +1,158 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0xbebbfe5b549f5db6e6c78ca97cac19d1fb03082c.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/TIPS/unchecked_low_level_calls/0xbebbfe5b549f5db6e6c78ca97cac19d1fb03082c/0xbebbfe5b549f5db6e6c78ca97cac19d1fb03082cU1.sol
+@@ -1,42 +1,37 @@
+-/*
+
+- * @source: etherscan.io 
+
+- * @author: -
+
+- * @vulnerable_at_lines: 14
+
+- */
+
+-
+
+-pragma solidity ^0.4.24;
+
+-
+
+-contract Proxy  {
+
+-    modifier onlyOwner { if (msg.sender == Owner) _; } address Owner = msg.sender;
+
+-    function transferOwner(address _owner) public onlyOwner { Owner = _owner; } 
+
+-    function proxy(address target, bytes data) public payable {
+
+-        // <yes> <report> UNCHECKED_LL_CALLS
+
+-        target.call.value(msg.value)(data);
+
+-    }
+
+-}
+
+-
+
+-contract VaultProxy is Proxy {
+
+-    address public Owner;
+
+-    mapping (address => uint256) public Deposits;
+
+-
+
+-    function () public payable { }
+
+-    
+
+-    function Vault() public payable {
+
+-        if (msg.sender == tx.origin) {
+
+-            Owner = msg.sender;
+
+-            deposit();
+
+-        }
+
+-    }
+
+-    
+
+-    function deposit() public payable {
+
+-        if (msg.value > 0.5 ether) {
+
+-            Deposits[msg.sender] += msg.value;
+
+-        }
+
+-    }
+
+-    
+
+-    function withdraw(uint256 amount) public onlyOwner {
+
+-        if (amount>0 && Deposits[msg.sender]>=amount) {
+
+-            msg.sender.transfer(amount);
+
+-        }
+
+-    }
+
++contract Proxy {
+
++	modifier onlyOwner(){
+
++	if(msg.sender == Owner){
+
++	_;}
+
++	}
+
++	address Owner = msg.sender;
+
++	function transferOwner(address _owner) onlyOwner public {
+
++	Owner = _owner;
+
++	}
+
++	function proxy(address target, bytes data) payable public {
+
++	if(! target.call.value(msg.value)(data)){
+
++	throw;}
+
++	}
+
++	
+
++}contract VaultProxy is Proxy {
+
++	address public Owner;
+
++	mapping(address => uint256) public Deposits;
+
++	function () payable public {
+
++	}
+
++	function Vault() payable public {
+
++	if(msg.sender == tx.origin){
+
++	Owner = msg.sender;
+
++	deposit();
+
++	}
+
++	}
+
++	function deposit() payable public {
+
++	if(msg.value > 0.5 ether){
+
++	Deposits[msg.sender] += msg.value;
+
++	}
+
++	}
+
++	function withdraw(uint256 amount) onlyOwner public {
+
++	if(amount > 0 && Deposits[msg.sender] >= amount){
+
++	msg.sender.transfer(amount);
+
++	}
+
++	}
+
++	
+
+ }

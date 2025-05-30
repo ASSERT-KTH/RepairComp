@@ -1,0 +1,16 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/bad_randomness/smart_billions.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/bad_randomness/smart_billions/smart_billions.sol
+@@ -251,6 +251,7 @@
+         if(investStart > 0) {
+
+             return(0);
+
+         }
+
++        require((block.number >= hashFirst)); /* <FIX> Insert:BC */
+
+         uint period = (block.number - hashFirst) / (10 * hashesSize);
+
+         if(period > dividendPeriod) {
+
+             return(0);

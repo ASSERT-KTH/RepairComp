@@ -1,9 +1,9 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0xb5e1b1ee15c6fa0e48fce100125569d430f1bd12.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/reentrancy/0xb5e1b1ee15c6fa0e48fce100125569d430f1bd12/0xb5e1b1ee15c6fa0e48fce100125569d430f1bd12.sol
-@@ -1,19 +1,21 @@
+@@ -1,76 +1,72 @@
 -/*
 
-- * @source: etherscan.io
+- * @source: etherscan.io 
 
 - * @author: -
 
@@ -11,117 +11,279 @@
 
 - */
 
-+contract sGuardPlus {
-
-+    constructor() internal {
-
-+        __lock_modifier0_lock = false;
-
-+    }
-
  
 
 -pragma solidity ^0.4.19;
 
 -
 
--contract Private_Bank {
+-contract Private_Bank
 
-+    bool private __lock_modifier0_lock;
+-{
 
-+    modifier __lock_modifier0() {
+-    mapping (address => uint) public balances;
 
-+        require(!__lock_modifier0_lock);
+-    
 
-+        __lock_modifier0_lock = true;
+-    uint public MinDeposit = 1 ether;
 
-+        _;
+-    
 
-+        __lock_modifier0_lock = false;
+-    Log TransferLog;
 
-+    }
+-    
 
-+}
+-    function Private_Bank(address _log)
 
-+contract Private_Bank is sGuardPlus {
+-    {
 
-     mapping(address => uint) public balances;
+-        TransferLog = Log(_log);
 
--
+-    }
 
-     uint public MinDeposit = 1 ether;
+-    
 
--
+-    function Deposit()
 
-     Log TransferLog;
+-    public
 
--
+-    payable
 
--    function Private_Bank(address _log) {
+-    {
 
-+    constructor(address _log) {
+-        if(msg.value > MinDeposit)
 
-         TransferLog = Log(_log);
+-        {
 
-     }
+-            balances[msg.sender]+=msg.value;
 
- 
+-            TransferLog.AddMessage(msg.sender,msg.value,"Deposit");
 
-@@ -24,9 +26,8 @@
-         }
+-        }
 
-     }
+-    }
 
- 
+-    
 
--    function CashOut(uint _am) public payable {
+-    function CashOut(uint _am)
 
-+    function CashOut(uint _am) public payable __lock_modifier0 {
+-    public
 
-         if (_am <= balances[msg.sender]) {
+-    payable
+
+-    {
+
+-        if(_am<=balances[msg.sender])
+
+-        {
 
 -            // <yes> <report> REENTRANCY
 
-             if (msg.sender.call.value(_am)()) {
+-            if(msg.sender.call.value(_am)())
 
-                 balances[msg.sender] -= _am;
+-            {
 
-                 TransferLog.AddMessage(msg.sender, _am, "CashOut");
+-                balances[msg.sender]-=_am;
 
-@@ -36,7 +37,6 @@
- 
+-                TransferLog.AddMessage(msg.sender,_am,"CashOut");
 
-     function() public payable {}
+-            }
+
+-        }
+
+-    }
+
+-    
+
+-    function() public payable{}    
+
+-    
+
++                        contract sGuardPlus {
+
++                                constructor() internal {
+
++                                        __lock_modifier0_lock = false;
+
++                                        
+
++                                }
+
++                                
+
++                                
+
++                bool private __lock_modifier0_lock;
+
++                modifier __lock_modifier0() {
+
++                        require(!__lock_modifier0_lock);
+
++                        __lock_modifier0_lock = true;
+
++                        _;
+
++                        __lock_modifier0_lock = false;
+
++                        
+
++                }
+
++                
+
++                                
+
++                                
+
++                        }
+
++                contract Private_Bank is sGuardPlus {
+
++mapping (address  => uint ) public   balances;
+
++uint  public   MinDeposit = 1 ether;
+
++Log     TransferLog;
+
++constructor (address    _log)   {
+
++TransferLog=Log(_log);
 
  }
 
--
+ 
 
- contract Log {
+-contract Log 
 
-     struct Message {
++function Deposit () public payable {
 
-         address Sender;
++if (msg.value>MinDeposit)
 
-@@ -44,11 +44,8 @@
-         uint Val;
+ {
 
-         uint Time;
+-   
 
-     }
+-    struct Message
 
--
+-    {
 
-     Message[] public History;
+-        address Sender;
 
--
+-        string  Data;
 
-     Message LastMsg;
+-        uint Val;
 
--
+-        uint  Time;
 
-     function AddMessage(address _adr, uint _val, string _data) public {
+-    }
 
-         LastMsg.Sender = _adr;
+-    
 
-         LastMsg.Time = now;
+-    Message[] public History;
+
+-    
+
+-    Message LastMsg;
+
+-    
+
+-    function AddMessage(address _adr,uint _val,string _data)
+
+-    public
+
+-    {
+
+-        LastMsg.Sender = _adr;
+
+-        LastMsg.Time = now;
+
+-        LastMsg.Val = _val;
+
+-        LastMsg.Data = _data;
+
+-        History.push(LastMsg);
+
+-    }
+
+-}
++balances[msg.sender]+=msg.value;
+
++TransferLog.AddMessage(msg.sender, msg.value, "Deposit");
+
++}
+
++
+
++}
+
++
+
++function CashOut (uint    _am) public __lock_modifier0 payable {
+
++if (_am<=balances[msg.sender])
+
++{
+
++if (msg.sender.call.value(_am)())
+
++{
+
++balances[msg.sender]-=_am;
+
++TransferLog.AddMessage(msg.sender, _am, "CashOut");
+
++}
+
++
+
++}
+
++
+
++}
+
++
+
++function () public payable {
+
++}
+
++
+
++}
+
++contract Log  {
+
++struct Message {
+
++address     Sender;
+
++string     Data;
+
++uint     Val;
+
++uint     Time;
+
++}
+
++Message [] public   History;
+
++Message     LastMsg;
+
++function AddMessage (address    _adr,uint    _val,string    _data) public  {
+
++LastMsg.Sender=_adr;
+
++LastMsg.Time=now;
+
++LastMsg.Val=_val;
+
++LastMsg.Data=_data;
+
++History.push(LastMsg);
+
++}
+
++
+
++}

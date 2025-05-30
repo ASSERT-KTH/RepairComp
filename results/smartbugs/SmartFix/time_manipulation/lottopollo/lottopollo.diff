@@ -1,0 +1,36 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/time_manipulation/lottopollo.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/time_manipulation/lottopollo/lottopollo.sol
+@@ -10,6 +10,7 @@
+   uint    timestamp;
+
+   function payOut(uint rand) internal {
+
+     // <yes> <report> TIME MANIPULATION
+
++    require((now >= rand)); /* <FIX> Insert:BC */
+
+     if ( rand> 0 && now - rand > 24 hours ) {
+
+       msg.sender.send( msg.value );
+
+ 
+
+@@ -26,8 +27,8 @@
+       // <yes> <report> TIME MANIPULATION
+
+       return block.timestamp;   
+
+     }
+
+-  function draw(uint seed){
+
++   /* <FIX> Change to Cnstr: */ constructor(uint seed){
+
+     uint randomNumber=randomGen(); 
+
+     payOut(randomNumber);
+
+   }
+
+-}
++}

@@ -1,0 +1,63 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/bad_randomness/old_blockhash.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/bad_randomness/old_blockhash/old_blockhash.sol
+@@ -1,14 +1,20 @@
++contract sGuard{
+
++  function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    uint256 c = a + b;
+
++    assert(c >= a);
+
++    return c;
+
++  }
+
++}
+
+ /*
+
+  * @source: https://github.com/SmartContractSecurity/SWC-registry/blob/master/test_cases/weak_randomness/old_blockhash.sol
+
+  * @author: -
+
+  * @vulnerable_at_lines: 35
+
+  */
+
+ 
+
+-pragma solidity ^0.4.24;
+
+ 
+
+ //Based on the the Capture the Ether challange at https://capturetheether.com/challenges/lotteries/predict-the-block-hash/
+
+ //Note that while it seems to have a 1/2^256 chance you guess the right hash, actually blockhash returns zero for blocks numbers that are more than 256 blocks ago so you can guess zero and wait.
+
+-contract PredictTheBlockHashChallenge {
+
++contract PredictTheBlockHashChallenge  is sGuard {
+
+ 
+
+     struct guess{
+
+       uint block;
+
+@@ -26,7 +32,7 @@
+         require(msg.value == 1 ether);
+
+ 
+
+         guesses[msg.sender].guess = hash;
+
+-        guesses[msg.sender].block  = block.number + 1;
+
++        guesses[msg.sender].block  = add_uint256(block.number, 1);
+
+     }
+
+ 
+
+     function settle() public {

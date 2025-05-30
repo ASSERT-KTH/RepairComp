@@ -1,9 +1,9 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0xcead721ef5b11f1a7b530171aab69b16c5e66b6e.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/reentrancy/0xcead721ef5b11f1a7b530171aab69b16c5e66b6e/0xcead721ef5b11f1a7b530171aab69b16c5e66b6e_3round.sol
-@@ -1,30 +1,24 @@
+@@ -1,48 +1,28 @@
 -/*
 
-- * @source: etherscan.io
+- * @source: etherscan.io 
 
 - * @author: -
 
@@ -17,41 +17,63 @@
 
  
 
- contract WALLET {
+-contract WALLET
 
-     function Put(uint _unlockTime) public payable {
+-{
+
+-    function Put(uint _unlockTime)
+
+-    public
+
+-    payable
+
+-    {
 
 -        var acc = Acc[msg.sender];
+
++contract WALLET {
+
++    function Put(uint _unlockTime) public payable {
 
 +        Holder storage acc = Acc[msg.sender];
 
          acc.balance += msg.value;
 
-         acc.unlockTime = _unlockTime > now ? _unlockTime : now;
+-        acc.unlockTime = _unlockTime>now?_unlockTime:now;
 
-         LogFile.AddMessage(msg.sender, msg.value, "Put");
+-        LogFile.AddMessage(msg.sender,msg.value,"Put");
+
++        acc.unlockTime = _unlockTime > now ? _unlockTime : now;
+
++        LogFile.AddMessage(msg.sender, msg.value, "Put");
 
      }
 
  
 
--    function Collect(uint _am) public payable {
+-    function Collect(uint _am)
+
+-    public
+
+-    payable
+
+-    {
 
 -        var acc = Acc[msg.sender];
 
--        if (
+-        if( acc.balance>=MinSum && acc.balance>=_am && now>acc.unlockTime)
 
--            acc.balance >= MinSum && acc.balance >= _am && now > acc.unlockTime
-
--        ) {
+-        {
 
 -            // <yes> <report> REENTRANCY
 
--            if (msg.sender.call.value(_am)()) {
+-            if(msg.sender.call.value(_am)())
 
--                acc.balance -= _am;
+-            {
 
--                LogFile.AddMessage(msg.sender, _am, "Collect");
+-                acc.balance-=_am;
+
+-                LogFile.AddMessage(msg.sender,_am,"Collect");
 
 -            }
 
@@ -61,21 +83,15 @@
 
 +        Holder storage acc = Acc[msg.sender];
 
-+        require(
++        require(acc.balance >= MinSum && acc.balance >= _am && now > acc.unlockTime, "Insufficient balance or unlock time not reached");
 
-+            acc.balance >= MinSum && acc.balance >= _am && now > acc.unlockTime,
-
-+            "Insufficient balance or unlock time not reached"
-
-+        );
-
-+
++        
 
 +        acc.balance -= _am;
 
 +        LogFile.AddMessage(msg.sender, _am, "Collect");
 
-+
++        
 
 +        msg.sender.transfer(_am);
 
@@ -83,16 +99,48 @@
 
  
 
-     function() public payable {
+-    function() 
 
-@@ -42,7 +36,7 @@
+-    public 
+
+-    payable
+
+-    {
+
++    function() public payable {
+
+         Put(0);
+
+     }
+
  
 
-     uint public MinSum = 1 ether;
+-    struct Holder   
+
+-    {
+
++    struct Holder {
+
+         uint unlockTime;
+
+         uint balance;
+
+     }
+
+@@ -51,35 +31,29 @@
+ 
+
+     Log LogFile;
 
  
 
--    function WALLET(address log) public {
+-    uint public MinSum = 1 ether;    
+
++    uint public MinSum = 1 ether;
+
+ 
+
+-    function WALLET(address log) public{
 
 +    constructor(address log) public {
 
@@ -102,7 +150,36 @@
 
  }
 
-@@ -57,13 +51,12 @@
+ 
+
+-
+
+-contract Log 
+
+-{
+
+-    struct Message
+
+-    {
+
++contract Log {
+
++    struct Message {
+
+         address Sender;
+
+-        string  Data;
+
++        string Data;
+
+         uint Val;
+
+-        uint  Time;
+
++        uint Time;
+
+     }
+
  
 
      Message[] public History;
@@ -113,7 +190,11 @@
 
 -
 
-     function AddMessage(address _adr, uint _val, string _data) public {
+-    function AddMessage(address _adr,uint _val,string _data)
+
+-    public
+
+-    {
 
 -        LastMsg.Sender = _adr;
 
@@ -124,6 +205,8 @@
 -        LastMsg.Data = _data;
 
 -        History.push(LastMsg);
+
++    function AddMessage(address _adr, uint _val, string _data) public {
 
 +        Message memory newMessage;
 

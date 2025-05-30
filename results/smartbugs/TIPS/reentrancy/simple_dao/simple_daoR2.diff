@@ -1,0 +1,86 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/simple_dao.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/TIPS/reentrancy/simple_dao/simple_daoR2.sol
+@@ -1,27 +1,16 @@
+-/*
+
+- * @source: http://blockchain.unica.it/projects/ethereum-survey/attacks.html#simpledao
+
+- * @author: -
+
+- * @vulnerable_at_lines: 19
+
+- */
+
+-
+
+-pragma solidity ^0.4.2;
+
+-
+
+ contract SimpleDAO {
+
+-  mapping (address => uint) public credit;
+
+-
+
+-  function donate(address to) payable {
+
+-    credit[to] += msg.value;
+
+-  }
+
+-
+
+-  function withdraw(uint amount) {
+
+-    if (credit[msg.sender]>= amount) {
+
+-      // <yes> <report> REENTRANCY
+
+-      bool res = msg.sender.call.value(amount)();
+
+-      credit[msg.sender]-=amount;
+
+-    }
+
+-  }
+
+-
+
+-  function queryCredit(address to) returns (uint){
+
+-    return credit[to];
+
+-  }
+
+-}
+
++	mapping(address => uint) public credit;
+
++	function donate(address to) payable public {
+
++	credit[to] += msg.value;
+
++	}
+
++	function withdraw(uint amount) public {
+
++	if(credit[msg.sender] >= amount){
+
++	credit[msg.sender] -= amount;
+
++	bool res = msg.sender.call.value(amount)();
+
++	}
+
++	}
+
++	function queryCredit(address to) public returns(uint ){
+
++	return credit[to];
+
++	}
+
++	
+
++}

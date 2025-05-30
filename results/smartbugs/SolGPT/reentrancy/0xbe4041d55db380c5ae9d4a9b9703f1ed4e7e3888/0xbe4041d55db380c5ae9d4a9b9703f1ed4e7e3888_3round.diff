@@ -1,9 +1,9 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0xbe4041d55db380c5ae9d4a9b9703f1ed4e7e3888.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/reentrancy/0xbe4041d55db380c5ae9d4a9b9703f1ed4e7e3888/0xbe4041d55db380c5ae9d4a9b9703f1ed4e7e3888_3round.sol
-@@ -1,9 +1,3 @@
+@@ -1,104 +1,73 @@
 -/*
 
-- * @source: etherscan.io
+- * @source: etherscan.io 
 
 - * @author: -
 
@@ -17,24 +17,55 @@
 
  
 
- contract MONEY_BOX {
+-contract MONEY_BOX   
 
-@@ -18,40 +12,41 @@
- 
+-{
+
+-    struct Holder   
+
+-    {
+
++contract MONEY_BOX {
+
++    struct Holder {
+
+         uint unlockTime;
+
+         uint balance;
+
+     }
+
+-    
+
++
+
+     mapping (address => Holder) public Acc;
+
+     
+
+     uint public MinSum;
+
+     
 
      Log LogFile;
 
- 
+     
 
 -    bool intitalized;
 
 +    bool initialized;
 
- 
+     
 
-     function SetMinSum(uint _val) public {
+-    function SetMinSum(uint _val)
 
--        if (intitalized) throw;
+-    public
+
+-    {
+
+-        if(intitalized)throw;
+
++    function SetMinSum(uint _val) public {
 
 +        require(!initialized);
 
@@ -42,11 +73,17 @@
 
      }
 
- 
+     
 
-     function SetLogFile(address _log) public {
+-    function SetLogFile(address _log)
 
--        if (intitalized) throw;
+-    public
+
+-    {
+
+-        if(intitalized)throw;
+
++    function SetLogFile(address _log) public {
 
 +        require(!initialized);
 
@@ -54,27 +91,43 @@
 
      }
 
- 
+     
 
-     function Initialized() public {
+-    function Initialized()
+
+-    public
+
+-    {
 
 -        intitalized = true;
+
++    function Initialized() public {
 
 +        initialized = true;
 
      }
 
- 
+     
 
-     function Put(uint _lockTime) public payable {
+-    function Put(uint _lockTime)
+
+-    public
+
+-    payable
+
+-    {
 
 -        var acc = Acc[msg.sender];
+
++    function Put(uint _lockTime) public payable {
 
 +        Holder storage acc = Acc[msg.sender];
 
          acc.balance += msg.value;
 
--        if (now + _lockTime > acc.unlockTime) acc.unlockTime = now + _lockTime;
+-        if(now+_lockTime>acc.unlockTime)acc.unlockTime=now+_lockTime;
+
+-        LogFile.AddMessage(msg.sender,msg.value,"Put");
 
 +        if (now + _lockTime > acc.unlockTime) {
 
@@ -82,70 +135,123 @@
 
 +        }
 
-         LogFile.AddMessage(msg.sender, msg.value, "Put");
++        LogFile.AddMessage(msg.sender, msg.value, "Put");
 
      }
 
- 
+     
 
--    function Collect(uint _am) public payable {
+-    function Collect(uint _am)
+
+-    public
+
+-    payable
+
+-    {
 
 -        var acc = Acc[msg.sender];
 
--        if (
+-        if( acc.balance>=MinSum && acc.balance>=_am && now>acc.unlockTime)
 
-+    function Collect(uint _am) public {
-
-+        Holder storage acc = Acc[msg.sender];
-
-+        require(
-
-             acc.balance >= MinSum && acc.balance >= _am && now > acc.unlockTime
-
--        ) {
+-        {
 
 -            // <yes> <report> REENTRANCY
 
--            if (msg.sender.call.value(_am)()) {
+-            if(msg.sender.call.value(_am)())
 
--                acc.balance -= _am;
+-            {
 
--                LogFile.AddMessage(msg.sender, _am, "Collect");
+-                acc.balance-=_am;
+
+-                LogFile.AddMessage(msg.sender,_am,"Collect");
 
 -            }
 
 -        }
 
-+        );
++    function Collect(uint _am) public {
 
-+
++        Holder storage acc = Acc[msg.sender];
+
++        require(acc.balance >= MinSum && acc.balance >= _am && now > acc.unlockTime);
+
++        
 
 +        acc.balance -= _am;
 
 +        LogFile.AddMessage(msg.sender, _am, "Collect");
 
-+
++        
 
 +        msg.sender.transfer(_am);
 
      }
 
+     
+
+-    function() 
+
+-    public 
+
+-    payable
+
+-    {
+
++    function() public payable {
+
+         Put(0);
+
+     }
+
+-    
+
+ }
+
  
-
-     function() public payable {
-
-@@ -69,13 +64,12 @@
- 
-
-     Message[] public History;
-
- 
-
--    Message LastMsg;
 
 -
 
-     function AddMessage(address _adr, uint _val, string _data) public {
+-contract Log 
+
+-{
+
+-    struct Message
+
+-    {
+
++contract Log {
+
++    struct Message {
+
+         address Sender;
+
+-        string  Data;
+
++        string Data;
+
+         uint Val;
+
+-        uint  Time;
+
++        uint Time;
+
+     }
+
+     
+
+     Message[] public History;
+
+     
+
+-    Message LastMsg;
+
+-    
+
+-    function AddMessage(address _adr,uint _val,string _data)
+
+-    public
+
+-    {
 
 -        LastMsg.Sender = _adr;
 
@@ -156,6 +262,8 @@
 -        LastMsg.Data = _data;
 
 -        History.push(LastMsg);
+
++    function AddMessage(address _adr, uint _val, string _data) public {
 
 +        Message memory newMessage;
 

@@ -1,0 +1,125 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/access_control/wallet_02_refund_nosub.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/access_control/wallet_02_refund_nosub/wallet_02_refund_nosub.sol
+@@ -1,17 +1,39 @@
++contract sGuard{
+
++  function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    assert(b <= a);
+
++    return a - b;
+
++  }
+
++  
+
++  function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    uint256 c = a + b;
+
++    assert(c >= a);
+
++    return c;
+
++  }
+
++  
+
++  bool internal locked_;
+
++  constructor() internal {
+
++    locked_ = false;
+
++  }
+
++  modifier nonReentrant_() {
+
++    require(!locked_);
+
++    locked_ = true;
+
++    _;
+
++    locked_ = false;
+
++  }
+
++}
+
+ /*
+
+  * @source: https://smartcontractsecurity.github.io/SWC-registry/docs/SWC-105#wallet-02-refund-nosubsol
+
+  * @author: -
+
+  * @vulnerable_at_lines: 36
+
+  */
+
+ 
+
+- pragma solidity ^0.4.24;
+
+ 
+
+  /* User can add pay in and withdraw Ether.
+
+     Unfortunately the developer forgot set the user's balance to 0 when refund() is called.
+
+     An attacker can pay in a small amount of Ether and call refund() repeatedly to empty the contract.
+
+  */
+
+ 
+
+- contract Wallet {
+
++ contract Wallet  is sGuard {
+
+      address creator;
+
+ 
+
+      mapping(address => uint256) balances;
+
+@@ -20,15 +42,15 @@
+          creator = msg.sender;
+
+      }
+
+ 
+
+-     function deposit() public payable {
+
+-         assert(balances[msg.sender] + msg.value > balances[msg.sender]);
+
+-         balances[msg.sender] += msg.value;
+
++      function deposit() nonReentrant_  public payable {
+
++         assert(add_uint256(balances[msg.sender], msg.value) > balances[msg.sender]);
+
++         balances[msg.sender] = add_uint256(balances[msg.sender], msg.value);
+
+      }
+
+ 
+
+-     function withdraw(uint256 amount) public {
+
++      function withdraw(uint256 amount) nonReentrant_  public {
+
+          require(amount <= balances[msg.sender]);
+
+          msg.sender.transfer(amount);
+
+-         balances[msg.sender] -= amount;
+
++         balances[msg.sender] = sub_uint256(balances[msg.sender], amount);
+
+      }
+
+ 
+
+      function refund() public {

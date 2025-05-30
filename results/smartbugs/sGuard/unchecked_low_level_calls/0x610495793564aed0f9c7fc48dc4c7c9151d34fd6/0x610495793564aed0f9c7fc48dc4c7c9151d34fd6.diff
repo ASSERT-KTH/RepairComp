@@ -1,0 +1,16 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0x610495793564aed0f9c7fc48dc4c7c9151d34fd6.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/unchecked_low_level_calls/0x610495793564aed0f9c7fc48dc4c7c9151d34fd6/0x610495793564aed0f9c7fc48dc4c7c9151d34fd6.sol
+@@ -4,7 +4,6 @@
+  * @vulnerable_at_lines: 33
+
+  */
+
+ 
+
+-pragma solidity ^0.4.24;
+
+ 
+
+ 
+
+ contract SimpleWallet {

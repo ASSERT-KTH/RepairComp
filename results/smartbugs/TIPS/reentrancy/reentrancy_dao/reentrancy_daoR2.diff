@@ -1,6 +1,6 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/reentrancy_dao.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/TIPS/reentrancy/reentrancy_dao/reentrancy_daoR2.sol
-@@ -1,26 +1,15 @@
+@@ -1,28 +1,18 @@
 -/*
 
 - * @source: https://github.com/ConsenSys/evm-analyzer-benchmark-suite
@@ -19,38 +19,74 @@
 
  contract ReentrancyDAO {
 
-     mapping(address => uint) credit;
+-    mapping (address => uint) credit;
 
-     uint balance;
+-    uint balance;
 
 -
 
-     function withdrawAll() public {
+-    function withdrawAll() public {
 
-         uint oCredit = credit[msg.sender];
+-        uint oCredit = credit[msg.sender];
 
-         if (oCredit > 0) {
+-        if (oCredit > 0) {
 
-             balance -= oCredit;
+-            balance -= oCredit;
 
 -            // <yes> <report> REENTRANCY
 
-+            credit[msg.sender] = 0;
+-            bool callResult = msg.sender.call.value(oCredit)();
 
-             bool callResult = msg.sender.call.value(oCredit)();
-
-             require(callResult);
+-            require (callResult);
 
 -            credit[msg.sender] = 0;
 
-         }
+-        }
 
-     }
+-    }
 
 -
 
-     function deposit() public payable {
+-    function deposit() public payable {
 
-         credit[msg.sender] += msg.value;
+-        credit[msg.sender] += msg.value;
 
-         balance += msg.value;
+-        balance += msg.value;
+
+-    }
+
+-}
+
++	mapping(address => uint) credit;
+
++	uint balance;
+
++	function withdrawAll() public {
+
++	uint oCredit = credit[msg.sender];
+
++	if(oCredit > 0){
+
++	balance -= oCredit;
+
++	credit[msg.sender] = 0;
+
++	bool callResult = msg.sender.call.value(oCredit)();
+
++	require(callResult);
+
++	}
+
++	}
+
++	function deposit() payable public {
+
++	credit[msg.sender] += msg.value;
+
++	balance += msg.value;
+
++	}
+
++	
+
++}

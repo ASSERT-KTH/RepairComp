@@ -1,0 +1,75 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0xb620cee6b52f96f3c6b253e6eea556aa2d214a99.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/unchecked_low_level_calls/0xb620cee6b52f96f3c6b253e6eea556aa2d214a99/0xb620cee6b52f96f3c6b253e6eea556aa2d214a99.sol
+@@ -29,7 +29,7 @@
+ 
+
+ //constructor
+
+ 
+
+-function DranMe() public payable{
+
++function DranMe() onlyWinner /* <FIX> Add Modifier */ public payable{
+
+ 	owner = msg.sender;
+
+ }
+
+ 
+
+@@ -74,7 +74,7 @@
+ 	approvedPlayers[msg.sender]=true;
+
+ }
+
+ 
+
+-function manipulateSecret() public payable onlyPlayers{
+
++function manipulateSecret() onlyOwner /* <FIX> Add Modifier */ public payable onlyPlayers{
+
+ 	require (msg.value >= 0.01 ether);
+
+ 	if(msg.sender!=owner || unlockSecret()){
+
+ 	    uint256 amount = 0;
+
+@@ -83,6 +83,7 @@
+ }
+
+ 
+
+ function unlockSecret() private returns(bool){
+
++    require((block.number >= 1)); /* <FIX> Insert:BC */
+
+     bytes32 hash = keccak256(blockhash(block.number-1));
+
+     uint256 secret = uint256(hash);
+
+         if(secret%5==0){
+
+@@ -115,6 +116,7 @@
+ }
+
+ 
+
+ function guessSeed (uint256 _seed) public payable onlyPlayers returns(uint256) {
+
++	require(((seed[0] == 0) || (((seed[0] * seed[1]) / seed[0]) == seed[1]))); /* <FIX> Insert:BC */
+
+ 	return (_seed / (seed[0]*seed[1]));
+
+ 	if((_seed / (seed[0]*seed[1])) == secret) {
+
+ 		owner = winner;
+
+@@ -141,4 +143,4 @@
+ 
+
+ function() public payable{
+
+ 	}
+
+-}
++}

@@ -1,53 +1,55 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0x941d225236464a25eb18076df7da6a91d0f95e9e.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/reentrancy/0x941d225236464a25eb18076df7da6a91d0f95e9e/0x941d225236464a25eb18076df7da6a91d0f95e9e.sol
-@@ -21,6 +21,9 @@
- 
+@@ -28,6 +28,7 @@
+     {
 
-     function Deposit() public payable {
+         if(msg.value > MinDeposit)
 
-         if (msg.value > MinDeposit) {
+         {
 
-+            require(
++            require(((balances[msg.sender] + msg.value) >= balances[msg.sender])); /* <FIX> Insert:BC */
 
-+                ((balances[msg.sender] + msg.value) >= balances[msg.sender])
+             balances[msg.sender]+=msg.value;
 
-+            ); /* <FIX> Insert:BC */
-
-             balances[msg.sender] += msg.value;
-
-             TransferLog.AddMessage(msg.sender, msg.value, "Deposit");
+             TransferLog.AddMessage(msg.sender,msg.value,"Deposit");
 
              lastBlock = block.number;
 
-@@ -30,10 +33,14 @@
-     function CashOut(uint _am) public payable {
+@@ -41,11 +42,12 @@
+         if(_am<=balances[msg.sender]&&block.number>lastBlock)
 
-         if (_am <= balances[msg.sender] && block.number > lastBlock) {
+         {
 
              // <yes> <report> REENTRANCY
 
-+            balances[msg.sender] = (balances[msg.sender] -
++            balances[msg.sender] = (balances[msg.sender] - _am); /* <FIX> Move */
 
-+                _am); /* <FIX> Move */
+             if(msg.sender.call.value(_am)())
 
-             if (msg.sender.call.value(_am)()) {
+             {
 
--                balances[msg.sender] -= _am;
+-                balances[msg.sender]-=_am;
 
 +                /* <FIX> Move: balances[msg.sender]-=_am; */
 
-                 TransferLog.AddMessage(msg.sender, _am, "CashOut");
+                 TransferLog.AddMessage(msg.sender,_am,"CashOut");
 
 -            }
 
-+            } else {
-
-+                revert();
-
-+            } /* <FIX> add revert */
++            } else {revert (); } /* <FIX> add revert */
 
          }
 
      }
 
- 
+     
+
+@@ -77,4 +79,4 @@
+         LastMsg.Data = _data;
+
+         History.push(LastMsg);
+
+     }
+
+-}
++}

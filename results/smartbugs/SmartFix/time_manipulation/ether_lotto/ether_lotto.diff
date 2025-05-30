@@ -1,0 +1,16 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/time_manipulation/ether_lotto.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/time_manipulation/ether_lotto/ether_lotto.sol
+@@ -36,6 +36,7 @@
+         assert(msg.value == TICKET_AMOUNT);
+
+ 
+
+         // Increase pot for each participant.
+
++        require(((pot + msg.value) >= pot)); /* <FIX> Insert:BC */
+
+         pot += msg.value;
+
+ 
+
+         // Compute some *almost random* value for selecting winner from current transaction.

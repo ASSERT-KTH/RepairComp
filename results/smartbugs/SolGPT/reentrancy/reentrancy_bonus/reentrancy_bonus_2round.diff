@@ -1,0 +1,86 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/reentrancy_bonus.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/reentrancy/reentrancy_bonus/reentrancy_bonus_2round.sol
+@@ -1,31 +1,29 @@
+-/*
+
+- * @source: https://consensys.github.io/smart-contract-best-practices/known_attacks/
+
+- * @author: consensys
+
+- * @vulnerable_at_lines: 28
+
+- */
+
+-
+
+ pragma solidity ^0.4.24;
+
+ 
+
+ contract Reentrancy_bonus{
+
+ 
+
+-    // INSECURE
+
+     mapping (address => uint) private userBalances;
+
+     mapping (address => bool) private claimedBonus;
+
+     mapping (address => uint) private rewardsForA;
+
++    mapping (address => bool) private isWithdrawing;
+
+ 
+
+     function withdrawReward(address recipient) public {
+
++        require(!isWithdrawing[recipient]);
+
++        isWithdrawing[recipient] = true;
+
++        
+
+         uint amountToWithdraw = rewardsForA[recipient];
+
+         rewardsForA[recipient] = 0;
+
+-        (bool success, ) = recipient.call.value(amountToWithdraw)("");
+
+-        require(success);
+
++        recipient.transfer(amountToWithdraw);
+
++        
+
++        isWithdrawing[recipient] = false;
+
+     }
+
+ 
+
+     function getFirstWithdrawalBonus(address recipient) public {
+
+-        require(!claimedBonus[recipient]); // Each recipient should only be able to claim the bonus once
+
++        require(!claimedBonus[recipient]); 
+
+ 
+
+         rewardsForA[recipient] += 100;
+
+-        // <yes> <report> REENTRANCY
+
+-        withdrawReward(recipient); // At this point, the caller will be able to execute getFirstWithdrawalBonus again.
+
++
+
++        withdrawReward(recipient); 
+
+         claimedBonus[recipient] = true;
+
+     }
+
+-}
+
++}

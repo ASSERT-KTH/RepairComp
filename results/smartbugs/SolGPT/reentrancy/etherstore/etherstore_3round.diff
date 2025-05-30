@@ -21,10 +21,10 @@
 
  contract EtherStore {
 
-@@ -18,13 +11,12 @@
+@@ -19,13 +12,12 @@
  
 
-     function withdrawFunds(uint256 _weiToWithdraw) public {
+     function withdrawFunds (uint256 _weiToWithdraw) public {
 
          require(balances[msg.sender] >= _weiToWithdraw);
 
@@ -52,4 +52,6 @@
 
      }
 
- }
+- }
+
++}

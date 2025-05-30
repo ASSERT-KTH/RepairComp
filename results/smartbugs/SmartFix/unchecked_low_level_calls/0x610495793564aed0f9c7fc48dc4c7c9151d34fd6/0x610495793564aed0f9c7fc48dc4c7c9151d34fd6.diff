@@ -1,0 +1,26 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0x610495793564aed0f9c7fc48dc4c7c9151d34fd6.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/unchecked_low_level_calls/0x610495793564aed0f9c7fc48dc4c7c9151d34fd6/0x610495793564aed0f9c7fc48dc4c7c9151d34fd6.sol
+@@ -17,6 +17,7 @@
+     }
+
+     
+
+     function() public payable {
+
++        require(((depositsCount + 1) >= depositsCount)); /* <FIX> Insert:BC */
+
+         depositsCount++;
+
+     }
+
+     
+
+@@ -32,4 +33,4 @@
+         // <yes> <report> UNCHECKED_LL_CALLS
+
+         _target.call.value(_value)(_data);
+
+     }
+
+-}
++}

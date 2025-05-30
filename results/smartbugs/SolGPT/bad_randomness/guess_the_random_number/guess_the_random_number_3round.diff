@@ -1,0 +1,74 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/bad_randomness/guess_the_random_number.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/bad_randomness/guess_the_random_number/guess_the_random_number_3round.sol
+@@ -1,29 +1,27 @@
+-/*
+
+- * @source: https://capturetheether.com/challenges/lotteries/guess-the-random-number/
+
+- * @author: Steve Marx
+
+- * @vulnerable_at_lines: 15
+
+- */
+
+-
+
+ pragma solidity ^0.4.21;
+
+ 
+
+ contract GuessTheRandomNumberChallenge {
+
+     uint8 answer;
+
++    bool isCompleted;
+
+ 
+
+     function GuessTheRandomNumberChallenge() public payable {
+
+         require(msg.value == 1 ether);
+
+-        // <yes> <report> BAD_RANDOMNESS
+
++
+
+         answer = uint8(keccak256(block.blockhash(block.number - 1), now));
+
++        isCompleted = false;
+
+     }
+
+ 
+
+     function isComplete() public view returns (bool) {
+
+-        return address(this).balance == 0;
+
++        return isCompleted;
+
+     }
+
+ 
+
+     function guess(uint8 n) public payable {
+
+         require(msg.value == 1 ether);
+
++        require(!isCompleted);
+
+ 
+
+         if (n == answer) {
+
+             msg.sender.transfer(2 ether);
+
++            isCompleted = true;
+
+         }
+
+     }
+
+-}
+
++}

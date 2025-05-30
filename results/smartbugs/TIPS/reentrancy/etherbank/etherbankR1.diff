@@ -1,0 +1,76 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/etherbank.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/TIPS/reentrancy/etherbank/etherbankR1.sol
+@@ -1,24 +1,16 @@
+-/*
+
+- * @source: https://github.com/seresistvanandras/EthBench/blob/master/Benchmark/Simple/reentrant.sol
+
+- * @author: -
+
+- * @vulnerable_at_lines: 21
+
+- */
+
+-
+
+-pragma solidity ^0.4.0;
+
+-contract EtherBank{
+
+-    mapping (address => uint) userBalances;
+
+-    function getBalance(address user) constant returns(uint) {  
+
+-		return userBalances[user];
+
++contract EtherBank {
+
++	mapping(address => uint) userBalances;
+
++	function getBalance(address user) view public returns(uint ){
+
++	return userBalances[user];
+
+ 	}
+
+-
+
+-	function addToBalance() {  
+
+-		userBalances[msg.sender] += msg.value;
+
++	function addToBalance() public {
+
++	userBalances[msg.sender] += msg.value;
+
+ 	}
+
+-
+
+-	function withdrawBalance() {  
+
+-		uint amountToWithdraw = userBalances[msg.sender];
+
+-        // <yes> <report> REENTRANCY
+
+-		if (!(msg.sender.call.value(amountToWithdraw)())) { throw; }
+
+-		userBalances[msg.sender] = 0;
+
+-	}    
+
++	function withdrawBalance() public {
+
++	uint amountToWithdraw = userBalances[msg.sender];
+
++	if(! (msg.sender.send(amountToWithdraw))){
+
++	throw;}
+
++	userBalances[msg.sender] = 0;
+
++	}
+
++	
+
+ }

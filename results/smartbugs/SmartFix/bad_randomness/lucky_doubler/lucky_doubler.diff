@@ -1,0 +1,16 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/bad_randomness/lucky_doubler.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/bad_randomness/lucky_doubler/lucky_doubler.sol
+@@ -84,6 +84,7 @@
+         }
+
+ 
+
+         //Add new entry to the entries array
+
++        require(((dValue == 0) || (((dValue * multiplier) / dValue) == multiplier))); /* <FIX> Insert:BC */
+
+         entries.push(Entry(msg.sender, dValue, (dValue * (multiplier) / 100), false));
+
+         users[msg.sender].deposits++;
+
+         unpaidEntries.push(entries.length -1);

@@ -1,6 +1,6 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/time_manipulation/ether_lotto.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/time_manipulation/ether_lotto/ether_lotto_1round.sol
-@@ -1,54 +1,24 @@
+@@ -1,59 +1,25 @@
 -/*
 
 - * @article: https://blog.positive.com/predicting-random-numbers-in-ethereum-smart-contracts-e5358c6b8620
@@ -15,15 +15,19 @@
 
 -
 
- pragma solidity ^0.4.15;
-
- 
-
--/// @title Ethereum Lottery Game.
+- pragma solidity ^0.4.15;
 
 -
 
+-/// @title Ethereum Lottery Game.
+
++pragma solidity ^0.4.15;
+
+ 
+
  contract EtherLotto {
+
+-
 
 -    // Amount of ether needed for participating in the lottery.
 
@@ -65,6 +69,8 @@
 
      function play() payable {
 
+-
+
 -        // Participants must spend some fixed ether before playing lottery.
 
 -        assert(msg.value == TICKET_AMOUNT);
@@ -93,6 +99,8 @@
 
          if (random == 0) {
 
+-
+
 -            // Send fee to bank account.
 
              bank.transfer(FEE_AMOUNT);
@@ -112,3 +120,9 @@
          }
 
      }
+
+-
+
+-}
+
++}

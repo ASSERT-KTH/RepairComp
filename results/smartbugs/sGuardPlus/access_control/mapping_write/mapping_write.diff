@@ -1,0 +1,126 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/access_control/mapping_write.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/access_control/mapping_write/mapping_write.sol
+@@ -1,30 +1,37 @@
+-/*
+
+- * @source: https://smartcontractsecurity.github.io/SWC-registry/docs/SWC-124#mapping-writesol
+
+- * @author: Suhabe Bugrara
+
+- * @vulnerable_at_lines: 20
+
+- */
+
+ 
+
+- pragma solidity ^0.4.24;
+
++                        contract sGuardPlus {
+
++                                constructor() internal {
+
++                                        
+
++                                        
+
++                                }
+
++                                function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++                                uint256 c = a + b;
+
++                                assert(c >= a);
+
++                                return c;
+
++                        }
+
++                                
+
++                                
+
++                                
+
++                        }
+
++                contract Map is sGuardPlus {
+
++address  public   owner;
+
++uint256 []    map;
+
++function set (uint256    key,uint256    value) public  {
+
++if (map.length<=key)
+
++{
+
++map.length=add_uint256(key, 1);
+
++}
+
+ 
+
+- //This code is derived from the Capture the Ether https://capturetheether.com/challenges/math/mapping/
+
++map[key]=value;
+
++}
+
+ 
+
+- contract Map {
+
+-     address public owner;
+
+-     uint256[] map;
+
++function get (uint256    key) public view returns (uint256    ){
+
++return map[key];
+
++}
+
+ 
+
+-     function set(uint256 key, uint256 value) public {
+
+-         if (map.length <= key) {
+
+-             map.length = key + 1;
+
+-         }
+
+-        // <yes> <report> ACCESS_CONTROL
+
+-         map[key] = value;
+
+-     }
+
++function withdraw () public  {
+
++require(msg.sender==owner);
+
++msg.sender.transfer(address(this).balance);
+
++}
+
+ 
+
+-     function get(uint256 key) public view returns (uint256) {
+
+-         return map[key];
+
+-     }
+
+-     function withdraw() public{
+
+-       require(msg.sender == owner);
+
+-       msg.sender.transfer(address(this).balance);
+
+-     }
+
+- }
+
++}

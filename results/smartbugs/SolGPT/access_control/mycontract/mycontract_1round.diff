@@ -1,6 +1,6 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/access_control/mycontract.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/access_control/mycontract/mycontract_1round.sol
-@@ -1,22 +1,16 @@
+@@ -1,24 +1,17 @@
 -/*
 
 - * @source: https://consensys.github.io/smart-contract-best-practices/recommendations/#avoid-using-txorigin
@@ -20,6 +20,8 @@
  
 
  contract MyContract {
+
+ 
 
      address owner;
 
@@ -51,4 +53,8 @@
 
      }
 
- }
+-
+
+-}
+
++}

@@ -1,0 +1,26 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0x19cf8481ea15427a98ba3cdd6d9e14690011ab10.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/unchecked_low_level_calls/0x19cf8481ea15427a98ba3cdd6d9e14690011ab10/0x19cf8481ea15427a98ba3cdd6d9e14690011ab10.sol
+@@ -348,6 +348,7 @@
+ 
+
+ function setChainsAddresses(address chainAd, int chainnumber) {
+
+     
+
++	   require((Chain2 == msg.sender)); /* <FIX> Insert */
+
+ 	   if (msg.sender != owner) {
+
+       throw;
+
+     }
+
+@@ -503,4 +504,4 @@
+ }
+
+ 
+
+ 
+
+-//------------------------------------------------------
++//------------------------------------------------------

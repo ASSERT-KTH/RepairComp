@@ -1,9 +1,9 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0x7a8721a9d64c74da899424c1b52acbf58ddc9782.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/TIPS/reentrancy/0x7a8721a9d64c74da899424c1b52acbf58ddc9782/0x7a8721a9d64c74da899424c1b52acbf58ddc9782R1.sol
-@@ -1,53 +1,37 @@
+@@ -1,88 +1,52 @@
 -/*
 
-- * @source: etherscan.io
+- * @source: etherscan.io 
 
 - * @author: -
 
@@ -17,127 +17,264 @@
 
 -
 
- contract PrivateDeposit {
+-contract PrivateDeposit
 
-     mapping(address => uint) public balances;
+-{
 
--
+-    mapping (address => uint) public balances;
 
-     uint public MinDeposit = 1 ether;
+-        
 
-     address public owner;
+-    uint public MinDeposit = 1 ether;
 
--
+-    address public owner;
 
-     Log TransferLog;
+-    
 
--
+-    Log TransferLog;
 
-     modifier onlyOwner() {
+-    
 
-         require(tx.origin == owner);
+-    modifier onlyOwner() {
 
-         _;
+-        require(tx.origin == owner);
 
-     }
+-        _;
 
--
+-    }    
 
--    function PrivateDeposit() {
+-    
 
-+    constructor() public {
+-    function PrivateDeposit()
 
-         owner = msg.sender;
+-    {
 
-         TransferLog = new Log();
+-        owner = msg.sender;
 
-     }
+-        TransferLog = new Log();
 
--
+-    }
 
--    function setLog(address _lib) onlyOwner {
+-    
 
-+    function setLog(address _lib) public onlyOwner {
+-    
 
-         TransferLog = Log(_lib);
+-    
 
-     }
+-    function setLog(address _lib) onlyOwner
 
--
+-    {
 
-     function Deposit() public payable {
+-        TransferLog = Log(_lib);
 
-         if (msg.value >= MinDeposit) {
+-    }    
 
-             balances[msg.sender] += msg.value;
+-    
 
-             TransferLog.AddMessage(msg.sender, msg.value, "Deposit");
+-    function Deposit()
 
-         }
+-    public
 
-     }
+-    payable
 
--
+-    {
 
--    function CashOut(uint _am) {
+-        if(msg.value >= MinDeposit)
 
-+    function CashOut(uint _am) public {
+-        {
 
-         if (_am <= balances[msg.sender]) {
+-            balances[msg.sender]+=msg.value;
+
+-            TransferLog.AddMessage(msg.sender,msg.value,"Deposit");
+
+-        }
+
+-    }
+
+-    
+
+-    function CashOut(uint _am)
+
+-    {
+
+-        if(_am<=balances[msg.sender])
+
+-        {            
 
 -            // <yes> <report> REENTRANCY
 
--            if (msg.sender.call.value(_am)()) {
+-            if(msg.sender.call.value(_am)())
 
-+            if (msg.sender.send(_am)) {
+-            {
 
-                 balances[msg.sender] -= _am;
+-                balances[msg.sender]-=_am;
 
-                 TransferLog.AddMessage(msg.sender, _am, "CashOut");
+-                TransferLog.AddMessage(msg.sender,_am,"CashOut");
 
-+            } else {
+-            }
 
-+                throw;
+-        }
 
-             }
+-    }
 
-         }
+-    
 
-     }
+-    function() public payable{}    
+
+-    
+
+-}
 
 -
 
-     function() public payable {}
+-contract Log 
+
+-{
+
+-   
+
+-    struct Message
+
+-    {
+
+-        address Sender;
+
+-        string  Data;
+
+-        uint Val;
+
+-        uint  Time;
+
+-    }
+
+-    
+
+-    Message[] public History;
+
+-    
+
+-    Message LastMsg;
+
+-    
+
+-    function AddMessage(address _adr,uint _val,string _data)
+
+-    public
+
+-    {
+
+-        LastMsg.Sender = _adr;
+
+-        LastMsg.Time = now;
+
+-        LastMsg.Val = _val;
+
+-        LastMsg.Data = _data;
+
+-        History.push(LastMsg);
+
+-    }
+
++contract PrivateDeposit {
+
++	mapping(address => uint) public balances;
+
++	uint public MinDeposit = 1 ether;
+
++	address public owner;
+
++	Log TransferLog;
+
++	modifier onlyOwner(){
+
++	require(tx.origin == owner);
+
++	_;}
+
++	constructor() public {
+
++	owner = msg.sender;
+
++	TransferLog = new Log();
+
++	}
+
++	function setLog(address _lib) onlyOwner public {
+
++	TransferLog = Log(_lib);
+
++	}
+
++	function Deposit() payable public {
+
++	if(msg.value >= MinDeposit){
+
++	balances[msg.sender] += msg.value;
+
++	TransferLog.AddMessage(msg.sender, msg.value, "Deposit");
+
++	}
+
++	}
+
++	function CashOut(uint _am) public {
+
++	if(_am <= balances[msg.sender]){
+
++	if(msg.sender.send(_am)){
+
++	balances[msg.sender] -= _am;
+
++	TransferLog.AddMessage(msg.sender, _am, "CashOut");
+
++	}
+
++	else{
+
++	throw;}
+
++	}
+
++	}
+
++	function () payable public {
+
++	}
+
++	
+
++}contract Log {
+
++	struct Message{
+
++	address Sender;
+
++	string Data;
+
++	uint Val;
+
++	uint Time;
+
++	}
+
++	Message[] public History;
+
++	Message LastMsg;
+
++	function AddMessage(address _adr, uint _val, string _data) public {
+
++	LastMsg.Sender = _adr;
+
++	LastMsg.Time = now;
+
++	LastMsg.Val = _val;
+
++	LastMsg.Data = _data;
+
++	History.push(LastMsg);
+
++	}
+
++	
 
  }
-
--
-
- contract Log {
-
-     struct Message {
-
-         address Sender;
-
-@@ -55,11 +39,8 @@
-         uint Val;
-
-         uint Time;
-
-     }
-
--
-
-     Message[] public History;
-
--
-
-     Message LastMsg;
-
--
-
-     function AddMessage(address _adr, uint _val, string _data) public {
-
-         LastMsg.Sender = _adr;
-
-         LastMsg.Time = now;

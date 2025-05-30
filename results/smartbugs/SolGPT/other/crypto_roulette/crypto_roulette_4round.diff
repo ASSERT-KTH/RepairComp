@@ -29,9 +29,9 @@
 
  contract CryptoRoulette {
 
-     uint256 private secretNumber;
+ 
 
-@@ -29,22 +18,27 @@
+@@ -30,20 +19,18 @@
      }
 
  
@@ -40,33 +40,15 @@
 
 -        // randomly set secretNumber with a value between 1 and 20
 
-         secretNumber =
+-        secretNumber = uint8(sha3(now, block.blockhash(block.number-1))) % 20 + 1;
 
--            (uint8(sha3(now, block.blockhash(block.number - 1))) % 20) +
-
-+            (uint8(
-
-+                sha3(
-
-+                    now,
-
-+                    block.blockhash(block.number - 1),
-
-+                    block.coinbase,
-
-+                    block.difficulty
-
-+                )
-
-+            ) % 20) +
-
-             1;
++        secretNumber = uint8(sha3(now, block.blockhash(block.number-1), block.coinbase, block.difficulty)) % 20 + 1;
 
      }
 
  
 
-     function play(uint256 number) public payable {
+     function play(uint256 number) payable public {
 
          require(msg.value >= betPrice && number <= 10);
 
@@ -96,7 +78,7 @@
 
  
 
-@@ -54,7 +48,7 @@
+@@ -53,9 +40,9 @@
  
 
      function kill() public {
@@ -112,3 +94,9 @@
      }
 
  
+
+     function() public payable { }
+
+-}
+
++}

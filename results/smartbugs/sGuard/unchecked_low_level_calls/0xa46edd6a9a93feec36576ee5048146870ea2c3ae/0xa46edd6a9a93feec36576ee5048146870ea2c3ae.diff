@@ -1,0 +1,16 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0xa46edd6a9a93feec36576ee5048146870ea2c3ae.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/unchecked_low_level_calls/0xa46edd6a9a93feec36576ee5048146870ea2c3ae/0xa46edd6a9a93feec36576ee5048146870ea2c3ae.sol
+@@ -4,7 +4,6 @@
+  * @vulnerable_at_lines: 16
+
+  */
+
+ 
+
+-pragma solidity ^0.4.18;
+
+ 
+
+ contract EBU{
+
+     

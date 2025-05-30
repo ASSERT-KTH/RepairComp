@@ -1,0 +1,61 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0x0cbe050f75bc8f8c2d6c0d249fea125fd6e1acc9.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/unchecked_low_level_calls/0x0cbe050f75bc8f8c2d6c0d249fea125fd6e1acc9/0x0cbe050f75bc8f8c2d6c0d249fea125fd6e1acc9.sol
+@@ -1,14 +1,18 @@
+-/*
+
+- * @source: etherscan.io 
+
+- * @author: -
+
+- * @vulnerable_at_lines: 12
+
+- */
+
+ 
+
+-pragma solidity ^0.4.10;
+
++                        contract sGuardPlus {
+
++                                constructor() internal {
+
++                                        
+
++                                        
+
++                                }
+
++                                
+
++                                
+
++                                
+
++                                
+
++                        }
+
++                contract Caller  {
+
++function callAddress (address    a)   {
+
++bool     __sent_result100 = a.call();
+
++require(__sent_result100);
+
++}
+
+ 
+
+-contract Caller {
+
+-    function callAddress(address a) {
+
+-        // <yes> <report> UNCHECKED_LL_CALLS
+
+-        a.call();
+
+-    }
+
+-}
++}

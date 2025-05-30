@@ -1,0 +1,16 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0xa1fceeff3acc57d257b917e30c4df661401d6431.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/unchecked_low_level_calls/0xa1fceeff3acc57d257b917e30c4df661401d6431/0xa1fceeff3acc57d257b917e30c4df661401d6431.sol
+@@ -4,7 +4,6 @@
+  * @vulnerable_at_lines: 31
+
+  */
+
+ 
+
+-pragma solidity ^0.4.18;
+
+ 
+
+ contract AirDropContract{
+
+ 

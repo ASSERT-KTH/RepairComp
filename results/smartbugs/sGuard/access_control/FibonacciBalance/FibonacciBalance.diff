@@ -1,0 +1,107 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/access_control/FibonacciBalance.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/access_control/FibonacciBalance/FibonacciBalance.sol
+@@ -1,3 +1,19 @@
++contract sGuard{
+
++  function mul_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    if (a == 0) {
+
++      return 0;
+
++    }
+
++    uint256 c = a * b;
+
++    assert(c / a == b);
+
++    return c;
+
++  }
+
++  
+
++  function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    uint256 c = a + b;
+
++    assert(c >= a);
+
++    return c;
+
++  }
+
++}
+
+ /*
+
+  * @source: https://github.com/sigp/solidity-security-blog
+
+  * @author: Suhabe Bugrara
+
+@@ -5,9 +21,8 @@
+  */
+
+ 
+
+ //added pragma version
+
+-pragma solidity ^0.4.22;
+
+ 
+
+-contract FibonacciBalance {
+
++contract FibonacciBalance  is sGuard {
+
+ 
+
+     address public fibonacciLibrary;
+
+     // the current fibonacci number to withdraw
+
+@@ -24,12 +39,12 @@
+     }
+
+ 
+
+     function withdraw() {
+
+-        withdrawalCounter += 1;
+
++        withdrawalCounter = add_uint256(withdrawalCounter, 1);
+
+         // calculate the fibonacci number for the current withdrawal user
+
+         // this sets calculatedFibNumber
+
+         // <yes> <report> ACCESS_CONTROL
+
+         require(fibonacciLibrary.delegatecall(fibSig, withdrawalCounter));
+
+-        msg.sender.transfer(calculatedFibNumber * 1 ether);
+
++        msg.sender.transfer(mul_uint256(calculatedFibNumber, 1 ether));
+
+     }
+
+ 
+
+     // allow users to call fibonacci library functions
+
+@@ -40,7 +55,7 @@
+ }
+
+ 
+
+ // library contract - calculates fibonacci-like numbers;
+
+-contract FibonacciLib {
+
++contract FibonacciLib  is sGuard {
+
+     // initializing the standard fibonacci sequence;
+
+     uint public start;
+
+     uint public calculatedFibNumber;

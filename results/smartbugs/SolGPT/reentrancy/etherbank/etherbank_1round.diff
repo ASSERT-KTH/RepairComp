@@ -1,0 +1,82 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/etherbank.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/reentrancy/etherbank/etherbank_1round.sol
+@@ -1,24 +1,22 @@
+-/*
+
+- * @source: https://github.com/seresistvanandras/EthBench/blob/master/Benchmark/Simple/reentrant.sol
+
+- * @author: -
+
+- * @vulnerable_at_lines: 21
+
+- */
+
++pragma solidity ^0.4.0;
+
+ 
+
+-pragma solidity ^0.4.0;
+
+ contract EtherBank{
+
+     mapping (address => uint) userBalances;
+
+-    function getBalance(address user) constant returns(uint) {  
+
+-		return userBalances[user];
+
+-	}
+
+ 
+
+-	function addToBalance() {  
+
+-		userBalances[msg.sender] += msg.value;
+
+-	}
+
++    function getBalance(address user) constant returns(uint) {
+
++        return userBalances[user];
+
++    }
+
+ 
+
+-	function withdrawBalance() {  
+
+-		uint amountToWithdraw = userBalances[msg.sender];
+
+-        // <yes> <report> REENTRANCY
+
+-		if (!(msg.sender.call.value(amountToWithdraw)())) { throw; }
+
+-		userBalances[msg.sender] = 0;
+
+-	}    
+
++    function addToBalance() {
+
++        userBalances[msg.sender] += msg.value;
+
++    }
+
++
+
++    function withdrawBalance() {
+
++        uint amountToWithdraw = userBalances[msg.sender];
+
++        userBalances[msg.sender] = 0; // Update balance before making external call
+
++        if (!(msg.sender.call.value(amountToWithdraw)())) { 
+
++            userBalances[msg.sender] = amountToWithdraw; // Revert balance if call fails
+
++            throw; 
+
++        }
+
++    }
+
+ }

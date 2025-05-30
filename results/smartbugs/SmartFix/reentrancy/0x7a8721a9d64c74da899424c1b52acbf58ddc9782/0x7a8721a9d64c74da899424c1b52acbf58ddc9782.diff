@@ -1,0 +1,72 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0x7a8721a9d64c74da899424c1b52acbf58ddc9782.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/reentrancy/0x7a8721a9d64c74da899424c1b52acbf58ddc9782/0x7a8721a9d64c74da899424c1b52acbf58ddc9782.sol
+@@ -16,7 +16,7 @@
+     Log TransferLog;
+
+     
+
+     modifier onlyOwner() {
+
+-        require(tx.origin == owner);
+
++        require(msg.sender == owner); /* <FIX> Replace: "tx.origin" => "msg.sender" */
+
+         _;
+
+     }    
+
+     
+
+@@ -39,6 +39,7 @@
+     {
+
+         if(msg.value >= MinDeposit)
+
+         {
+
++            require(((balances[msg.sender] + msg.value) >= balances[msg.sender])); /* <FIX> Insert:BC */
+
+             balances[msg.sender]+=msg.value;
+
+             TransferLog.AddMessage(msg.sender,msg.value,"Deposit");
+
+         }
+
+@@ -49,11 +50,12 @@
+         if(_am<=balances[msg.sender])
+
+         {            
+
+             // <yes> <report> REENTRANCY
+
++            balances[msg.sender] = (balances[msg.sender] - _am); /* <FIX> Move */
+
+             if(msg.sender.call.value(_am)())
+
+             {
+
+-                balances[msg.sender]-=_am;
+
++                /* <FIX> Move: balances[msg.sender]-=_am; */
+
+                 TransferLog.AddMessage(msg.sender,_am,"CashOut");
+
+-            }
+
++            } else {revert (); } /* <FIX> add revert */
+
+         }
+
+     }
+
+     
+
+@@ -85,4 +87,4 @@
+         LastMsg.Data = _data;
+
+         History.push(LastMsg);
+
+     }
+
+-}
++}

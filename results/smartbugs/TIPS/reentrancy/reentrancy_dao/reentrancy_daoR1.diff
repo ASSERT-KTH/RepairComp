@@ -1,0 +1,92 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/reentrancy_dao.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/TIPS/reentrancy/reentrancy_dao/reentrancy_daoR1.sol
+@@ -1,28 +1,18 @@
+-/*
+
+- * @source: https://github.com/ConsenSys/evm-analyzer-benchmark-suite
+
+- * @author: Suhabe Bugrara
+
+- * @vulnerable_at_lines: 18
+
+- */
+
+-
+
+-pragma solidity ^0.4.19;
+
+-
+
+ contract ReentrancyDAO {
+
+-    mapping (address => uint) credit;
+
+-    uint balance;
+
+-
+
+-    function withdrawAll() public {
+
+-        uint oCredit = credit[msg.sender];
+
+-        if (oCredit > 0) {
+
+-            balance -= oCredit;
+
+-            // <yes> <report> REENTRANCY
+
+-            bool callResult = msg.sender.call.value(oCredit)();
+
+-            require (callResult);
+
+-            credit[msg.sender] = 0;
+
+-        }
+
+-    }
+
+-
+
+-    function deposit() public payable {
+
+-        credit[msg.sender] += msg.value;
+
+-        balance += msg.value;
+
+-    }
+
+-}
+
++	mapping(address => uint) credit;
+
++	uint balance;
+
++	function withdrawAll() public {
+
++	uint oCredit = credit[msg.sender];
+
++	if(oCredit > 0){
+
++	balance -= oCredit;
+
++	bool callResult = msg.sender.send(oCredit);
+
++	require(callResult);
+
++	credit[msg.sender] = 0;
+
++	}
+
++	}
+
++	function deposit() payable public {
+
++	credit[msg.sender] += msg.value;
+
++	balance += msg.value;
+
++	}
+
++	
+
++}

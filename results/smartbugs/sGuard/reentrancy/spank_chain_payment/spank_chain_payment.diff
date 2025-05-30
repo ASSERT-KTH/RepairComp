@@ -1,0 +1,158 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/spank_chain_payment.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/reentrancy/spank_chain_payment/spank_chain_payment.sol
+@@ -1,3 +1,21 @@
++contract sGuard{
+
++  function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    uint256 c = a + b;
+
++    assert(c >= a);
+
++    return c;
+
++  }
+
++  
+
++  bool internal locked_;
+
++  constructor() internal {
+
++    locked_ = false;
+
++  }
+
++  modifier nonReentrant_() {
+
++    require(!locked_);
+
++    locked_ = true;
+
++    _;
+
++    locked_ = false;
+
++  }
+
++}
+
+ /*
+
+  * @source: https://github.com/trailofbits/not-so-smart-contracts/blob/master/reentrancy/SpankChain_source_code/SpankChain_Payment.sol
+
+  * @author: -
+
+@@ -6,11 +24,10 @@
+ 
+
+  // https://etherscan.io/address/0xf91546835f756da0c10cfa0cda95b15577b84aa7#code
+
+ 
+
+- pragma solidity ^0.4.23;
+
+  // produced by the Solididy File Flattener (c) David Appleton 2018
+
+  // contact : dave@akomba.com
+
+  // released under Apache 2.0 licence
+
+- contract Token {
+
++ contract Token  is sGuard {
+
+      /* This is a slight change to the ERC20 base standard.
+
+      function totalSupply() constant returns (uint256 supply);
+
+      is replaced with:
+
+@@ -177,7 +194,7 @@
+          return string(result);
+
+      }
+
+  }
+
+- contract StandardToken is Token {
+
++ contract StandardToken is sGuard,  Token {
+
+ 
+
+      function transfer(address _to, uint256 _value) public returns (bool success) {
+
+          //Default assumes totalSupply can't be over max (2^256 - 1).
+
+@@ -220,7 +237,7 @@
+      mapping (address => mapping (address => uint256)) allowed;
+
+  }
+
+ 
+
+- contract HumanStandardToken is StandardToken {
+
++ contract HumanStandardToken is sGuard,  StandardToken {
+
+ 
+
+      /* Public variables of the token */
+
+ 
+
+@@ -261,7 +278,7 @@
+      }
+
+  }
+
+ 
+
+- contract LedgerChannel {
+
++ contract LedgerChannel  is sGuard {
+
+ 
+
+      string public constant NAME = "Ledger Channel";
+
+      string public constant VERSION = "0.0.1";
+
+@@ -436,7 +453,7 @@
+          delete Channels[_lcID];
+
+      }
+
+ 
+
+-     function joinChannel(bytes32 _lcID, uint256[2] _balances) public payable {
+
++      function joinChannel(bytes32 _lcID, uint256[2] _balances) nonReentrant_  public payable {
+
+          // require the channel is not open yet
+
+          require(Channels[_lcID].isOpen == false);
+
+          require(msg.sender == Channels[_lcID].partyAddresses[1]);
+
+@@ -450,8 +467,8 @@
+              Channels[_lcID].erc20Balances[1] = _balances[1];
+
+          }
+
+ 
+
+-         Channels[_lcID].initialDeposit[0]+=_balances[0];
+
+-         Channels[_lcID].initialDeposit[1]+=_balances[1];
+
++         Channels[_lcID].initialDeposit[0] = add_uint256(Channels[_lcID].initialDeposit[0], _balances[0]);
+
++         Channels[_lcID].initialDeposit[1] = add_uint256(Channels[_lcID].initialDeposit[1], _balances[1]);
+
+          // no longer allow joining functions to be called
+
+          Channels[_lcID].isOpen = true;
+
+          numChannels++;

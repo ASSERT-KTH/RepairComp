@@ -1,0 +1,244 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0x7a8721a9d64c74da899424c1b52acbf58ddc9782.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/reentrancy/0x7a8721a9d64c74da899424c1b52acbf58ddc9782/0x7a8721a9d64c74da899424c1b52acbf58ddc9782_4round.sol
+@@ -1,88 +1,64 @@
+-/*
+
+- * @source: etherscan.io 
+
+- * @author: -
+
+- * @vulnerable_at_lines: 52
+
+- */
+
+-
+
+ pragma solidity ^0.4.19;
+
+ 
+
+-contract PrivateDeposit
+
+-{
+
++contract PrivateDeposit {
+
+     mapping (address => uint) public balances;
+
+-        
+
++    
+
+     uint public MinDeposit = 1 ether;
+
+     address public owner;
+
+     
+
+     Log TransferLog;
+
+     
+
+     modifier onlyOwner() {
+
+-        require(tx.origin == owner);
+
++        require(msg.sender == owner);
+
+         _;
+
+-    }    
+
++    }
+
+     
+
+-    function PrivateDeposit()
+
+-    {
+
++    function PrivateDeposit() public {
+
+         owner = msg.sender;
+
+         TransferLog = new Log();
+
+     }
+
+     
+
+-    
+
+-    
+
+-    function setLog(address _lib) onlyOwner
+
+-    {
+
++    function setLog(address _lib) public onlyOwner {
+
+         TransferLog = Log(_lib);
+
+-    }    
+
+-    
+
+-    function Deposit()
+
+-    public
+
+-    payable
+
+-    {
+
+-        if(msg.value >= MinDeposit)
+
+-        {
+
+-            balances[msg.sender]+=msg.value;
+
+-            TransferLog.AddMessage(msg.sender,msg.value,"Deposit");
+
+-        }
+
+     }
+
+     
+
+-    function CashOut(uint _am)
+
+-    {
+
+-        if(_am<=balances[msg.sender])
+
+-        {            
+
+-            // <yes> <report> REENTRANCY
+
+-            if(msg.sender.call.value(_am)())
+
+-            {
+
+-                balances[msg.sender]-=_am;
+
+-                TransferLog.AddMessage(msg.sender,_am,"CashOut");
+
+-            }
+
+-        }
+
++    function Deposit() public payable {
+
++        require(msg.value >= MinDeposit);
+
++        
+
++        balances[msg.sender] += msg.value;
+
++        TransferLog.AddMessage(msg.sender, msg.value, "Deposit");
+
+     }
+
+     
+
+-    function() public payable{}    
+
++    function CashOut(uint _am) public {
+
++        require(_am <= balances[msg.sender]);
+
++        
+
++        balances[msg.sender] -= _am;
+
++        if(!msg.sender.call.value(_am)()) {
+
++            revert();
+
++        }
+
++        
+
++        TransferLog.AddMessage(msg.sender, _am, "CashOut");
+
++    }
+
+     
+
++    function() public payable {}
+
+ }
+
+ 
+
+-contract Log 
+
+-{
+
+-   
+
+-    struct Message
+
+-    {
+
++contract Log {
+
++    struct Message {
+
+         address Sender;
+
+-        string  Data;
+
++        string Data;
+
+         uint Val;
+
+-        uint  Time;
+
++        uint Time;
+
+     }
+
+     
+
+     Message[] public History;
+
+     
+
+-    Message LastMsg;
+
+-    
+
+-    function AddMessage(address _adr,uint _val,string _data)
+
+-    public
+
+-    {
+
+-        LastMsg.Sender = _adr;
+
+-        LastMsg.Time = now;
+
+-        LastMsg.Val = _val;
+
+-        LastMsg.Data = _data;
+
+-        History.push(LastMsg);
+
++    function AddMessage(address _adr, uint _val, string _data) public {
+
++        Message memory newMessage;
+
++        newMessage.Sender = _adr;
+
++        newMessage.Time = now;
+
++        newMessage.Val = _val;
+
++        newMessage.Data = _data;
+
++        History.push(newMessage);
+
+     }
+
+ }

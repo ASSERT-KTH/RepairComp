@@ -1,6 +1,6 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/access_control/mycontract.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/TIPS/access_control/mycontract/mycontract.sol
-@@ -1,22 +1,10 @@
+@@ -1,24 +1,11 @@
 -/*
 
 - * @source: https://consensys.github.io/smart-contract-best-practices/recommendations/#avoid-using-txorigin
@@ -21,30 +21,50 @@
 
  contract MyContract {
 
-     address owner;
+-
+
+-    address owner;
 
 -
 
 -    function MyContract() public {
 
-+    constructor() public {
+-        owner = msg.sender;
 
-         owner = msg.sender;
-
-     }
+-    }
 
 -
 
-     function sendTo(address receiver, uint amount) public {
+-    function sendTo(address receiver, uint amount) public {
 
 -        // <yes> <report> ACCESS_CONTROL
 
 -        require(tx.origin == owner);
 
-+        require(msg.sender == owner);
+-        receiver.transfer(amount);
 
-         receiver.transfer(amount);
+-    }
 
-     }
+-
 
- }
+-}
+
++	address owner;
+
++	constructor() public {
+
++	owner = msg.sender;
+
++	}
+
++	function sendTo(address receiver, uint amount) public {
+
++	require(msg.sender == owner);
+
++	receiver.transfer(amount);
+
++	}
+
++	
+
++}

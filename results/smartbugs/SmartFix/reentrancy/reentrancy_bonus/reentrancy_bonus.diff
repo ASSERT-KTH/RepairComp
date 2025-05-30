@@ -3,21 +3,21 @@
 @@ -1,3 +1,14 @@
 +contract SmartFix {
 
-+    bool public _locked = false;
++  bool public _locked = false;
 
 +
 
-+    modifier _nonReentrant() {
++  modifier _nonReentrant() {
 
-+        require(!_locked);
++    require(!_locked);
 
-+        _locked = true;
++    _locked = true;
 
-+        _;
++    _;
 
-+        _locked = false;
++    _locked = false;
 
-+    }
++  }
 
 +}
 
@@ -29,34 +29,32 @@
 
   * @author: consensys
 
-@@ -6,13 +17,15 @@
+@@ -6,14 +17,14 @@
  
 
  pragma solidity ^0.4.24;
 
  
 
--contract Reentrancy_bonus {
+-contract Reentrancy_bonus{
 
 +contract Reentrancy_bonus is SmartFix {
 
+ 
+
      // INSECURE
 
-     mapping(address => uint) private userBalances;
+     mapping (address => uint) private userBalances;
 
-     mapping(address => bool) private claimedBonus;
+     mapping (address => bool) private claimedBonus;
 
-     mapping(address => uint) private rewardsForA;
+     mapping (address => uint) private rewardsForA;
 
  
 
 -    function withdrawReward(address recipient) public {
 
-+    function withdrawReward(
-
-+        address recipient
-
-+    ) public _nonReentrant /* <FIX> Add Modifier:NR */ {
++    function withdrawReward(address recipient) _nonReentrant /* <FIX> Add Modifier:NR */ public {
 
          uint amountToWithdraw = rewardsForA[recipient];
 

@@ -1,0 +1,16 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/unchecked_return_value.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/unchecked_low_level_calls/unchecked_return_value/unchecked_return_value.sol
+@@ -4,7 +4,6 @@
+  * @vulnerable_at_lines: 17
+
+  */
+
+ 
+
+-pragma solidity 0.4.25;
+
+ 
+
+ contract ReturnValue {
+
+ 

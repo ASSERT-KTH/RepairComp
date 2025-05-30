@@ -3,21 +3,21 @@
 @@ -1,3 +1,14 @@
 +contract SmartFix {
 
-+    bool public _locked = false;
++  bool public _locked = false;
 
 +
 
-+    modifier _nonReentrant() {
++  modifier _nonReentrant() {
 
-+        require(!_locked);
++    require(!_locked);
 
-+        _locked = true;
++    _locked = true;
 
-+        _;
++    _;
 
-+        _locked = false;
++    _locked = false;
 
-+    }
++  }
 
 +}
 
@@ -27,9 +27,9 @@
 
   * @source: https://github.com/SmartContractSecurity/SWC-registry/blob/master/test_cases/reentracy/modifier_reentrancy.sol
 
-  * @author: -
+  * @author: - 
 
-@@ -6,13 +17,21 @@
+@@ -6,13 +17,14 @@
  
 
  pragma solidity ^0.4.24;
@@ -40,38 +40,24 @@
 
 +contract ModifierEntrancy is SmartFix {
 
-     mapping(address => uint) public tokenBalance;
+   mapping (address => uint) public tokenBalance;
 
-     string constant name = "Nu Token";
+   string constant name = "Nu Token";
 
  
 
-     //If a contract has a zero balance and supports the token give them some token
+   //If a contract has a zero balance and supports the token give them some token
 
-     // <yes> <report> REENTRANCY
+   // <yes> <report> REENTRANCY
 
--    function airDrop() public hasNoBalance supportsToken {
+-  function airDrop() hasNoBalance supportsToken  public{
 
-+    function airDrop()
++  function airDrop() _nonReentrant /* <FIX> Add Modifier:NR */ hasNoBalance supportsToken  public{
 
-+        public
++    require(((tokenBalance[msg.sender] + 20) >= tokenBalance[msg.sender])); /* <FIX> Insert:BC */
 
-+        _nonReentrant
+     tokenBalance[msg.sender] += 20;
 
-+        /* <FIX> Add Modifier:NR */ hasNoBalance
-
-+        supportsToken
-
-+    {
-
-+        require(
-
-+            ((tokenBalance[msg.sender] + 20) >= tokenBalance[msg.sender])
-
-+        ); /* <FIX> Insert:BC */
-
-         tokenBalance[msg.sender] += 20;
-
-     }
+   }
 
  

@@ -1,0 +1,331 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0x89c1b3807d4c67df034fffb62f3509561218d30b.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/unchecked_low_level_calls/0x89c1b3807d4c67df034fffb62f3509561218d30b/0x89c1b3807d4c67df034fffb62f3509561218d30b.sol
+@@ -1,12 +1,53 @@
++contract sGuard{
+
++  function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    assert(b <= a);
+
++    return a - b;
+
++  }
+
++  
+
++  function sub_uint64(uint64 a, uint64 b) internal pure returns (uint64) {
+
++    assert(b <= a);
+
++    return a - b;
+
++  }
+
++  
+
++  function add_uint64(uint64 a, uint64 b) internal pure returns (uint64) {
+
++    uint64 c = a + b;
+
++    assert(c >= a);
+
++    return c;
+
++  }
+
++  
+
++  function mul_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    if (a == 0) {
+
++      return 0;
+
++    }
+
++    uint256 c = a * b;
+
++    assert(c / a == b);
+
++    return c;
+
++  }
+
++  
+
++  bool internal locked_;
+
++  constructor() internal {
+
++    locked_ = false;
+
++  }
+
++  modifier nonReentrant_() {
+
++    require(!locked_);
+
++    locked_ = true;
+
++    _;
+
++    locked_ = false;
+
++  }
+
++  
+
++  function div_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    uint256 c = a / b;
+
++    return c;
+
++  }
+
++}
+
+ /*
+
+  * @source: etherscan.io 
+
+  * @author: -
+
+  * @vulnerable_at_lines: 162,175,180,192
+
+  */
+
+ 
+
+-pragma solidity ^0.4.9;
+
+-
+
+-contract TownCrier {
+
++
+
++contract TownCrier  is sGuard {
+
+     struct Request { // the data structure for each request
+
+         address requester; // the address of the requester
+
+         uint fee; // the amount of wei the requester pays for the request
+
+@@ -60,7 +101,7 @@
+         externalCallFlag = false;
+
+     }
+
+ 
+
+-    function upgrade(address newAddr) {
+
++     function upgrade(address newAddr) nonReentrant_  {
+
+         if (msg.sender == requests[0].requester && unrespondedCnt == 0) {
+
+             newVersion = -int(newAddr);
+
+             killswitch = true;
+
+@@ -68,22 +109,22 @@
+         }
+
+     }
+
+ 
+
+-    function reset(uint price, uint minGas, uint cancellationGas) public {
+
++     function reset(uint price, uint minGas, uint cancellationGas) nonReentrant_  public {
+
+         if (msg.sender == requests[0].requester && unrespondedCnt == 0) {
+
+             GAS_PRICE = price;
+
+-            MIN_FEE = price * minGas;
+
+-            CANCELLATION_FEE = price * cancellationGas;
+
++            MIN_FEE = mul_uint256(price, minGas);
+
++            CANCELLATION_FEE = mul_uint256(price, cancellationGas);
+
+             Reset(GAS_PRICE, MIN_FEE, CANCELLATION_FEE);
+
+         }
+
+     }
+
+ 
+
+-    function suspend() public {
+
++     function suspend() nonReentrant_  public {
+
+         if (msg.sender == requests[0].requester) {
+
+             killswitch = true;
+
+         }
+
+     }
+
+ 
+
+-    function restart() public {
+
++     function restart() nonReentrant_  public {
+
+         if (msg.sender == requests[0].requester && newVersion == 0) {
+
+             killswitch = false;
+
+         }
+
+@@ -97,7 +138,7 @@
+         }
+
+     }
+
+ 
+
+-    function request(uint8 requestType, address callbackAddr, bytes4 callbackFID, uint timestamp, bytes32[] requestData) public payable returns (int) {
+
++     function request(uint8 requestType, address callbackAddr, bytes4 callbackFID, uint timestamp, bytes32[] requestData) nonReentrant_  public payable returns (int) {
+
+         if (externalCallFlag) {
+
+             throw;
+
+         }
+
+@@ -123,8 +164,8 @@
+         } else {
+
+             // Record the request.
+
+             uint64 requestId = requestCnt;
+
+-            requestCnt++;
+
+-            unrespondedCnt++;
+
++            (requestCnt = add_uint64(requestCnt, 1));
+
++            (unrespondedCnt = add_uint64(unrespondedCnt, 1));
+
+ 
+
+             bytes32 paramsHash = sha3(requestType, requestData);
+
+             requests[requestId].requester = msg.sender;
+
+@@ -139,7 +180,7 @@
+         }
+
+     }
+
+ 
+
+-    function deliver(uint64 requestId, bytes32 paramsHash, uint64 error, bytes32 respData) public {
+
++     function deliver(uint64 requestId, bytes32 paramsHash, uint64 error, bytes32 respData) nonReentrant_  public {
+
+         if (msg.sender != SGX_ADDRESS ||
+
+                 requestId <= 0 ||
+
+                 requests[requestId].requester == 0 ||
+
+@@ -161,12 +202,12 @@
+             // <yes> <report> UNCHECKED_LL_CALLS
+
+             SGX_ADDRESS.send(CANCELLATION_FEE);
+
+             requests[requestId].fee = DELIVERED_FEE_FLAG;
+
+-            unrespondedCnt--;
+
++            (unrespondedCnt = sub_uint64(unrespondedCnt, 1));
+
+             return;
+
+         }
+
+ 
+
+         requests[requestId].fee = DELIVERED_FEE_FLAG;
+
+-        unrespondedCnt--;
+
++        (unrespondedCnt = sub_uint64(unrespondedCnt, 1));
+
+ 
+
+         if (error < 2) {
+
+             // Either no error occurs, or the requester sent an invalid query.
+
+@@ -181,10 +222,10 @@
+             externalCallFlag = false;
+
+         }
+
+ 
+
+-        uint callbackGas = (fee - MIN_FEE) / tx.gasprice; // gas left for the callback function
+
++        uint callbackGas = div_uint256((sub_uint256(fee, MIN_FEE)), tx.gasprice); // gas left for the callback function
+
+         DeliverInfo(requestId, fee, tx.gasprice, msg.gas, callbackGas, paramsHash, error, respData); // log the response information
+
+-        if (callbackGas > msg.gas - 5000) {
+
+-            callbackGas = msg.gas - 5000;
+
++        if (callbackGas > sub_uint256(msg.gas, 5000)) {
+
++            callbackGas = sub_uint256(msg.gas, 5000);
+
+         }
+
+         
+
+         externalCallFlag = true;
+
+@@ -193,7 +234,7 @@
+         externalCallFlag = false;
+
+     }
+
+ 
+
+-    function cancel(uint64 requestId) public returns (int) {
+
++     function cancel(uint64 requestId) nonReentrant_  public returns (int) {
+
+         if (externalCallFlag) {
+
+             throw;
+
+         }
+
+@@ -208,7 +249,7 @@
+             // then cancel it.
+
+             requests[requestId].fee = CANCELLED_FEE_FLAG;
+
+             externalCallFlag = true;
+
+-            if (!msg.sender.call.value(fee - CANCELLATION_FEE)()) {
+
++            if (!msg.sender.call.value(sub_uint256(fee, CANCELLATION_FEE))()) {
+
+                 throw;
+
+             }
+
+             externalCallFlag = false;

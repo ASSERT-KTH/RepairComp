@@ -1,9 +1,9 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0xb11b2fed6c9354f7aa2f658d3b4d7b31d8a13b77.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/unchecked_low_level_calls/0xb11b2fed6c9354f7aa2f658d3b4d7b31d8a13b77/0xb11b2fed6c9354f7aa2f658d3b4d7b31d8a13b77_3round.sol
-@@ -1,27 +1,22 @@
+@@ -1,42 +1,41 @@
 -/*
 
-- * @source: etherscan.io
+- * @source: etherscan.io 
 
 - * @author: -
 
@@ -17,29 +17,29 @@
 
  
 
- contract Proxy {
+ contract Proxy  {
 
-     modifier onlyOwner() {
+-    modifier onlyOwner { if (msg.sender == Owner) _; } address Owner = msg.sender;
 
--        if (msg.sender == Owner) _;
+-    function transferOwner(address _owner) public onlyOwner { Owner = _owner; } 
+
++    modifier onlyOwner { 
 
 +        require(msg.sender == Owner);
 
-+        _;
++        _; 
 
-     }
-
--    address Owner = msg.sender;
++    } 
 
 +    address public Owner = msg.sender;
 
 +
 
-     function transferOwner(address _owner) public onlyOwner {
++    function transferOwner(address _owner) public onlyOwner { 
 
-         Owner = _owner;
++        Owner = _owner; 
 
-     }
++    }
 
 +
 
@@ -61,20 +61,49 @@
 
 -    address public Owner;
 
-     mapping(address => uint256) public Deposits;
+     mapping (address => uint256) public Deposits;
 
  
 
-     function() public payable {}
+     function () public payable { }
 
-@@ -40,8 +35,7 @@
+-    
+
++
+
+     function Vault() public payable {
+
+         if (msg.sender == tx.origin) {
+
+             Owner = msg.sender;
+
+             deposit();
+
+         }
+
      }
 
- 
+-    
+
++
+
+     function deposit() public payable {
+
+         if (msg.value > 0.5 ether) {
+
+             Deposits[msg.sender] += msg.value;
+
+         }
+
+     }
+
+-    
+
++
 
      function withdraw(uint256 amount) public onlyOwner {
 
--        if (amount > 0 && Deposits[msg.sender] >= amount) {
+-        if (amount>0 && Deposits[msg.sender]>=amount) {
 
 -            msg.sender.transfer(amount);
 

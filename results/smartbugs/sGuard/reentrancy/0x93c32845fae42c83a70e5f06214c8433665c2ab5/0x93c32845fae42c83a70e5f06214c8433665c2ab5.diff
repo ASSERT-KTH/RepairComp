@@ -1,0 +1,138 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0x93c32845fae42c83a70e5f06214c8433665c2ab5.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/reentrancy/0x93c32845fae42c83a70e5f06214c8433665c2ab5/0x93c32845fae42c83a70e5f06214c8433665c2ab5.sol
+@@ -1,24 +1,46 @@
++contract sGuard{
+
++  function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    assert(b <= a);
+
++    return a - b;
+
++  }
+
++  
+
++  bool internal locked_;
+
++  constructor() internal {
+
++    locked_ = false;
+
++  }
+
++  modifier nonReentrant_() {
+
++    require(!locked_);
+
++    locked_ = true;
+
++    _;
+
++    locked_ = false;
+
++  }
+
++  
+
++  function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    uint256 c = a + b;
+
++    assert(c >= a);
+
++    return c;
+
++  }
+
++}
+
+ /*
+
+  * @source: etherscan.io 
+
+  * @author: -
+
+  * @vulnerable_at_lines: 29
+
+  */
+
+ 
+
+-pragma solidity ^0.4.25;
+
+ 
+
+ contract X_WALLET
+
+-{
+
+-    function Put(uint _unlockTime)
+
++ is sGuard {
+
++     function Put(uint _unlockTime) nonReentrant_ 
+
+     public
+
+     payable
+
+     {
+
+         var acc = Acc[msg.sender];
+
+-        acc.balance += msg.value;
+
++        acc.balance = add_uint256(acc.balance, msg.value);
+
+         acc.unlockTime = _unlockTime>now?_unlockTime:now;
+
+         LogFile.AddMessage(msg.sender,msg.value,"Put");
+
+     }
+
+ 
+
+-    function Collect(uint _am)
+
++     function Collect(uint _am) nonReentrant_ 
+
+     public
+
+     payable
+
+     {
+
+@@ -28,7 +50,7 @@
+             // <yes> <report> REENTRANCY
+
+             if(msg.sender.call.value(_am)())
+
+             {
+
+-                acc.balance-=_am;
+
++                acc.balance = sub_uint256(acc.balance, _am);
+
+                 LogFile.AddMessage(msg.sender,_am,"Collect");
+
+             }
+
+         }
+
+@@ -60,7 +82,7 @@
+ 
+
+ 
+
+ contract Log 
+
+-{
+
++ is sGuard {
+
+     struct Message
+
+     {
+
+         address Sender;

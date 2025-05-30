@@ -1,0 +1,46 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/bad_randomness/etheraffle.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/bad_randomness/etheraffle/etheraffle.sol
+@@ -108,6 +108,7 @@
+         RaffleResult(raffleId, winningNumber, winningAddress, seed1, seed2, seed3, randHash);
+
+ 
+
+         // Start next raffle
+
++        require(((raffleId + 1) >= raffleId)); /* <FIX> Insert:BC */
+
+         raffleId++;
+
+         nextTicket = 0;
+
+         // <yes> <report> BAD_RANDOMNESS
+
+@@ -127,6 +128,7 @@
+         uint refund = 0;
+
+         for (uint i = 0; i < totalTickets; i++) {
+
+             if (msg.sender == contestants[i].addr && raffleId == contestants[i].raffleId) {
+
++                require(((refund + pricePerTicket) >= refund)); /* <FIX> Insert:BC */
+
+                 refund += pricePerTicket;
+
+                 contestants[i] = Contestant(address(0), 0);
+
+                 gaps.push(i);
+
+@@ -152,6 +154,7 @@
+             }
+
+ 
+
+             RaffleResult(raffleId, totalTickets, address(0), address(0), address(0), 0, 0);
+
++            require(((raffleId + 1) >= raffleId)); /* <FIX> Insert:BC */
+
+             raffleId++;
+
+             nextTicket = 0;
+
+             // <yes> <report> BAD_RANDOMNESS

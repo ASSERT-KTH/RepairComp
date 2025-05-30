@@ -1,0 +1,144 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/reentrance.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/reentrancy/reentrance/reentrance.sol
+@@ -1,32 +1,47 @@
+-/*
+
+- * @source: https://ethernaut.zeppelin.solutions/level/0xf70706db003e94cfe4b5e27ffd891d5c81b39488
+
+- * @author: Alejandro Santander
+
+- * @vulnerable_at_lines: 24
+
+- */
+
+ 
+
+-pragma solidity ^0.4.18;
+
++                        contract sGuardPlus {
+
++                                constructor() internal {
+
++                                        __lock_modifier0_lock = false;
+
++                                        
+
++                                }
+
++                                
+
++                                
+
++                bool private __lock_modifier0_lock;
+
++                modifier __lock_modifier0() {
+
++                        require(!__lock_modifier0_lock);
+
++                        __lock_modifier0_lock = true;
+
++                        _;
+
++                        __lock_modifier0_lock = false;
+
++                        
+
++                }
+
++                
+
++                                
+
++                                
+
++                        }
+
++                contract Reentrance is sGuardPlus {
+
++mapping (address  => uint ) public   balances;
+
++function donate (address    _to) public payable {
+
++balances[_to]+=msg.value;
+
++}
+
+ 
+
+-contract Reentrance {
+
++function balanceOf (address    _who) public view returns (uint    balance){
+
++return balances[_who];
+
++}
+
+ 
+
+-  mapping(address => uint) public balances;
+
++function withdraw (uint    _amount) public __lock_modifier0  {
+
++if (balances[msg.sender]>=_amount)
+
++{
+
++if (msg.sender.call.value(_amount)())
+
++{
+
++_amount;
+
++}
+
+ 
+
+-  function donate(address _to) public payable {
+
+-    balances[_to] += msg.value;
+
+-  }
+
++balances[msg.sender]-=_amount;
+
++}
+
+ 
+
+-  function balanceOf(address _who) public view returns (uint balance) {
+
+-    return balances[_who];
+
+-  }
+
++}
+
+ 
+
+-  function withdraw(uint _amount) public {
+
+-    if(balances[msg.sender] >= _amount) {
+
+-      // <yes> <report> REENTRANCY
+
+-      if(msg.sender.call.value(_amount)()) {
+
+-        _amount;
+
+-      }
+
+-      balances[msg.sender] -= _amount;
+
+-    }
+
+-  }
+
++function () public payable {
+
++}
+
+ 
+
+-  function() public payable {}
+
+ }

@@ -1,6 +1,6 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/bad_randomness/old_blockhash.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/bad_randomness/old_blockhash/old_blockhash_3round.sol
-@@ -1,20 +1,12 @@
+@@ -1,21 +1,13 @@
 -/*
 
 - * @source: https://github.com/SmartContractSecurity/SWC-registry/blob/master/test_cases/weak_randomness/old_blockhash.sol
@@ -23,13 +23,19 @@
 
  contract PredictTheBlockHashChallenge {
 
--    struct guess {
+ 
+
+-    struct guess{
+
+-      uint block;
+
+-      bytes32 guess;
 
 +    struct Guess {
 
-         uint block;
++        uint block;
 
-         bytes32 guess;
++        bytes32 guess;
 
      }
 
@@ -45,7 +51,17 @@
 
          require(msg.value == 1 ether);
 
-@@ -29,9 +21,12 @@
+@@ -26,17 +18,18 @@
+         require(msg.value == 1 ether);
+
+ 
+
+         guesses[msg.sender].guess = hash;
+
+-        guesses[msg.sender].block  = block.number + 1;
+
++        guesses[msg.sender].block = block.number + 1;
+
      }
 
  
@@ -62,14 +78,20 @@
 
 +
 
-+        bytes32 answer = keccak256(
-
-+            abi.encodePacked(blockhash(guesses[msg.sender].block))
-
-+        );
++        bytes32 answer = keccak256(abi.encodePacked(blockhash(guesses[msg.sender].block)));
 
  
 
          guesses[msg.sender].block = 0;
 
          if (guesses[msg.sender].guess == answer) {
+
+             msg.sender.transfer(2 ether);
+
+         }
+
+     }
+
+-}
+
++}

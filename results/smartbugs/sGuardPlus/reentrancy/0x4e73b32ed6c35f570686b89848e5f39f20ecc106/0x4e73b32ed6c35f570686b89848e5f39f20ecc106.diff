@@ -1,9 +1,9 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0x4e73b32ed6c35f570686b89848e5f39f20ecc106.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/reentrancy/0x4e73b32ed6c35f570686b89848e5f39f20ecc106/0x4e73b32ed6c35f570686b89848e5f39f20ecc106.sol
-@@ -1,20 +1,21 @@
+@@ -1,96 +1,80 @@
 -/*
 
-- * @source: etherscan.io
+- * @source: etherscan.io 
 
 - * @author: -
 
@@ -11,117 +11,331 @@
 
 - */
 
-+contract sGuardPlus {
-
-+    constructor() internal {
-
-+        __lock_modifier0_lock = false;
-
-+    }
-
  
 
 -pragma solidity ^0.4.19;
 
 -
 
--contract PRIVATE_ETH_CELL {
+-contract PRIVATE_ETH_CELL
 
-+    bool private __lock_modifier0_lock;
+-{
 
-+    modifier __lock_modifier0() {
+-    mapping (address=>uint256) public balances;   
 
-+        require(!__lock_modifier0_lock);
+-   
 
-+        __lock_modifier0_lock = true;
+-    uint public MinSum;
 
-+        _;
+-    
 
-+        __lock_modifier0_lock = false;
+-    LogFile Log;
 
-+    }
+-    
 
-+}
+-    bool intitalized;
 
-+contract PRIVATE_ETH_CELL is sGuardPlus {
+-    
 
-     mapping(address => uint256) public balances;
+-    function SetMinSum(uint _val)
 
--
+-    public
 
-     uint public MinSum;
+-    {
 
--
+-        require(!intitalized);
 
-     LogFile Log;
+-        MinSum = _val;
 
--
+-    }
 
-     bool intitalized;
+-    
 
--
+-    function SetLogFile(address _log)
 
-     function SetMinSum(uint _val) public {
+-    public
 
-         require(!intitalized);
+-    {
 
-         MinSum = _val;
+-        require(!intitalized);
 
-@@ -34,9 +35,8 @@
-         Log.AddMessage(msg.sender, msg.value, "Put");
+-        Log = LogFile(_log);
 
-     }
+-    }
 
- 
+-    
 
--    function Collect(uint _am) public payable {
+-    function Initialized()
 
-+    function Collect(uint _am) public payable __lock_modifier0 {
+-    public
 
-         if (balances[msg.sender] >= MinSum && balances[msg.sender] >= _am) {
+-    {
+
+-        intitalized = true;
+
+-    }
+
+-    
+
+-    function Deposit()
+
+-    public
+
+-    payable
+
+-    {
+
+-        balances[msg.sender]+= msg.value;
+
+-        Log.AddMessage(msg.sender,msg.value,"Put");
+
+-    }
+
+-    
+
+-    function Collect(uint _am)
+
+-    public
+
+-    payable
+
+-    {
+
+-        if(balances[msg.sender]>=MinSum && balances[msg.sender]>=_am)
+
+-        {
 
 -            // <yes> <report> REENTRANCY
 
-             if (msg.sender.call.value(_am)()) {
+-            if(msg.sender.call.value(_am)())
 
-                 balances[msg.sender] -= _am;
+-            {
 
-                 Log.AddMessage(msg.sender, _am, "Collect");
+-                balances[msg.sender]-=_am;
 
-@@ -48,7 +48,6 @@
-         Deposit();
+-                Log.AddMessage(msg.sender,_am,"Collect");
 
-     }
+-            }
+
+-        }
+
+-    }
+
+-    
+
+-    function() 
+
+-    public 
+
+-    payable
+
+-    {
+
+-        Deposit();
+
+-    }
+
+-    
+
++                        contract sGuardPlus {
+
++                                constructor() internal {
+
++                                        __lock_modifier0_lock = false;
+
++                                        
+
++                                }
+
++                                
+
++                                
+
++                bool private __lock_modifier0_lock;
+
++                modifier __lock_modifier0() {
+
++                        require(!__lock_modifier0_lock);
+
++                        __lock_modifier0_lock = true;
+
++                        _;
+
++                        __lock_modifier0_lock = false;
+
++                        
+
++                }
+
++                
+
++                                
+
++                                
+
++                        }
+
++                contract PRIVATE_ETH_CELL is sGuardPlus {
+
++mapping (address  => uint256 ) public   balances;
+
++uint  public   MinSum;
+
++LogFile     Log;
+
++bool     intitalized;
+
++function SetMinSum (uint    _val) public  {
+
++require( ! intitalized);
+
++MinSum=_val;
 
  }
 
--
+ 
 
- contract LogFile {
++function SetLogFile (address    _log) public  {
 
-     struct Message {
++require( ! intitalized);
 
-         address Sender;
++Log=LogFile(_log);
 
-@@ -56,11 +55,8 @@
-         uint Val;
++}
 
-         uint Time;
+ 
 
-     }
++function Initialized () public  {
 
--
++intitalized=true;
 
-     Message[] public History;
++}
 
--
+ 
 
-     Message LastMsg;
+-contract LogFile
 
--
++function Deposit () public payable {
 
-     function AddMessage(address _adr, uint _val, string _data) public {
++balances[msg.sender]+=msg.value;
 
-         LastMsg.Sender = _adr;
++Log.AddMessage(msg.sender, msg.value, "Put");
 
-         LastMsg.Time = now;
++}
+
++
+
++function Collect (uint    _am) public __lock_modifier0 payable {
+
++if (balances[msg.sender]>=MinSum&&balances[msg.sender]>=_am)
+
+ {
+
+-    struct Message
+
+-    {
+
+-        address Sender;
+
+-        string  Data;
+
+-        uint Val;
+
+-        uint  Time;
+
+-    }
+
+-    
+
+-    Message[] public History;
+
+-    
+
+-    Message LastMsg;
+
+-    
+
+-    function AddMessage(address _adr,uint _val,string _data)
+
+-    public
+
+-    {
+
+-        LastMsg.Sender = _adr;
+
+-        LastMsg.Time = now;
+
+-        LastMsg.Val = _val;
+
+-        LastMsg.Data = _data;
+
+-        History.push(LastMsg);
+
+-    }
+
+-}
++if (msg.sender.call.value(_am)())
+
++{
+
++balances[msg.sender]-=_am;
+
++Log.AddMessage(msg.sender, _am, "Collect");
+
++}
+
++
+
++}
+
++
+
++}
+
++
+
++function () public payable {
+
++Deposit();
+
++}
+
++
+
++}
+
++contract LogFile  {
+
++struct Message {
+
++address     Sender;
+
++string     Data;
+
++uint     Val;
+
++uint     Time;
+
++}
+
++Message [] public   History;
+
++Message     LastMsg;
+
++function AddMessage (address    _adr,uint    _val,string    _data) public  {
+
++LastMsg.Sender=_adr;
+
++LastMsg.Time=now;
+
++LastMsg.Val=_val;
+
++LastMsg.Data=_data;
+
++History.push(LastMsg);
+
++}
+
++
+
++}

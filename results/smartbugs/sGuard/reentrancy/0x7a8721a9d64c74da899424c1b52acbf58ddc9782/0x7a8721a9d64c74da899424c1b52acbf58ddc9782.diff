@@ -1,55 +1,55 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0x7a8721a9d64c74da899424c1b52acbf58ddc9782.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/reentrancy/0x7a8721a9d64c74da899424c1b52acbf58ddc9782/0x7a8721a9d64c74da899424c1b52acbf58ddc9782.sol
-@@ -1,12 +1,33 @@
-+contract sGuard {
+@@ -1,13 +1,35 @@
++contract sGuard{
 
-+    function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
++  function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
 
-+        assert(b <= a);
++    assert(b <= a);
 
-+        return a - b;
++    return a - b;
 
-+    }
++  }
 
-+
++  
 
-+    bool internal locked_;
++  bool internal locked_;
 
-+    constructor() internal {
++  constructor() internal {
 
-+        locked_ = false;
++    locked_ = false;
 
-+    }
++  }
 
-+    modifier nonReentrant_() {
++  modifier nonReentrant_() {
 
-+        require(!locked_);
++    require(!locked_);
 
-+        locked_ = true;
++    locked_ = true;
 
-+        _;
++    _;
 
-+        locked_ = false;
++    locked_ = false;
 
-+    }
++  }
 
-+
++  
 
-+    function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
++  function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
 
-+        uint256 c = a + b;
++    uint256 c = a + b;
 
-+        assert(c >= a);
++    assert(c >= a);
 
-+        return c;
++    return c;
 
-+    }
++  }
 
 +}
 
  /*
 
-  * @source: etherscan.io
+  * @source: etherscan.io 
 
   * @author: -
 
@@ -61,22 +61,24 @@
 
 -pragma solidity ^0.4.19;
 
--
-
--contract PrivateDeposit {
-
-+contract PrivateDeposit is sGuard {
-
-     mapping(address => uint) public balances;
-
  
+
+ contract PrivateDeposit
+
+-{
+
++ is sGuard {
+
+     mapping (address => uint) public balances;
+
+         
 
      uint public MinDeposit = 1 ether;
 
-@@ -15,7 +36,7 @@
+@@ -16,7 +38,7 @@
      Log TransferLog;
 
- 
+     
 
      modifier onlyOwner() {
 
@@ -86,68 +88,82 @@
 
          _;
 
-     }
+     }    
 
- 
+     
 
-@@ -28,18 +49,18 @@
+@@ -33,25 +55,25 @@
          TransferLog = Log(_lib);
 
-     }
+     }    
 
- 
+     
 
--    function Deposit() public payable {
+-    function Deposit()
 
-+    function Deposit() public payable nonReentrant_ {
++     function Deposit() nonReentrant_ 
 
-         if (msg.value >= MinDeposit) {
+     public
 
--            balances[msg.sender] += msg.value;
+     payable
+
+     {
+
+         if(msg.value >= MinDeposit)
+
+         {
+
+-            balances[msg.sender]+=msg.value;
 
 +            balances[msg.sender] = add_uint256(balances[msg.sender], msg.value);
 
-             TransferLog.AddMessage(msg.sender, msg.value, "Deposit");
+             TransferLog.AddMessage(msg.sender,msg.value,"Deposit");
 
          }
 
      }
 
- 
+     
 
--    function CashOut(uint _am) {
+-    function CashOut(uint _am)
 
-+    function CashOut(uint _am) nonReentrant_ {
++     function CashOut(uint _am) nonReentrant_ 
 
-         if (_am <= balances[msg.sender]) {
+     {
+
+         if(_am<=balances[msg.sender])
+
+         {            
 
              // <yes> <report> REENTRANCY
 
-             if (msg.sender.call.value(_am)()) {
+             if(msg.sender.call.value(_am)())
 
--                balances[msg.sender] -= _am;
+             {
+
+-                balances[msg.sender]-=_am;
 
 +                balances[msg.sender] = sub_uint256(balances[msg.sender], _am);
 
-                 TransferLog.AddMessage(msg.sender, _am, "CashOut");
+                 TransferLog.AddMessage(msg.sender,_am,"CashOut");
 
              }
 
          }
 
-@@ -48,7 +69,7 @@
-     function() public payable {}
-
+@@ -62,7 +84,7 @@
  }
 
  
 
--contract Log {
+ contract Log 
 
-+contract Log is sGuard {
+-{
 
-     struct Message {
++ is sGuard {
 
-         address Sender;
+    
 
-         string Data;
+     struct Message
+
+     {

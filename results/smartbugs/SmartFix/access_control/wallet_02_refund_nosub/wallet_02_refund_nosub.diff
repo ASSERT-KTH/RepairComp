@@ -1,26 +1,22 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/access_control/wallet_02_refund_nosub.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/access_control/wallet_02_refund_nosub/wallet_02_refund_nosub.sol
-@@ -33,7 +33,11 @@
+@@ -33,7 +33,9 @@
  
 
-     function refund() public {
+      function refund() public {
 
-         // <yes> <report> ACCESS_CONTROL
+          // <yes> <report> ACCESS_CONTROL
 
--        msg.sender.transfer(balances[msg.sender]);
+-         msg.sender.transfer(balances[msg.sender]);
 
-+        uint256 tmp__1 = balances[msg.sender]; /* <FIX> Insert */
++         uint256 tmp__1 = balances[msg.sender]; /* <FIX> Insert */
 
-+        balances[msg.sender] = 0; /* <FIX> Insert */
++         balances[msg.sender] = 0; /* <FIX> Insert */
 
-+        msg.sender.transfer(
++         msg.sender.transfer(tmp__1); /* <FIX> Replace: "balances[msg.sender]" => "tmp__1" */
 
-+            tmp__1
-
-+        ); /* <FIX> Replace: "balances[msg.sender]" => "tmp__1" */
-
-     }
+      }
 
  
 
-     // In an emergency the owner can migrate  allfunds to a different address.
+      // In an emergency the owner can migrate  allfunds to a different address.

@@ -1,0 +1,108 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0xb37f18af15bafb869a065b61fc83cfc44ed9cc27.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/TIPS/unchecked_low_level_calls/0xb37f18af15bafb869a065b61fc83cfc44ed9cc27/0xb37f18af15bafb869a065b61fc83cfc44ed9cc27U2.sol
+@@ -1,35 +1,20 @@
+-/*
+
+- * @source: etherscan.io 
+
+- * @author: -
+
+- * @vulnerable_at_lines: 33
+
+- */
+
+-
+
+-pragma solidity ^0.4.24;
+
+-
+
+-
+
+ contract SimpleWallet {
+
+-    address public owner = msg.sender;
+
+-    uint public depositsCount;
+
+-    
+
+-    modifier onlyOwner {
+
+-        require(msg.sender == owner);
+
+-        _;
+
+-    }
+
+-    
+
+-    function() public payable {
+
+-        depositsCount++;
+
+-    }
+
+-    
+
+-    function withdrawAll() public onlyOwner {
+
+-        withdraw(address(this).balance);
+
+-    }
+
+-    
+
+-    function withdraw(uint _value) public onlyOwner {
+
+-        msg.sender.transfer(_value);
+
+-    }
+
+-    
+
+-    function sendMoney(address _target, uint _value) public onlyOwner {
+
+-        // <yes> <report> UNCHECKED_LL_CALLS
+
+-        _target.call.value(_value)();
+
+-    }
+
++	address public owner = msg.sender;
+
++	uint public depositsCount;
+
++	modifier onlyOwner(){
+
++	require(msg.sender == owner);
+
++	_;}
+
++	function () payable public {
+
++	depositsCount++;
+
++	}
+
++	function withdrawAll() onlyOwner public {
+
++	withdraw(address(this).balance);
+
++	}
+
++	function withdraw(uint _value) onlyOwner public {
+
++	msg.sender.transfer(_value);
+
++	}
+
++	function sendMoney(address _target, uint _value) onlyOwner public {
+
++	_target.transfer(_value);
+
++	}
+
++	
+
+ }

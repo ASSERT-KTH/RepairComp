@@ -1,0 +1,16 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/front_running/eth_tx_order_dependence_minimal.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/front_running/eth_tx_order_dependence_minimal/eth_tx_order_dependence_minimal.sol
+@@ -25,6 +25,7 @@
+     }
+
+ 
+
+     function claimReward(uint256 submission) {
+
++        require((owner == msg.sender)); /* <FIX> Insert */
+
+         require (!claimed);
+
+         require(submission < 10);
+
+         // <yes> <report> FRONT_RUNNING

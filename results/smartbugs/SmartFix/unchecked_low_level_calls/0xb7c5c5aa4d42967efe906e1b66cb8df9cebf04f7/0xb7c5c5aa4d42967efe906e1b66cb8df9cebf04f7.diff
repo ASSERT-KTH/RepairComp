@@ -1,0 +1,37 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0xb7c5c5aa4d42967efe906e1b66cb8df9cebf04f7.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/unchecked_low_level_calls/0xb7c5c5aa4d42967efe906e1b66cb8df9cebf04f7/0xb7c5c5aa4d42967efe906e1b66cb8df9cebf04f7.sol
+@@ -17,12 +17,15 @@
+     mapping(address => uint256) public balances;
+
+     
+
+     function () payable public {
+
++        require(((balances[msg.sender] + msg.value) >= balances[msg.sender])); /* <FIX> Insert:BC */
+
+         balances[msg.sender] += msg.value;
+
+     }
+
+     
+
+     function withdraw() public {
+
+         // <yes> <report> UNCHECKED_LL_CALLS
+
+-        msg.sender.call.value(balances[msg.sender])();
+
+-        balances[msg.sender] = 0;
+
++        uint256 tmp__1 = balances[msg.sender]; /* <FIX> Insert */
+
++        balances[msg.sender] = 0; /* <FIX> Move */
+
++        msg.sender.call.value(tmp__1)(); /* <FIX> Replace: "balances[msg.sender]" => "tmp__1" */
+
++        /* <FIX> Move: balances[msg.sender] = 0; */
+
+     }
+
+-}
++}

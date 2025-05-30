@@ -1,0 +1,16 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/bad_randomness/lottery.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/bad_randomness/lottery/lottery.sol
+@@ -6,7 +6,6 @@
+  */
+
+ 
+
+  //added pragma version
+
+-  pragma solidity ^0.4.0;
+
+   
+
+  contract Lottery {
+
+      event GetBet(uint betAmount, uint blockNumber, bool won);

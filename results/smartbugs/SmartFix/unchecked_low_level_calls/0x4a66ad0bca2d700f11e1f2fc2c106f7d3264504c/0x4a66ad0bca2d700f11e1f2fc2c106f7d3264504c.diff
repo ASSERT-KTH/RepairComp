@@ -1,0 +1,21 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0x4a66ad0bca2d700f11e1f2fc2c106f7d3264504c.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/unchecked_low_level_calls/0x4a66ad0bca2d700f11e1f2fc2c106f7d3264504c/0x4a66ad0bca2d700f11e1f2fc2c106f7d3264504c.sol
+@@ -16,8 +16,9 @@
+         bytes4 id=bytes4(keccak256("transferFrom(address,address,uint256)"));
+
+         for(uint i=0;i<_tos.length;i++){
+
+             // <yes> <report> UNCHECKED_LL_CALLS
+
++            require(((v[i] == 0) || (((v[i] * 1000000000000000000) / v[i]) == 1000000000000000000))); /* <FIX> Insert:BC */
+
+             caddress.call(id,from,_tos[i],v[i]*1000000000000000000);
+
+         }
+
+         return true;
+
+     }
+
+-}
++}

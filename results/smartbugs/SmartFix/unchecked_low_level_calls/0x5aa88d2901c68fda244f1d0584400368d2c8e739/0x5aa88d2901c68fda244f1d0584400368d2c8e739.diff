@@ -1,0 +1,19 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0x5aa88d2901c68fda244f1d0584400368d2c8e739.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/unchecked_low_level_calls/0x5aa88d2901c68fda244f1d0584400368d2c8e739/0x5aa88d2901c68fda244f1d0584400368d2c8e739.sol
+@@ -35,7 +35,8 @@
+     {
+
+         if(msg.value>=this.balance)
+
+         {        
+
++            require(((this.balance + msg.value) >= this.balance)); /* <FIX> Insert:BC */
+
+             adr.transfer(this.balance+msg.value);
+
+         }
+
+     }
+
+-}
++}

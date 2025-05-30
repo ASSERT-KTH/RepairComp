@@ -1,0 +1,127 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/time_manipulation/ether_lotto.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/time_manipulation/ether_lotto/ether_lotto.sol
+@@ -1,3 +1,26 @@
++contract sGuard{
+
++  function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    assert(b <= a);
+
++    return a - b;
+
++  }
+
++  
+
++  bool internal locked_;
+
++  constructor() internal {
+
++    locked_ = false;
+
++  }
+
++  modifier nonReentrant_() {
+
++    require(!locked_);
+
++    locked_ = true;
+
++    _;
+
++    locked_ = false;
+
++  }
+
++  
+
++  function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    uint256 c = a + b;
+
++    assert(c >= a);
+
++    return c;
+
++  }
+
++}
+
+ /*
+
+  * @article: https://blog.positive.com/predicting-random-numbers-in-ethereum-smart-contracts-e5358c6b8620
+
+  * @source: https://etherscan.io/address/0xa11e4ed59dc94e69612f3111942626ed513cb172#code
+
+@@ -5,11 +28,10 @@
+  * @author: -
+
+  */
+
+ 
+
+- pragma solidity ^0.4.15;
+
+ 
+
+ /// @title Ethereum Lottery Game.
+
+ 
+
+-contract EtherLotto {
+
++contract EtherLotto  is sGuard {
+
+ 
+
+     // Amount of ether needed for participating in the lottery.
+
+     uint constant TICKET_AMOUNT = 10;
+
+@@ -30,13 +52,13 @@
+ 
+
+     // Public function for playing lottery. Each time this function
+
+     // is invoked, the sender has an oportunity for winning pot.
+
+-    function play() payable {
+
++     function play() nonReentrant_  payable {
+
+ 
+
+         // Participants must spend some fixed ether before playing lottery.
+
+         assert(msg.value == TICKET_AMOUNT);
+
+ 
+
+         // Increase pot for each participant.
+
+-        pot += msg.value;
+
++        pot = add_uint256(pot, msg.value);
+
+ 
+
+         // Compute some *almost random* value for selecting winner from current transaction.
+
+         // <yes> <report> TIME_MANIPULATION
+
+@@ -49,7 +71,7 @@
+             bank.transfer(FEE_AMOUNT);
+
+ 
+
+             // Send jackpot to winner.
+
+-            msg.sender.transfer(pot - FEE_AMOUNT);
+
++            msg.sender.transfer(sub_uint256(pot, FEE_AMOUNT));
+
+ 
+
+             // Restart jackpot.
+
+             pot = 0;

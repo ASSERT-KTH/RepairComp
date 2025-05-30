@@ -1,0 +1,92 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/arithmetic/insecure_transfer.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/arithmetic/insecure_transfer/insecure_transfer.sol
+@@ -1,21 +1,28 @@
+-/*
+
+- * @source: https://consensys.github.io/smart-contract-best-practices/known_attacks/#front-running-aka-transaction-ordering-dependence
+
+- * @author: consensys
+
+- * @vulnerable_at_lines: 18
+
+- */
+
+ 
+
+-pragma solidity ^0.4.10;
+
+-
+
+-contract IntegerOverflowAdd {
+
+-    mapping (address => uint256) public balanceOf;
+
+-
+
+-    // INSECURE
+
+-    function transfer(address _to, uint256 _value) public{
+
+-        /* Check if sender has balance */
+
+-        require(balanceOf[msg.sender] >= _value);
+
+-        balanceOf[msg.sender] -= _value;
+
+-        // <yes> <report> ARITHMETIC
+
+-        balanceOf[_to] += _value;
+
++                        contract sGuardPlus {
+
++                                constructor() internal {
+
++                                        
+
++                                        
+
++                                }
+
++                                function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++                                assert(b <= a);
+
++                                return a - b;
+
++                        }
+
++function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++                                uint256 c = a + b;
+
++                                assert(c >= a);
+
++                                return c;
+
++                        }
+
++                                
+
++                                
+
++                                
+
++                        }
+
++                contract IntegerOverflowAdd is sGuardPlus {
+
++mapping (address  => uint256 ) public   balanceOf;
+
++function transfer (address    _to,uint256    _value) public  {
+
++require(balanceOf[msg.sender]>=_value);
+
++balanceOf[msg.sender]=sub_uint256(balanceOf[msg.sender], _value);
+
++balanceOf[_to]=add_uint256(balanceOf[_to], _value);
+
+ }
+
+ 
+
+ }

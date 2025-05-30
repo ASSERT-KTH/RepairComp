@@ -1,0 +1,267 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/bad_randomness/lucky_doubler.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/bad_randomness/lucky_doubler/lucky_doubler.sol
+@@ -1,3 +1,40 @@
++contract sGuard{
+
++  function div_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    uint256 c = a / b;
+
++    return c;
+
++  }
+
++  
+
++  function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    assert(b <= a);
+
++    return a - b;
+
++  }
+
++  
+
++  function mul_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    if (a == 0) {
+
++      return 0;
+
++    }
+
++    uint256 c = a * b;
+
++    assert(c / a == b);
+
++    return c;
+
++  }
+
++  
+
++  bool internal locked_;
+
++  constructor() internal {
+
++    locked_ = false;
+
++  }
+
++  modifier nonReentrant_() {
+
++    require(!locked_);
+
++    locked_ = true;
+
++    _;
+
++    locked_ = false;
+
++  }
+
++  
+
++  function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    uint256 c = a + b;
+
++    assert(c >= a);
+
++    return c;
+
++  }
+
++}
+
+ /*
+
+  * @article: https://blog.positive.com/predicting-random-numbers-in-ethereum-smart-contracts-e5358c6b8620
+
+  * @source: https://etherscan.io/address/0xF767fCA8e65d03fE16D4e38810f5E5376c3372A8#code
+
+@@ -6,9 +43,8 @@
+  */
+
+ 
+
+  //added pragma version
+
+-pragma solidity ^0.4.0;
+
+-
+
+- contract LuckyDoubler {
+
++
+
++ contract LuckyDoubler  is sGuard {
+
+ //##########################################################
+
+ //#### LuckyDoubler: A doubler with random payout order ####
+
+ //#### Deposit 1 ETHER to participate                   ####
+
+@@ -71,7 +107,7 @@
+ 
+
+         if (msg.value > 1 ether) {
+
+ 
+
+-        	msg.sender.send(msg.value - 1 ether);
+
++        	msg.sender.send(sub_uint256(msg.value, 1 ether));
+
+         	dValue = 1 ether;
+
+         }
+
+ 
+
+@@ -84,12 +120,12 @@
+         }
+
+ 
+
+         //Add new entry to the entries array
+
+-        entries.push(Entry(msg.sender, dValue, (dValue * (multiplier) / 100), false));
+
++        entries.push(Entry(msg.sender, dValue, (div_uint256(mul_uint256(dValue, (multiplier)), 100)), false));
+
+         users[msg.sender].deposits++;
+
+-        unpaidEntries.push(entries.length -1);
+
++        unpaidEntries.push(sub_uint256(entries.length, 1));
+
+ 
+
+         //Collect fees and update contract balance
+
+-        balance += (dValue * (100 - fee)) / 100;
+
++        balance = add_uint256(balance, div_uint256((mul_uint256(dValue, (sub_uint256(100, fee)))), 100));
+
+ 
+
+         uint index = unpaidEntries.length > 1 ? rand(unpaidEntries.length) : 0;
+
+         Entry theEntry = entries[unpaidEntries[index]];
+
+@@ -103,17 +139,17 @@
+             theEntry.paid = true;
+
+             users[theEntry.entryAddress].payoutsReceived++;
+
+ 
+
+-            balance -= payout;
+
+-
+
+-            if (index < unpaidEntries.length - 1)
+
+-                unpaidEntries[index] = unpaidEntries[unpaidEntries.length - 1];
+
+-
+
+-            unpaidEntries.length--;
+
++            balance = sub_uint256(balance, payout);
+
++
+
++            if (index < sub_uint256(unpaidEntries.length, 1))
+
++                unpaidEntries[index] = unpaidEntries[sub_uint256(unpaidEntries.length, 1)];
+
++
+
++            (unpaidEntries.length = sub_uint256(unpaidEntries.length, 1));
+
+ 
+
+         }
+
+ 
+
+         //Collect money from fees and possible leftovers from errors (actual balance untouched)
+
+-        uint fees = this.balance - balance;
+
++        uint fees = sub_uint256(this.balance, balance);
+
+         if (fees > 0)
+
+         {
+
+                 owner.send(fees);
+
+@@ -125,26 +161,26 @@
+     uint256 constant private FACTOR =  1157920892373161954235709850086879078532699846656405640394575840079131296399;
+
+     // <yes> <report> BAD_RANDOMNESS
+
+     function rand(uint max) constant private returns (uint256 result){
+
+-        uint256 factor = FACTOR * 100 / max;
+
+-        uint256 lastBlockNumber = block.number - 1;
+
++        uint256 factor = div_uint256(FACTOR * 100, max);
+
++        uint256 lastBlockNumber = sub_uint256(block.number, 1);
+
+         uint256 hashVal = uint256(block.blockhash(lastBlockNumber));
+
+ 
+
+-        return uint256((uint256(hashVal) / factor)) % max;
+
++        return uint256((div_uint256(uint256(hashVal), factor))) % max;
+
+     }
+
+ 
+
+ 
+
+     //Contract management
+
+-    function changeOwner(address newOwner) onlyowner {
+
++     function changeOwner(address newOwner) nonReentrant_  onlyowner {
+
+         owner = newOwner;
+
+     }
+
+ 
+
+-    function changeMultiplier(uint multi) onlyowner {
+
++     function changeMultiplier(uint multi) nonReentrant_  onlyowner {
+
+         if (multi < 110 || multi > 150) throw;
+
+ 
+
+         multiplier = multi;
+
+     }
+
+ 
+
+-    function changeFee(uint newFee) onlyowner {
+
++     function changeFee(uint newFee) nonReentrant_  onlyowner {
+
+         if (fee > 5)
+
+             throw;
+
+         fee = newFee;

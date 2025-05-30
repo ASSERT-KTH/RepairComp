@@ -1,0 +1,41 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0x9d06cbafa865037a01d322d3f4222fa3e04e5488.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/unchecked_low_level_calls/0x9d06cbafa865037a01d322d3f4222fa3e04e5488/0x9d06cbafa865037a01d322d3f4222fa3e04e5488.sol
+@@ -41,6 +41,7 @@
+         require(active > 0);
+
+         require(msg.value >= token_price);        
+
+ 
+
++        require(((msg.value == 0) || (((msg.value * (10 ** 18)) / msg.value) == (10 ** 18)))); /* <FIX> Insert:BC */
+
+         uint tokens_buy = msg.value*10**18/token_price;
+
+ 
+
+         require(tokens_buy > 0);
+
+@@ -49,6 +50,7 @@
+         	return false;
+
+         }
+
+ 
+
++        require(((msg.value == 0) || (((msg.value * 3) / msg.value) == 3))); /* <FIX> Insert:BC */
+
+         uint sum2 = msg.value * 3 / 10;           
+
+         // <yes> <report> UNCHECKED_LL_CALLS
+
+         owner2.send(sum2);
+
+@@ -87,4 +89,4 @@
+     }        	
+
+ 
+
+ 
+
+-}
++}

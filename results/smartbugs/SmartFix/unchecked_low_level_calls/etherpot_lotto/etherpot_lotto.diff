@@ -1,0 +1,132 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/etherpot_lotto.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/unchecked_low_level_calls/etherpot_lotto/etherpot_lotto.sol
+@@ -1,3 +1,11 @@
++contract SmartFix {
+
++  function add_uint8(uint8 a, uint8 b) internal pure returns (uint8) {
+
++    require (a + b >= a);
+
++    uint8 c = a + b;
+
++    return c;
+
++  }
+
++}
+
++
+
+ /*
+
+  * @source: https://github.com/etherpot/contract/blob/master/app/contracts/lotto.sol
+
+  * @author: -
+
+@@ -7,7 +15,7 @@
+ //added pragma version
+
+ pragma solidity ^0.4.0;
+
+ 
+
+- contract Lotto {
+
++ contract Lotto is SmartFix {
+
+ 
+
+      uint constant public blocksPerRound = 6800;
+
+      // there are an infinite number of rounds (just like a real lottery that takes place every week). `blocksPerRound` decides how many blocks each round will last. 6800 is around a day.
+
+@@ -59,8 +67,9 @@
+ 
+
+          var ticketIndex = uint256(0);
+
+ 
+
+-         for(var buyerIndex = 0; buyerIndex<rounds[roundIndex].buyers.length; buyerIndex++){
+
++         for(var buyerIndex = 0; buyerIndex<rounds[roundIndex].buyers.length; buyerIndex = add_uint8(buyerIndex,1)){ /* <FIX> Insert:BC */
+
+              var buyer = rounds[roundIndex].buyers[buyerIndex];
+
++             require(((ticketIndex + rounds[roundIndex].ticketsCountByBuyer[buyer]) >= ticketIndex)); /* <FIX> Insert:BC */
+
+              ticketIndex+=rounds[roundIndex].ticketsCountByBuyer[buyer];
+
+ 
+
+              if(ticketIndex>winningTicketIndex){
+
+@@ -70,6 +79,7 @@
+      }
+
+ 
+
+      function getDecisionBlockNumber(uint roundIndex,uint subpotIndex) constant returns (uint){
+
++         require((((roundIndex + 1) == 0) || ((((roundIndex + 1) * blocksPerRound) / (roundIndex + 1)) == blocksPerRound))); /* <FIX> Insert:BC */
+
+          return ((roundIndex+1)*blocksPerRound)+subpotIndex;
+
+      }
+
+ 
+
+@@ -132,6 +142,7 @@
+          //this is the function that gets called when people send money to the contract.
+
+ 
+
+          var roundIndex = getRoundIndex();
+
++         require((msg.value >= (msg.value % ticketPrice))); /* <FIX> Insert:BC */
+
+          var value = msg.value-(msg.value%ticketPrice);
+
+ 
+
+          if(value==0) return;
+
+@@ -143,6 +154,7 @@
+          //no partial tickets, send a partial refund
+
+ 
+
+          var ticketsCount = value/ticketPrice;
+
++         require(((rounds[roundIndex].ticketsCount + ticketsCount) >= rounds[roundIndex].ticketsCount)); /* <FIX> Insert:BC */
+
+          rounds[roundIndex].ticketsCount+=ticketsCount;
+
+ 
+
+          if(rounds[roundIndex].ticketsCountByBuyer[msg.sender]==0){
+
+@@ -150,10 +162,12 @@
+              rounds[roundIndex].buyers[buyersLength] = msg.sender;
+
+          }
+
+ 
+
++         require(((rounds[roundIndex].ticketsCountByBuyer[msg.sender] + ticketsCount) >= rounds[roundIndex].ticketsCountByBuyer[msg.sender])); /* <FIX> Insert:BC */
+
+          rounds[roundIndex].ticketsCountByBuyer[msg.sender]+=ticketsCount;
+
+          rounds[roundIndex].ticketsCount+=ticketsCount;
+
+          //keep track of the total tickets
+
+ 
+
++         require(((rounds[roundIndex].pot + value) >= rounds[roundIndex].pot)); /* <FIX> Insert:BC */
+
+          rounds[roundIndex].pot+=value;
+
+          //keep track of the total pot
+
+ 

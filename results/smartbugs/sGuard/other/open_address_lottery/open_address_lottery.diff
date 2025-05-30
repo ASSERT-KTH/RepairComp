@@ -1,0 +1,91 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/other/open_address_lottery.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/other/open_address_lottery/open_address_lottery.sol
+@@ -1,9 +1,18 @@
++contract sGuard{
+
++  function mul_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    if (a == 0) {
+
++      return 0;
+
++    }
+
++    uint256 c = a * b;
+
++    assert(c / a == b);
+
++    return c;
+
++  }
+
++}
+
+ /*
+
+  * @source: https://etherscan.io/address/0x741f1923974464efd0aa70e77800ba5d9ed18902#code
+
+  * @vulnerable_at_lines: 91
+
+  */
+
+ 
+
+-pragma solidity ^0.4.19;
+
+ /*
+
+  * This is a distributed lottery that chooses random addresses as lucky addresses. If these
+
+  * participate, they get the jackpot: 7 times the price of their bet.
+
+@@ -23,7 +32,7 @@
+  https://www.reddit.com/r/ethdev/comments/7wp363/how_does_this_honeypot_work_it_seems_like_a/
+
+ */
+
+ 
+
+-contract OpenAddressLottery{
+
++contract OpenAddressLottery is sGuard {
+
+     struct SeedComponents{
+
+         uint component1;
+
+         uint component2;
+
+@@ -53,7 +62,7 @@
+         if(luckyNumberOfAddress(msg.sender) == LuckyNumber){ //check if it equals 7
+
+             winner[msg.sender] = true; // every address can only win once
+
+             
+
+-            uint win=msg.value*7; //win = 7 times the ticket price
+
++            uint win=mul_uint256(msg.value, 7); //win = 7 times the ticket price
+
+             
+
+             if(win>this.balance) //if the balance isnt sufficient...
+
+                 win=this.balance; //...send everything we've got
+
+@@ -92,7 +101,7 @@
+         s.component1 = uint(msg.sender);
+
+         s.component2 = uint256(block.blockhash(block.number - 1));
+
+         s.component3 = block.difficulty*(uint)(block.coinbase);
+
+-        s.component4 = tx.gasprice * 7;
+
++        s.component4 = mul_uint256(tx.gasprice, 7);
+
+         
+
+         reseed(s); //reseed
+
+     }

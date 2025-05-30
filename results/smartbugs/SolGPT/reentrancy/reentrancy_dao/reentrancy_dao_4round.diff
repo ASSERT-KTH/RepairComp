@@ -32,12 +32,25 @@
 
              bool callResult = msg.sender.call.value(oCredit)();
 
-             require(callResult);
+-            require (callResult);
 
 -            credit[msg.sender] = 0;
+
++            require(callResult);
 
          }
 
      }
 
  
+
+@@ -25,4 +18,4 @@
+         credit[msg.sender] += msg.value;
+
+         balance += msg.value;
+
+     }
+
+-}
+
++}

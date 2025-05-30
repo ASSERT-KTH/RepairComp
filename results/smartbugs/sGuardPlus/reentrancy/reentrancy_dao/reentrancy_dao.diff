@@ -1,6 +1,6 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/reentrancy_dao.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/reentrancy/reentrancy_dao/reentrancy_dao.sol
-@@ -1,20 +1,23 @@
+@@ -1,28 +1,41 @@
 -/*
 
 - * @source: https://github.com/ConsenSys/evm-analyzer-benchmark-suite
@@ -11,60 +11,120 @@
 
 - */
 
-+contract sGuardPlus {
-
-+    constructor() internal {
-
-+        __lock_modifier0_lock = false;
-
-+    }
-
  
 
 -pragma solidity ^0.4.19;
 
--
++                        contract sGuardPlus {
 
--contract ReentrancyDAO {
++                                constructor() internal {
 
-+    bool private __lock_modifier0_lock;
++                                        __lock_modifier0_lock = false;
 
-+    modifier __lock_modifier0() {
++                                        
 
-+        require(!__lock_modifier0_lock);
++                                }
 
-+        __lock_modifier0_lock = true;
++                                
 
-+        _;
++                                
 
-+        __lock_modifier0_lock = false;
++                bool private __lock_modifier0_lock;
 
-+    }
++                modifier __lock_modifier0() {
+
++                        require(!__lock_modifier0_lock);
+
++                        __lock_modifier0_lock = true;
+
++                        _;
+
++                        __lock_modifier0_lock = false;
+
++                        
+
++                }
+
++                
+
++                                
+
++                                
+
++                        }
+
++                contract ReentrancyDAO is sGuardPlus {
+
++mapping (address  => uint )    credit;
+
++uint     balance;
+
++function withdrawAll () public __lock_modifier0  {
+
++uint     oCredit = credit[msg.sender];
+
++if (oCredit>0)
+
++{
+
++balance-=oCredit;
+
++bool     callResult = msg.sender.call.value(oCredit)();
+
++require(callResult);
+
++credit[msg.sender]=0;
 
 +}
 
-+contract ReentrancyDAO is sGuardPlus {
+ 
 
-     mapping(address => uint) credit;
+-contract ReentrancyDAO {
 
-     uint balance;
+-    mapping (address => uint) credit;
 
--
+-    uint balance;
+
++}
+
+ 
 
 -    function withdrawAll() public {
 
-+    function withdrawAll() public __lock_modifier0 {
+-        uint oCredit = credit[msg.sender];
 
-         uint oCredit = credit[msg.sender];
+-        if (oCredit > 0) {
 
-         if (oCredit > 0) {
-
-             balance -= oCredit;
+-            balance -= oCredit;
 
 -            // <yes> <report> REENTRANCY
 
-             bool callResult = msg.sender.call.value(oCredit)();
+-            bool callResult = msg.sender.call.value(oCredit)();
 
-             require(callResult);
+-            require (callResult);
 
-             credit[msg.sender] = 0;
+-            credit[msg.sender] = 0;
+
+-        }
+
+-    }
+
++function deposit () public payable {
+
++credit[msg.sender]+=msg.value;
+
++balance+=msg.value;
+
++}
+
+ 
+
+-    function deposit() public payable {
+
+-        credit[msg.sender] += msg.value;
+
+-        balance += msg.value;
+
+-    }
+
+ }

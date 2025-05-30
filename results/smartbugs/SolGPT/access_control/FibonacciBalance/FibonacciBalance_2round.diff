@@ -1,6 +1,6 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/access_control/FibonacciBalance.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/access_control/FibonacciBalance/FibonacciBalance_2round.sol
-@@ -1,50 +1,36 @@
+@@ -1,51 +1,40 @@
 -/*
 
 - * @source: https://github.com/sigp/solidity-security-blog
@@ -20,6 +20,8 @@
  
 
  contract FibonacciBalance {
+
+ 
 
      address public fibonacciLibrary;
 
@@ -46,6 +48,8 @@
 -    // constructor - loads the contract with ether
 
 +    bytes4 constant fibSig = bytes4(keccak256("setFibonacci(uint256)"));
+
++
 
 +
 
@@ -95,9 +99,13 @@
 
 -// library contract - calculates fibonacci-like numbers;
 
++
+
  contract FibonacciLib {
 
 -    // initializing the standard fibonacci sequence;
+
++
 
      uint public start;
 
@@ -112,3 +120,14 @@
          start = _start;
 
      }
+
+@@ -59,4 +48,4 @@
+         else if (n == 1) return start + 1;
+
+         else return fibonacci(n - 1) + fibonacci(n - 2);
+
+     }
+
+-}
+
++}

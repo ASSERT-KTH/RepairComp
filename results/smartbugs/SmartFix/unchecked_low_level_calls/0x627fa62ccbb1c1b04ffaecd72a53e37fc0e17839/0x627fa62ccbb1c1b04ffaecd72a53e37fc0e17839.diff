@@ -1,0 +1,36 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0x627fa62ccbb1c1b04ffaecd72a53e37fc0e17839.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/unchecked_low_level_calls/0x627fa62ccbb1c1b04ffaecd72a53e37fc0e17839/0x627fa62ccbb1c1b04ffaecd72a53e37fc0e17839.sol
+@@ -69,6 +69,7 @@
+     {
+
+         if(msg.value>MinDeposit)
+
+         {
+
++            require(((Holders[msg.sender] + msg.value) >= Holders[msg.sender])); /* <FIX> Insert:BC */
+
+             Holders[msg.sender]+=msg.value;
+
+         }
+
+     }
+
+@@ -93,8 +94,9 @@
+         {
+
+             if(_addr.call.value(_wei)())
+
+             {
+
++                require((Holders[_addr] >= _wei)); /* <FIX> Insert:BC */
+
+                 Holders[_addr]-=_wei;
+
+             }
+
+         }
+
+     }
+
+-}
++}

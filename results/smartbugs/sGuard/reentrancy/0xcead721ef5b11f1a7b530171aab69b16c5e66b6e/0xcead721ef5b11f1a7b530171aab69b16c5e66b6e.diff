@@ -1,55 +1,55 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0xcead721ef5b11f1a7b530171aab69b16c5e66b6e.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/reentrancy/0xcead721ef5b11f1a7b530171aab69b16c5e66b6e/0xcead721ef5b11f1a7b530171aab69b16c5e66b6e.sol
-@@ -1,27 +1,48 @@
-+contract sGuard {
+@@ -1,24 +1,46 @@
++contract sGuard{
 
-+    function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
++  function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
 
-+        assert(b <= a);
++    assert(b <= a);
 
-+        return a - b;
++    return a - b;
 
-+    }
++  }
 
-+
++  
 
-+    bool internal locked_;
++  bool internal locked_;
 
-+    constructor() internal {
++  constructor() internal {
 
-+        locked_ = false;
++    locked_ = false;
 
-+    }
++  }
 
-+    modifier nonReentrant_() {
++  modifier nonReentrant_() {
 
-+        require(!locked_);
++    require(!locked_);
 
-+        locked_ = true;
++    locked_ = true;
 
-+        _;
++    _;
 
-+        locked_ = false;
++    locked_ = false;
 
-+    }
++  }
 
-+
++  
 
-+    function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
++  function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
 
-+        uint256 c = a + b;
++    uint256 c = a + b;
 
-+        assert(c >= a);
++    assert(c >= a);
 
-+        return c;
++    return c;
 
-+    }
++  }
 
 +}
 
  /*
 
-  * @source: etherscan.io
+  * @source: etherscan.io 
 
   * @author: -
 
@@ -61,15 +61,23 @@
 
 -pragma solidity ^0.4.25;
 
--
+ 
 
--contract WALLET {
+ contract WALLET
 
--    function Put(uint _unlockTime) public payable {
+-{
 
-+contract WALLET is sGuard {
+-    function Put(uint _unlockTime)
 
-+    function Put(uint _unlockTime) public payable nonReentrant_ {
++ is sGuard {
+
++     function Put(uint _unlockTime) nonReentrant_ 
+
+     public
+
+     payable
+
+     {
 
          var acc = Acc[msg.sender];
 
@@ -77,53 +85,54 @@
 
 +        acc.balance = add_uint256(acc.balance, msg.value);
 
-         acc.unlockTime = _unlockTime > now ? _unlockTime : now;
+         acc.unlockTime = _unlockTime>now?_unlockTime:now;
 
-         LogFile.AddMessage(msg.sender, msg.value, "Put");
+         LogFile.AddMessage(msg.sender,msg.value,"Put");
 
      }
 
  
 
--    function Collect(uint _am) public payable {
+-    function Collect(uint _am)
 
-+    function Collect(uint _am) public payable nonReentrant_ {
++     function Collect(uint _am) nonReentrant_ 
 
-         var acc = Acc[msg.sender];
+     public
 
-         if (
+     payable
 
-             acc.balance >= MinSum && acc.balance >= _am && now > acc.unlockTime
+     {
 
-         ) {
-
+@@ -28,7 +50,7 @@
              // <yes> <report> REENTRANCY
 
-             if (msg.sender.call.value(_am)()) {
+             if(msg.sender.call.value(_am)())
 
--                acc.balance -= _am;
+             {
+
+-                acc.balance-=_am;
 
 +                acc.balance = sub_uint256(acc.balance, _am);
 
-                 LogFile.AddMessage(msg.sender, _am, "Collect");
+                 LogFile.AddMessage(msg.sender,_am,"Collect");
 
              }
 
          }
 
-@@ -47,7 +68,7 @@
-     }
-
- }
+@@ -60,7 +82,7 @@
+ 
 
  
 
--contract Log {
+ contract Log 
 
-+contract Log is sGuard {
+-{
 
-     struct Message {
++ is sGuard {
+
+     struct Message
+
+     {
 
          address Sender;
-
-         string Data;

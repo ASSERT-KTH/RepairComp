@@ -1,0 +1,123 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/etherbank.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/reentrancy/etherbank/etherbank.sol
+@@ -1,24 +1,40 @@
+-/*
+
+- * @source: https://github.com/seresistvanandras/EthBench/blob/master/Benchmark/Simple/reentrant.sol
+
+- * @author: -
+
+- * @vulnerable_at_lines: 21
+
+- */
+
+ 
+
+-pragma solidity ^0.4.0;
+
+-contract EtherBank{
+
+-    mapping (address => uint) userBalances;
+
+-    function getBalance(address user) constant returns(uint) {  
+
+-		return userBalances[user];
+
+-	}
+
++                        contract sGuardPlus {
+
++                                constructor() internal {
+
++                                        __lock_modifier0_lock = false;
+
++                                        
+
++                                }
+
++                                
+
++                                
+
++                bool private __lock_modifier0_lock;
+
++                modifier __lock_modifier0() {
+
++                        require(!__lock_modifier0_lock);
+
++                        __lock_modifier0_lock = true;
+
++                        _;
+
++                        __lock_modifier0_lock = false;
+
++                        
+
++                }
+
++                
+
++                                
+
++                                
+
++                        }
+
++                contract EtherBank is sGuardPlus {
+
++mapping (address  => uint )    userBalances;
+
++function getBalance (address    user)  constant returns (uint    ){
+
++return userBalances[user];
+
++}
+
+ 
+
+-	function addToBalance() {  
+
+-		userBalances[msg.sender] += msg.value;
+
+-	}
+
++function addToBalance ()   {
+
++userBalances[msg.sender]+=msg.value;
+
++}
+
+ 
+
+-	function withdrawBalance() {  
+
+-		uint amountToWithdraw = userBalances[msg.sender];
+
+-        // <yes> <report> REENTRANCY
+
+-		if (!(msg.sender.call.value(amountToWithdraw)())) { throw; }
+
+-		userBalances[msg.sender] = 0;
+
+-	}    
+
+-}
++function withdrawBalance ()  __lock_modifier0  {
+
++uint     amountToWithdraw = userBalances[msg.sender];
+
++if ( ! (msg.sender.call.value(amountToWithdraw)()))
+
++{
+
++throw;}
+
++
+
++userBalances[msg.sender]=0;
+
++}
+
++
+
++}

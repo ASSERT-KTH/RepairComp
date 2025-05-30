@@ -1,0 +1,62 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/other/open_address_lottery.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/other/open_address_lottery/open_address_lottery.sol
+@@ -53,6 +53,7 @@
+         if(luckyNumberOfAddress(msg.sender) == LuckyNumber){ //check if it equals 7
+
+             winner[msg.sender] = true; // every address can only win once
+
+             
+
++            require(((msg.value == 0) || (((msg.value * 7) / msg.value) == 7))); /* <FIX> Insert:BC */
+
+             uint win=msg.value*7; //win = 7 times the ticket price
+
+             
+
+             if(win>this.balance) //if the balance isnt sufficient...
+
+@@ -60,6 +61,7 @@
+             msg.sender.transfer(win);
+
+         }
+
+         
+
++        require((block.number >= lastReseed)); /* <FIX> Insert:BC */
+
+         if(block.number-lastReseed>1000) //reseed if needed
+
+             reseed(SeedComponents((uint)(block.coinbase), block.difficulty, block.gaslimit, block.timestamp)); //generate a quality random seed
+
+     }
+
+@@ -90,8 +92,10 @@
+         // <yes> <report> OTHER - uninitialized storage
+
+         SeedComponents s;
+
+         s.component1 = uint(msg.sender);
+
++        require((block.number >= 1)); /* <FIX> Insert:BC */
+
+         s.component2 = uint256(block.blockhash(block.number - 1));
+
+         s.component3 = block.difficulty*(uint)(block.coinbase);
+
++        require(((tx.gasprice == 0) || (((tx.gasprice * 7) / tx.gasprice) == 7))); /* <FIX> Insert:BC */
+
+         s.component4 = tx.gasprice * 7;
+
+         
+
+         reseed(s); //reseed
+
+@@ -102,4 +106,4 @@
+             participate();
+
+     }
+
+ 
+
+-}
++}

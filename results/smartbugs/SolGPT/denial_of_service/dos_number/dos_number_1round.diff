@@ -1,0 +1,100 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/denial_of_service/dos_number.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/denial_of_service/dos_number/dos_number_1round.sol
+@@ -1,21 +1,15 @@
+-/*
+
+- * @source: https://github.com/SmartContractSecurity/SWC-registry/blob/master/test_cases/dos_gas_limit/dos_number.sol
+
+- * @author: -
+
+- * @vulnerable_at_lines: 18,19,20,21,22
+
+- */
+
+-
+
+ pragma solidity ^0.4.25;
+
+ 
+
+ contract DosNumber {
+
+ 
+
++    uint constant MAX_ELEMENTS = 1500;
+
+     uint numElements = 0;
+
+     uint[] array;
+
+ 
+
+-    function insertNnumbers(uint value,uint numbers) public {
+
+-
+
+-        // Gas DOS if number > 382 more or less, it depends on actual gas limit
+
+-        // <yes> <report> DENIAL_OF_SERVICE
+
+-        for(uint i=0;i<numbers;i++) {
+
++    function insertNnumbers(uint value, uint numbers) public {
+
++        require(numElements + numbers <= MAX_ELEMENTS, "Exceeds maximum elements limit");
+
++        
+
++        for(uint i=0; i<numbers; i++) {
+
+             if(numElements == array.length) {
+
+                 array.length += 1;
+
+             }
+
+@@ -24,15 +18,12 @@
+     }
+
+ 
+
+     function clear() public {
+
+-        require(numElements>1500);
+
++        require(numElements > MAX_ELEMENTS, "Number of elements is not greater than the limit");
+
+         numElements = 0;
+
+     }
+
+ 
+
+-    // Gas DOS clear
+
+     function clearDOS() public {
+
+-
+
+-        // number depends on actual gas limit
+
+-        require(numElements>1500);
+
++        require(numElements > MAX_ELEMENTS, "Number of elements is not greater than the limit");
+
+         array = new uint[](0);
+
+         numElements = 0;
+
+     }
+
+@@ -44,4 +35,4 @@
+     function getRealLengthArray() public view returns(uint) {
+
+         return array.length;
+
+     }
+
+-}
+
++}

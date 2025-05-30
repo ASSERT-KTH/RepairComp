@@ -1,0 +1,116 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/access_control/unprotected0.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/access_control/unprotected0/unprotected0_2round.sol
+@@ -1,39 +1,23 @@
+-/*
+
+- * @source: https://github.com/trailofbits/not-so-smart-contracts/blob/master/unprotected_function/Unprotected.sol
+
+- * @author: -
+
+- * @vulnerable_at_lines: 25
+
+- */
+
++pragma solidity ^0.4.15;
+
+ 
+
+- pragma solidity ^0.4.15;
+
++contract Protected{
+
++    address private owner;
+
+ 
+
+- contract Unprotected{
+
+-     address private owner;
+
++    modifier onlyowner {
+
++        require(msg.sender==owner);
+
++        _;
+
++    }
+
+ 
+
+-     modifier onlyowner {
+
+-         require(msg.sender==owner);
+
+-         _;
+
+-     }
+
++    function Protected()
+
++    public
+
++    {
+
++        owner = msg.sender;
+
++    }
+
+ 
+
+-     function Unprotected()
+
+-         public
+
+-     {
+
+-         owner = msg.sender;
+
+-     }
+
+-
+
+-     // This function should be protected
+
+-     // <yes> <report> ACCESS_CONTROL
+
+-     function changeOwner(address _newOwner)
+
+-         public
+
+-     {
+
++    function changeOwner(address _newOwner)
+
++    public
+
++    onlyowner
+
++    {
+
+         owner = _newOwner;
+
+-     }
+
+-
+
+-    /*
+
+-    function changeOwner_fixed(address _newOwner)
+
+-         public
+
+-         onlyowner
+
+-     {
+
+-        owner = _newOwner;
+
+-     }
+
+-     */
+
+- }
+
++    }
+
++}

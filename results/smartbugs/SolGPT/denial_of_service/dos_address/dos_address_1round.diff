@@ -1,0 +1,76 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/denial_of_service/dos_address.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/denial_of_service/dos_address/dos_address_1round.sol
+@@ -1,9 +1,3 @@
+-/*
+
+- * @source: https://github.com/SmartContractSecurity/SWC-registry/blob/master/test_cases/dos_gas_limit/dos_address.sol
+
+- * @author: -
+
+- * @vulnerable_at_lines: 16,17,18
+
+- */
+
+-
+
+ pragma solidity ^0.4.25;
+
+ 
+
+ contract DosGas {
+
+@@ -12,16 +6,17 @@
+     bool win = false;
+
+ 
+
+     function emptyCreditors() public {
+
+-        // <yes> <report> DENIAL_OF_SERVICE
+
+-        if(creditorAddresses.length>1500) {
+
+-            creditorAddresses = new address[](0);
+
++
+
++        if(creditorAddresses.length > 1500) {
+
++            delete creditorAddresses;
+
+             win = true;
+
+         }
+
+     }
+
+ 
+
+     function addCreditors() public returns (bool) {
+
+-        for(uint i=0;i<350;i++) {
+
+-          creditorAddresses.push(msg.sender);
+
++        require(creditorAddresses.length + 350 <= 1500);
+
++        for(uint i=0; i<350; i++) {
+
++            creditorAddresses.push(msg.sender);
+
+         }
+
+         return true;
+
+     }
+
+@@ -33,4 +28,4 @@
+     function numberCreditors() public view returns (uint) {
+
+         return creditorAddresses.length;
+
+     }
+
+-}
+
++}

@@ -1,0 +1,16 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/access_control/FibonacciBalance.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/access_control/FibonacciBalance/FibonacciBalance.sol
+@@ -24,6 +24,7 @@
+     }
+
+ 
+
+     function withdraw() {
+
++        require(((withdrawalCounter + 1) >= withdrawalCounter)); /* <FIX> Insert:BC */
+
+         withdrawalCounter += 1;
+
+         // calculate the fibonacci number for the current withdrawal user
+
+         // this sets calculatedFibNumber

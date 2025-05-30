@@ -1,0 +1,95 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/reentrancy_dao.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/reentrancy/reentrancy_dao/reentrancy_dao.sol
+@@ -1,16 +1,33 @@
++contract sGuard{
+
++  function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    uint256 c = a + b;
+
++    assert(c >= a);
+
++    return c;
+
++  }
+
++  
+
++  bool internal locked_;
+
++  constructor() internal {
+
++    locked_ = false;
+
++  }
+
++  modifier nonReentrant_() {
+
++    require(!locked_);
+
++    locked_ = true;
+
++    _;
+
++    locked_ = false;
+
++  }
+
++}
+
+ /*
+
+  * @source: https://github.com/ConsenSys/evm-analyzer-benchmark-suite
+
+  * @author: Suhabe Bugrara
+
+  * @vulnerable_at_lines: 18
+
+  */
+
+ 
+
+-pragma solidity ^0.4.19;
+
+ 
+
+-contract ReentrancyDAO {
+
++contract ReentrancyDAO  is sGuard {
+
+     mapping (address => uint) credit;
+
+     uint balance;
+
+ 
+
+-    function withdrawAll() public {
+
++     function withdrawAll() nonReentrant_  public {
+
+         uint oCredit = credit[msg.sender];
+
+         if (oCredit > 0) {
+
+             balance -= oCredit;
+
+@@ -21,8 +38,8 @@
+         }
+
+     }
+
+ 
+
+-    function deposit() public payable {
+
+-        credit[msg.sender] += msg.value;
+
++     function deposit() nonReentrant_  public payable {
+
++        credit[msg.sender] = add_uint256(credit[msg.sender], msg.value);
+
+         balance += msg.value;
+
+     }
+
+ }

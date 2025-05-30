@@ -1,0 +1,16 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/denial_of_service/list_dos.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/denial_of_service/list_dos/list_dos.sol
+@@ -32,6 +32,7 @@
+          uint amount = msg.value;
+
+          // check if the system already broke down. If for 12h no new creditor gives new credit to the system it will brake down.
+
+          // 12h are on average = 60*60*12/12.5 = 3456
+
++         require(((lastTimeOfNewCredit + TWELVE_HOURS) >= lastTimeOfNewCredit)); /* <FIX> Insert:BC */
+
+          if (lastTimeOfNewCredit + TWELVE_HOURS < block.timestamp) {
+
+              // Return money to sender
+
+              msg.sender.send(amount);

@@ -1,0 +1,125 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/other/crypto_roulette.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/other/crypto_roulette/crypto_roulette.sol
+@@ -1,8 +1,31 @@
++contract sGuard{
+
++  function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    uint256 c = a + b;
+
++    assert(c >= a);
+
++    return c;
+
++  }
+
++  
+
++  bool internal locked_;
+
++  constructor() internal {
+
++    locked_ = false;
+
++  }
+
++  modifier nonReentrant_() {
+
++    require(!locked_);
+
++    locked_ = true;
+
++    _;
+
++    locked_ = false;
+
++  }
+
++  
+
++  function add_uint8(uint8 a, uint8 b) internal pure returns (uint8) {
+
++    uint8 c = a + b;
+
++    assert(c >= a);
+
++    return c;
+
++  }
+
++}
+
+ /*
+
+  * @source: https://github.com/thec00n/smart-contract-honeypots/blob/master/CryptoRoulette.sol
+
+  * @vulnerable_at_lines: 40,41,42
+
+  */
+
+-pragma solidity ^0.4.19;
+
+ 
+
+ // CryptoRoulette
+
+ //
+
+@@ -11,7 +34,7 @@
+ // https://www.reddit.com/r/ethdev/comments/7wp363/how_does_this_honeypot_work_it_seems_like_a/
+
+ // To play, call the play() method with the guessed number (1-20).  Bet price: 0.1 ether
+
+ 
+
+-contract CryptoRoulette {
+
++contract CryptoRoulette  is sGuard {
+
+ 
+
+     uint256 private secretNumber;
+
+     uint256 public lastPlayed;
+
+@@ -31,10 +54,10 @@
+ 
+
+     function shuffle() internal {
+
+         // randomly set secretNumber with a value between 1 and 20
+
+-        secretNumber = uint8(sha3(now, block.blockhash(block.number-1))) % 20 + 1;
+
++        secretNumber = add_uint8(uint8(sha3(now, block.blockhash(block.number-1))) % 20, 1);
+
+     }
+
+ 
+
+-    function play(uint256 number) payable public {
+
++     function play(uint256 number) nonReentrant_  payable public {
+
+         require(msg.value >= betPrice && number <= 10);
+
+         // <yes> <report> OTHER - uninitialized storage
+
+         Game game; //Uninitialized storage pointer
+
+@@ -52,7 +75,7 @@
+     }
+
+ 
+
+     function kill() public {
+
+-        if (msg.sender == ownerAddr && now > lastPlayed + 1 days) {
+
++        if (msg.sender == ownerAddr && now > add_uint256(lastPlayed, 1 days)) {
+
+             suicide(msg.sender);
+
+         }
+
+     }

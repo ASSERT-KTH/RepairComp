@@ -1,0 +1,16 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0x524960d55174d912768678d8c606b4d50b79d7b1.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/unchecked_low_level_calls/0x524960d55174d912768678d8c606b4d50b79d7b1/0x524960d55174d912768678d8c606b4d50b79d7b1.sol
+@@ -4,7 +4,6 @@
+  * @vulnerable_at_lines: 21
+
+  */
+
+ 
+
+-pragma solidity ^0.4.13;
+
+ 
+
+ contract Centra4 {
+
+ 

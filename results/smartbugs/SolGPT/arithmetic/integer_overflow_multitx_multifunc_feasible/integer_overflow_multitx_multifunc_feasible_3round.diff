@@ -48,10 +48,12 @@
 
 +        require(count >= input, "Integer underflow");
 
-+
++        
 
          count -= input;
 
      }
 
- }
+-}
+
++}

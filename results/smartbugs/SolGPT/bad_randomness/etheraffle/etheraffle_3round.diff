@@ -1,6 +1,6 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/bad_randomness/etheraffle.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/bad_randomness/etheraffle/etheraffle_3round.sol
-@@ -1,10 +1,3 @@
+@@ -1,11 +1,4 @@
 -/*
 
 - * @article: https://blog.positive.com/predicting-random-numbers-in-ethereum-smart-contracts-e5358c6b8620
@@ -15,11 +15,15 @@
 
 -
 
- pragma solidity ^0.4.16;
+- pragma solidity ^0.4.16;
+
++pragma solidity ^0.4.16;
 
  
 
  contract Ethraffle_v4b {
+
+     struct Contestant {
 
 @@ -14,7 +7,7 @@
      }
@@ -38,30 +42,36 @@
 
          address seed1,
 
-@@ -23,32 +16,31 @@
-         bytes32 randHash
+@@ -24,39 +17,34 @@
+     );
+
+ 
+
+     event TicketPurchase(
+
+-        uint raffleId,
+
++        uint indexed raffleId,
+
+         address contestant,
+
+         uint number
 
      );
 
  
 
--    event TicketPurchase(uint raffleId, address contestant, uint number);
+     event TicketRefund(
 
-+    event TicketPurchase(
+-        uint raffleId,
 
 +        uint indexed raffleId,
 
-+        address contestant,
+         address contestant,
 
-+        uint number
+         uint number
 
-+    );
-
- 
-
--    event TicketRefund(uint raffleId, address contestant, uint number);
-
-+    event TicketRefund(uint indexed raffleId, address contestant, uint number);
+     );
 
  
 
@@ -75,7 +85,7 @@
 
 -    uint public constant pricePerTicket = (prize + fee) / totalTickets; // Make sure this divides evenly
 
-+    uint public constant pricePerTicket = (prize + fee) / totalTickets;
++    uint public constant pricePerTicket = (prize + fee) / totalTickets; 
 
      address feeAddress;
 
@@ -93,7 +103,7 @@
 
      uint nextTicket = 0;
 
-     mapping(uint => Contestant) contestants;
+     mapping (uint => Contestant) contestants;
 
      uint[] gaps;
 
@@ -111,13 +121,13 @@
 
 -    // Call buyTickets() when receiving Ether outside a function
 
-     function() public payable {
+     function () payable public {
 
          buyTickets();
 
      }
 
-@@ -71,58 +63,44 @@
+@@ -79,50 +67,34 @@
              }
 
  
@@ -172,49 +182,25 @@
 
 -        bytes32 randHash = keccak256(seed1, seed2, seed3);
 
--
-
--        uint winningNumber = uint(randHash) % totalTickets;
-
 +        // Use an external source of randomness to generate random numbers
 
 +        // For demonstration purposes, we will use a simple random number generator
 
-+        uint winningNumber = uint(
++        uint winningNumber = uint(keccak256(block.timestamp, block.difficulty)) % totalTickets;
 
-+            keccak256(block.timestamp, block.difficulty)
++        address winningAddress = contestants[winningNumber].addr;
 
-+        ) % totalTickets;
-
-         address winningAddress = contestants[winningNumber].addr;
-
-         RaffleResult(
-
-             raffleId,
-
-             winningNumber,
-
-             winningAddress,
-
--            seed1,
-
--            seed2,
-
--            seed3,
-
--            randHash
-
-+            msg.sender,
-
-+            tx.origin,
-
-+            block.difficulty,
-
-+            keccak256(block.timestamp, block.difficulty)
-
-         );
++        RaffleResult(raffleId, winningNumber, winningAddress, msg.sender, tx.origin, block.difficulty, keccak256(block.timestamp, block.difficulty));
 
  
+
+-        uint winningNumber = uint(randHash) % totalTickets;
+
+-        address winningAddress = contestants[winningNumber].addr;
+
+-        RaffleResult(raffleId, winningNumber, winningAddress, seed1, seed2, seed3, randHash);
+
+-
 
 -        // Start next raffle
 
@@ -254,7 +240,7 @@
 
          for (uint i = 0; i < totalTickets; i++) {
 
-@@ -133,41 +111,12 @@
+@@ -130,33 +102,12 @@
                  refund += pricePerTicket;
 
                  contestants[i] = Contestant(address(0), 0);
@@ -305,23 +291,7 @@
 
 -
 
--            RaffleResult(
-
--                raffleId,
-
--                totalTickets,
-
--                address(0),
-
--                address(0),
-
--                address(0),
-
--                0,
-
--                0
-
--            );
+-            RaffleResult(raffleId, totalTickets, address(0), address(0), address(0), 0, 0);
 
 -            raffleId++;
 
@@ -338,3 +308,14 @@
      }
 
  
+
+@@ -171,4 +122,4 @@
+             selfdestruct(feeAddress);
+
+         }
+
+     }
+
+-}
+
++}

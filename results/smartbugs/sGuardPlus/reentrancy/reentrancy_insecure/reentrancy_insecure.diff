@@ -1,0 +1,98 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/reentrancy_insecure.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/reentrancy/reentrancy_insecure/reentrancy_insecure.sol
+@@ -1,21 +1,30 @@
+-/*
+
+- * @source: https://consensys.github.io/smart-contract-best-practices/known_attacks/
+
+- * @author: consensys
+
+- * @vulnerable_at_lines: 17
+
+- */
+
+ 
+
+-pragma solidity ^0.5.0;
+
++                        contract sGuardPlus {
+
++                                constructor() internal {
+
++                                        __lock_modifier0_lock = false;
+
++                                        
+
++                                }
+
++                                
+
++                                
+
++                bool private __lock_modifier0_lock;
+
++                modifier __lock_modifier0() {
+
++                        require(!__lock_modifier0_lock);
+
++                        __lock_modifier0_lock = true;
+
++                        _;
+
++                        __lock_modifier0_lock = false;
+
++                        
+
++                }
+
++                
+
++                                
+
++                                
+
++                        }
+
++                contract Reentrancy_insecure is sGuardPlus {
+
++mapping (address  => uint ) private   userBalances;
+
++function withdrawBalance () public __lock_modifier0  {
+
++uint     amountToWithdraw = userBalances[msg.sender];
+
++(bool     success, ) = msg.sender.call.value(amountToWithdraw)("");
+
++require(success);
+
++userBalances[msg.sender]=0;
+
++}
+
+ 
+
+-contract Reentrancy_insecure {
+
+-
+
+-    // INSECURE
+
+-    mapping (address => uint) private userBalances;
+
+-
+
+-    function withdrawBalance() public {
+
+-        uint amountToWithdraw = userBalances[msg.sender];
+
+-        // <yes> <report> REENTRANCY
+
+-        (bool success, ) = msg.sender.call.value(amountToWithdraw)(""); // At this point, the caller's code is executed, and can call withdrawBalance again
+
+-        require(success);
+
+-        userBalances[msg.sender] = 0;
+
+-    }
+
+ }

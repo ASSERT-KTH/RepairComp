@@ -1,0 +1,87 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0xf29ebe930a539a60279ace72c707cba851a57707.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/unchecked_low_level_calls/0xf29ebe930a539a60279ace72c707cba851a57707/0xf29ebe930a539a60279ace72c707cba851a57707.sol
+@@ -1,22 +1,24 @@
+-/*
+
+- * @source: etherscan.io 
+
+- * @author: -
+
+- * @vulnerable_at_lines: 16
+
+- */
+
+ 
+
+-pragma solidity ^0.4.24;
+
++                        contract sGuardPlus {
+
++                                constructor() internal {
+
++                                        
+
++                                        
+
++                                }
+
++                                
+
++                                
+
++                                
+
++                                
+
++                        }
+
++                contract B  {
+
++address  public   owner = msg.sender;
+
++function go () public payable {
+
++address     target = 0xC8A60C51967F4022BF9424C337e9c6F0bD220E1C;
+
++bool     __sent_result100 = target.call.value(msg.value)();
+
++require(__sent_result100);
+
++owner.transfer(address(this).balance);
+
++}
+
+ 
+
++function () public payable {
+
++}
+
+ 
+
+-contract B {
+
+-    address public owner = msg.sender;
+
+-    
+
+-    function go() public payable {
+
+-        address target = 0xC8A60C51967F4022BF9424C337e9c6F0bD220E1C;
+
+-        // <yes> <report> UNCHECKED_LL_CALLS
+
+-        target.call.value(msg.value)();
+
+-        owner.transfer(address(this).balance);
+
+-    }
+
+-    
+
+-    function() public payable {
+
+-    }
+
+-}
++}

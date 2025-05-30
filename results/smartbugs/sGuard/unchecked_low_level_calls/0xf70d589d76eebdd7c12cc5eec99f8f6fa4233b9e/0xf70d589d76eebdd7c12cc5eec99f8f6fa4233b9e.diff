@@ -1,0 +1,16 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0xf70d589d76eebdd7c12cc5eec99f8f6fa4233b9e.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/unchecked_low_level_calls/0xf70d589d76eebdd7c12cc5eec99f8f6fa4233b9e/0xf70d589d76eebdd7c12cc5eec99f8f6fa4233b9e.sol
+@@ -4,7 +4,6 @@
+  * @vulnerable_at_lines: 44
+
+  */
+
+ 
+
+-pragma solidity ^0.4.19;
+
+ 
+
+ contract WhaleGiveaway2
+
+ {

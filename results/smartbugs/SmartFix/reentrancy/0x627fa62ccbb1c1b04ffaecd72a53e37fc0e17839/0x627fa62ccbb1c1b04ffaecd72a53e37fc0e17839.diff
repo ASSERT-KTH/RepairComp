@@ -1,0 +1,36 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0x627fa62ccbb1c1b04ffaecd72a53e37fc0e17839.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/reentrancy/0x627fa62ccbb1c1b04ffaecd72a53e37fc0e17839/0x627fa62ccbb1c1b04ffaecd72a53e37fc0e17839.sol
+@@ -68,6 +68,7 @@
+     {
+
+         if(msg.value>MinDeposit)
+
+         {
+
++            require(((Holders[msg.sender] + msg.value) >= Holders[msg.sender])); /* <FIX> Insert:BC */
+
+             Holders[msg.sender]+=msg.value;
+
+         }
+
+     }
+
+@@ -93,8 +94,9 @@
+             // <yes> <report> REENTRANCY
+
+             if(_addr.call.value(_wei)())
+
+             {
+
++                require((Holders[_addr] >= _wei)); /* <FIX> Insert:BC */
+
+                 Holders[_addr]-=_wei;
+
+             }
+
+         }
+
+     }
+
+-}
++}

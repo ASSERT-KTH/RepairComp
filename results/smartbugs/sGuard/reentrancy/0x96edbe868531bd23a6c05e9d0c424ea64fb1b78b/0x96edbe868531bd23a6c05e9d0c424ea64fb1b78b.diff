@@ -1,0 +1,199 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0x96edbe868531bd23a6c05e9d0c424ea64fb1b78b.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/reentrancy/0x96edbe868531bd23a6c05e9d0c424ea64fb1b78b/0x96edbe868531bd23a6c05e9d0c424ea64fb1b78b.sol
+@@ -1,13 +1,35 @@
++contract sGuard{
+
++  function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    assert(b <= a);
+
++    return a - b;
+
++  }
+
++  
+
++  function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    uint256 c = a + b;
+
++    assert(c >= a);
+
++    return c;
+
++  }
+
++  
+
++  bool internal locked_;
+
++  constructor() internal {
+
++    locked_ = false;
+
++  }
+
++  modifier nonReentrant_() {
+
++    require(!locked_);
+
++    locked_ = true;
+
++    _;
+
++    locked_ = false;
+
++  }
+
++}
+
+ /*
+
+  * @source: etherscan.io 
+
+  * @author: -
+
+  * @vulnerable_at_lines: 63
+
+  */
+
+ 
+
+-pragma solidity ^0.4.19;
+
+ 
+
+ contract PENNY_BY_PENNY  
+
+-{
+
++ is sGuard {
+
+     struct Holder   
+
+     {
+
+         uint unlockTime;
+
+@@ -22,37 +44,37 @@
+     
+
+     bool intitalized;
+
+     
+
+-    function SetMinSum(uint _val)
+
++     function SetMinSum(uint _val) nonReentrant_ 
+
+     public
+
+     {
+
+         if(intitalized)throw;
+
+         MinSum = _val;
+
+     }
+
+     
+
+-    function SetLogFile(address _log)
+
++     function SetLogFile(address _log) nonReentrant_ 
+
+     public
+
+     {
+
+         if(intitalized)throw;
+
+         Log = LogFile(_log);
+
+     }
+
+     
+
+-    function Initialized()
+
++     function Initialized() nonReentrant_ 
+
+     public
+
+     {
+
+         intitalized = true;
+
+     }
+
+     
+
+-    function Put(uint _lockTime)
+
++     function Put(uint _lockTime) nonReentrant_ 
+
+     public
+
+     payable
+
+     {
+
+         var acc = Acc[msg.sender];
+
+-        acc.balance += msg.value;
+
+-        if(now+_lockTime>acc.unlockTime)acc.unlockTime=now+_lockTime;
+
++        acc.balance = add_uint256(acc.balance, msg.value);
+
++        if(add_uint256(now, _lockTime)>acc.unlockTime)acc.unlockTime=add_uint256(now, _lockTime);
+
+         Log.AddMessage(msg.sender,msg.value,"Put");
+
+     }
+
+     
+
+-    function Collect(uint _am)
+
++     function Collect(uint _am) nonReentrant_ 
+
+     public
+
+     payable
+
+     {
+
+@@ -62,7 +84,7 @@
+             // <yes> <report> REENTRANCY
+
+             if(msg.sender.call.value(_am)())
+
+             {
+
+-                acc.balance-=_am;
+
++                acc.balance = sub_uint256(acc.balance, _am);
+
+                 Log.AddMessage(msg.sender,_am,"Collect");
+
+             }
+
+         }
+
+@@ -79,7 +101,7 @@
+ 
+
+ 
+
+ contract LogFile
+
+-{
+
++ is sGuard {
+
+     struct Message
+
+     {
+
+         address Sender;

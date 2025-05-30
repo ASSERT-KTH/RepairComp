@@ -1,6 +1,6 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/arithmetic/token.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/arithmetic/token/token.sol
-@@ -1,25 +1,26 @@
+@@ -1,30 +1,38 @@
 -/*
 
 - * @source: https://github.com/sigp/solidity-security-blog
@@ -11,76 +11,120 @@
 
 - */
 
--
+ 
 
--pragma solidity ^0.4.18;
+- pragma solidity ^0.4.18;
 
--
++                        contract sGuardPlus {
 
--contract Token {
++                                constructor() internal {
 
-+contract sGuardPlus {
++                                        
 
-+    constructor() internal {}
++                                        
 
-+    function sub_uint(uint a, uint b) internal pure returns (uint) {
++                                }
 
-+        assert(b <= a);
++                                function sub_uint(uint a, uint b) internal pure returns (uint) {
 
-+        return a - b;
++                                assert(b <= a);
 
-+    }
++                                return a - b;
 
-+    function add_uint(uint a, uint b) internal pure returns (uint) {
++                        }
 
-+        uint c = a + b;
++function add_uint(uint a, uint b) internal pure returns (uint) {
 
-+        assert(c >= a);
++                                uint c = a + b;
 
-+        return c;
++                                assert(c >= a);
 
-+    }
++                                return c;
+
++                        }
+
++                                
+
++                                
+
++                                
+
++                        }
+
++                contract Token is sGuardPlus {
+
++mapping (address  => uint )    balances;
+
++uint  public   totalSupply;
+
++constructor (uint    _initialSupply)   {
+
++balances[msg.sender]=totalSupply=_initialSupply;
 
 +}
 
-+contract Token is sGuardPlus {
+ 
 
-     mapping(address => uint) balances;
+- contract Token {
 
-     uint public totalSupply;
++function transfer (address    _to,uint    _value) public  returns (bool    ){
+
++require(sub_uint(balances[msg.sender], _value)>=0);
+
++balances[msg.sender]=sub_uint(balances[msg.sender], _value);
+
++balances[_to]=add_uint(balances[_to], _value);
+
++return true;
+
++}
+
+ 
+
+-   mapping(address => uint) balances;
+
+-   uint public totalSupply;
+
++function balanceOf (address    _owner) public constant returns (uint    balance){
+
++return balances[_owner];
+
++}
+
+ 
+
+-   function Token(uint _initialSupply) {
+
+-     balances[msg.sender] = totalSupply = _initialSupply;
+
+-   }
 
 -
 
--    function Token(uint _initialSupply) {
+-   function transfer(address _to, uint _value) public returns (bool) {
 
-+    constructor(uint _initialSupply) {
+-     // <yes> <report> ARITHMETIC
 
-         balances[msg.sender] = totalSupply = _initialSupply;
+-     require(balances[msg.sender] - _value >= 0);
 
-     }
+-     // <yes> <report> ARITHMETIC
 
- 
+-     balances[msg.sender] -= _value;
 
-     function transfer(address _to, uint _value) public returns (bool) {
+-     balances[_to] += _value;
 
--        // <yes> <report> ARITHMETIC
+-     return true;
 
--        require(balances[msg.sender] - _value >= 0);
+-   }
 
--        // <yes> <report> ARITHMETIC
+-
 
--        balances[msg.sender] -= _value;
+-   function balanceOf(address _owner) public constant returns (uint balance) {
 
--        balances[_to] += _value;
+-     return balances[_owner];
 
-+        require(sub_uint(balances[msg.sender], _value) >= 0);
+-   }
 
-+        balances[msg.sender] = sub_uint(balances[msg.sender], _value);
+- }
 
-+        balances[_to] = add_uint(balances[_to], _value);
-
-         return true;
-
-     }
-
- 
++}

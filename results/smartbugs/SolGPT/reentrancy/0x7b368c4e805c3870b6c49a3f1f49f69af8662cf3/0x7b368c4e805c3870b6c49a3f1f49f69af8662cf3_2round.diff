@@ -1,9 +1,9 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0x7b368c4e805c3870b6c49a3f1f49f69af8662cf3.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/reentrancy/0x7b368c4e805c3870b6c49a3f1f49f69af8662cf3/0x7b368c4e805c3870b6c49a3f1f49f69af8662cf3_2round.sol
-@@ -1,49 +1,41 @@
+@@ -1,81 +1,53 @@
 -/*
 
-- * @source: etherscan.io
+- * @source: etherscan.io 
 
 - * @author: -
 
@@ -17,39 +17,53 @@
 
  
 
- contract W_WALLET {
+-contract W_WALLET
 
--    function Put(uint _unlockTime) public payable {
+-{
+
+-    function Put(uint _unlockTime)
+
+-    public
+
+-    payable
+
+-    {
 
 -        var acc = Acc[msg.sender];
 
 -        acc.balance += msg.value;
 
--        acc.unlockTime = _unlockTime > now ? _unlockTime : now;
+-        acc.unlockTime = _unlockTime>now?_unlockTime:now;
 
--        LogFile.AddMessage(msg.sender, msg.value, "Put");
+-        LogFile.AddMessage(msg.sender,msg.value,"Put");
 
 -    }
 
 -
 
--    function Collect(uint _am) public payable {
+-    function Collect(uint _am)
+
+-    public
+
+-    payable
+
+-    {
 
 -        var acc = Acc[msg.sender];
 
--        if (
+-        if( acc.balance>=MinSum && acc.balance>=_am && now>acc.unlockTime)
 
--            acc.balance >= MinSum && acc.balance >= _am && now > acc.unlockTime
-
--        ) {
+-        {
 
 -            // <yes> <report> REENTRANCY
 
--            if (msg.sender.call.value(_am)()) {
+-            if(msg.sender.call.value(_am)())
 
--                acc.balance -= _am;
+-            {
 
--                LogFile.AddMessage(msg.sender, _am, "Collect");
+-                acc.balance-=_am;
+
+-                LogFile.AddMessage(msg.sender,_am,"Collect");
 
 -            }
 
@@ -59,7 +73,13 @@
 
 -
 
--    function() public payable {
+-    function() 
+
+-    public 
+
+-    payable
+
+-    {
 
 -        Put(0);
 
@@ -67,7 +87,13 @@
 
 -
 
-     struct Holder {
+-    struct Holder   
+
+-    {
+
++contract W_WALLET {
+
++    struct Holder {
 
          uint unlockTime;
 
@@ -77,25 +103,25 @@
 
  
 
-     mapping(address => Holder) public Acc;
+     mapping (address => Holder) public Acc;
 
--
++    Log LogFile;
 
-     Log LogFile;
-
--
-
-     uint public MinSum = 1 ether;
++    uint public MinSum = 1 ether;
 
  
 
-     function W_WALLET(address log) public {
+-    Log LogFile;
 
-         LogFile = Log(log);
++    function W_WALLET(address log) public {
+
++        LogFile = Log(log);
 
 +    }
 
-+
+ 
+
+-    uint public MinSum = 1 ether;    
 
 +    function Put(uint _unlockTime) public payable {
 
@@ -109,27 +135,25 @@
 
 +    }
 
-+
+ 
+
+-    function W_WALLET(address log) public{
+
+-        LogFile = Log(log);
 
 +    function Collect(uint _am) public {
 
 +        Holder storage acc = Acc[msg.sender];
 
-+        require(
++        require(acc.balance >= MinSum && acc.balance >= _am && now > acc.unlockTime, "Insufficient balance or unlock time not reached");
 
-+            acc.balance >= MinSum && acc.balance >= _am && now > acc.unlockTime,
-
-+            "Insufficient balance or unlock time not reached"
-
-+        );
-
-+
++        
 
 +        acc.balance -= _am;
 
 +        LogFile.AddMessage(msg.sender, _am, "Collect");
 
-+
++        
 
 +        require(msg.sender.call.value(_am)(), "Transfer failed");
 
@@ -147,21 +171,56 @@
 
  
 
-@@ -56,8 +48,7 @@
+-
+
+-contract Log 
+
+-{
+
+-    struct Message
+
+-    {
+
++contract Log {
+
++    struct Message {
+
+         address Sender;
+
+-        string  Data;
+
++        string Data;
+
+         uint Val;
+
+-        uint  Time;
+
++        uint Time;
+
      }
 
  
 
      Message[] public History;
 
--
-
--    Message LastMsg;
-
 +    Message public LastMsg;
 
  
 
-     function AddMessage(address _adr, uint _val, string _data) public {
+-    Message LastMsg;
+
+-
+
+-    function AddMessage(address _adr,uint _val,string _data)
+
+-    public
+
+-    {
+
++    function AddMessage(address _adr, uint _val, string _data) public {
 
          LastMsg.Sender = _adr;
+
+         LastMsg.Time = now;
+
+         LastMsg.Val = _val;

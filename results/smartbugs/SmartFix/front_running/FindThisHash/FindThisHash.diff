@@ -1,0 +1,48 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/front_running/FindThisHash.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/front_running/FindThisHash/FindThisHash.sol
+@@ -1,3 +1,7 @@
++contract SmartFix {
+
++  address public smartfix_owner = msg.sender;
+
++}
+
++
+
+ /*
+
+  * @source: https://github.com/sigp/solidity-security-blog
+
+  * @author: -
+
+@@ -6,7 +10,7 @@
+ 
+
+ pragma solidity ^0.4.22;
+
+ 
+
+-contract FindThisHash {
+
++contract FindThisHash is SmartFix {
+
+     bytes32 constant public hash = 0xb5b5b97fafd9855eec9b41f74dfb6c38f5951141f9a3ecd7f44d5479b630ee0a;
+
+ 
+
+     constructor() public payable {} // load with ether
+
+@@ -14,6 +18,7 @@
+     function solve(string solution) public {
+
+         // If you can find the pre image of the hash, receive 1000 ether
+
+          // <yes> <report> FRONT_RUNNING
+
++        require((smartfix_owner == msg.sender)); /* <FIX> Insert */
+
+         require(hash == sha3(solution));
+
+         msg.sender.transfer(1000 ether);
+
+     }

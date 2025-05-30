@@ -1,0 +1,18 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/denial_of_service/auction.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/denial_of_service/auction/auction.sol
+@@ -12,7 +12,7 @@
+   uint currentBid;
+
+ 
+
+   //Takes in bid, refunding the frontrunner if they are outbid
+
+-  function bid() payable {
+
++   /* <FIX> Change to Cnstr: */ constructor() payable {
+
+     require(msg.value > currentBid);
+
+ 
+
+     //If the refund fails, the entire transaction reverts.

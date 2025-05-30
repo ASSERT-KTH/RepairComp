@@ -1,0 +1,96 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/lotto.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/unchecked_low_level_calls/lotto/lotto_2round.sol
+@@ -1,29 +1,23 @@
+-/*
+
+- * @source: https://github.com/sigp/solidity-security-blog
+
+- * @author: Suhabe Bugrara
+
+- * @vulnerable_at_lines: 20,27
+
+- */
+
++pragma solidity ^0.4.18;
+
+ 
+
+- pragma solidity ^0.4.18;
+
+- 
+
+- contract Lotto {
+
++contract Lotto {
+
+ 
+
+-     bool public payedOut = false;
+
+-     address public winner;
+
+-     uint public winAmount;
+
++    bool public payedOut = false;
+
++    address public winner;
+
++    uint public winAmount;
+
+ 
+
+-     // ... extra functionality here
+
++    function sendToWinner() public {
+
++        require(!payedOut);
+
++        require(winner != address(0));
+
++        require(winAmount > 0);
+
+ 
+
+-     function sendToWinner() public {
+
+-         require(!payedOut);
+
+-         // <yes> <report> UNCHECKED_LL_CALLS
+
+-         winner.send(winAmount);
+
+-         payedOut = true;
+
+-     }
+
++        payedOut = true;
+
++        winner.transfer(winAmount);
+
++    }
+
+ 
+
+-     function withdrawLeftOver() public {
+
+-         require(payedOut);
+
+-         // <yes> <report> UNCHECKED_LL_CALLS
+
+-         msg.sender.send(this.balance);
+
+-     }
+
+- }
+
++    function withdrawLeftOver() public {
+
++        require(payedOut);
+
++
+
++        msg.sender.transfer(this.balance);
+
++    }
+
++}

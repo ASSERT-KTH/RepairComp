@@ -1,0 +1,112 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/lotto.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/unchecked_low_level_calls/lotto/lotto.sol
+@@ -1,29 +1,29 @@
+-/*
+
+- * @source: https://github.com/sigp/solidity-security-blog
+
+- * @author: Suhabe Bugrara
+
+- * @vulnerable_at_lines: 20,27
+
+- */
+
+ 
+
+- pragma solidity ^0.4.18;
+
+- 
+
+- contract Lotto {
+
++                        contract sGuardPlus {
+
++                                constructor() internal {
+
++                                        
+
++                                        
+
++                                }
+
++                                
+
++                                
+
++                                
+
++                                
+
++                        }
+
++                contract Lotto  {
+
++bool  public   payedOut = false;
+
++address  public   winner;
+
++uint  public   winAmount;
+
++function sendToWinner () public  {
+
++require( ! payedOut);
+
++bool     __sent_result100 = winner.send(winAmount);
+
++require(__sent_result100);
+
++payedOut=true;
+
++}
+
+ 
+
+-     bool public payedOut = false;
+
+-     address public winner;
+
+-     uint public winAmount;
+
++function withdrawLeftOver () public  {
+
++require(payedOut);
+
++bool     __sent_result101 = msg.sender.send(this.balance);
+
++require(__sent_result101);
+
++}
+
+ 
+
+-     // ... extra functionality here
+
+-
+
+-     function sendToWinner() public {
+
+-         require(!payedOut);
+
+-         // <yes> <report> UNCHECKED_LL_CALLS
+
+-         winner.send(winAmount);
+
+-         payedOut = true;
+
+-     }
+
+-
+
+-     function withdrawLeftOver() public {
+
+-         require(payedOut);
+
+-         // <yes> <report> UNCHECKED_LL_CALLS
+
+-         msg.sender.send(this.balance);
+
+-     }
+
+- }
+
++}

@@ -1,9 +1,9 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0x7541b76cb60f4c60af330c208b0623b7f54bf615.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/reentrancy/0x7541b76cb60f4c60af330c208b0623b7f54bf615/0x7541b76cb60f4c60af330c208b0623b7f54bf615_3round.sol
-@@ -1,49 +1,42 @@
+@@ -1,85 +1,59 @@
 -/*
 
-- * @source: etherscan.io
+- * @source: etherscan.io 
 
 - * @author: -
 
@@ -17,39 +17,53 @@
 
  
 
- contract U_BANK {
+-contract U_BANK
 
--    function Put(uint _unlockTime) public payable {
+-{
+
+-    function Put(uint _unlockTime)
+
+-    public
+
+-    payable
+
+-    {
 
 -        var acc = Acc[msg.sender];
 
 -        acc.balance += msg.value;
 
--        acc.unlockTime = _unlockTime > now ? _unlockTime : now;
+-        acc.unlockTime = _unlockTime>now?_unlockTime:now;
 
--        LogFile.AddMessage(msg.sender, msg.value, "Put");
+-        LogFile.AddMessage(msg.sender,msg.value,"Put");
 
 -    }
 
 -
 
--    function Collect(uint _am) public payable {
+-    function Collect(uint _am)
+
+-    public
+
+-    payable
+
+-    {
 
 -        var acc = Acc[msg.sender];
 
--        if (
+-        if( acc.balance>=MinSum && acc.balance>=_am && now>acc.unlockTime)
 
--            acc.balance >= MinSum && acc.balance >= _am && now > acc.unlockTime
-
--        ) {
+-        {
 
 -            // <yes> <report> REENTRANCY
 
--            if (msg.sender.call.value(_am)()) {
+-            if(msg.sender.call.value(_am)())
 
--                acc.balance -= _am;
+-            {
 
--                LogFile.AddMessage(msg.sender, _am, "Collect");
+-                acc.balance-=_am;
+
+-                LogFile.AddMessage(msg.sender,_am,"Collect");
 
 -            }
 
@@ -59,7 +73,13 @@
 
 -
 
--    function() public payable {
+-    function() 
+
+-    public 
+
+-    payable
+
+-    {
 
 -        Put(0);
 
@@ -67,7 +87,13 @@
 
 -
 
-     struct Holder {
+-    struct Holder   
+
+-    {
+
++contract U_BANK {
+
++    struct Holder {
 
          uint unlockTime;
 
@@ -77,7 +103,7 @@
 
  
 
-     mapping(address => Holder) public Acc;
+     mapping (address => Holder) public Acc;
 
 -
 
@@ -85,11 +111,15 @@
 
  
 
-     uint public MinSum = 2 ether;
+-    uint public MinSum = 2 ether;    
+
++    uint public MinSum = 2 ether;
 
  
 
-     function U_BANK(address log) public {
+-    function U_BANK(address log) public{
+
++    function U_BANK(address log) public {
 
          LogFile = Log(log);
 
@@ -115,11 +145,7 @@
 
 +        Holder storage acc = Acc[msg.sender];
 
-+        require(
-
-+            acc.balance >= MinSum && acc.balance >= _am && now > acc.unlockTime
-
-+        );
++        require(acc.balance >= MinSum && acc.balance >= _am && now > acc.unlockTime);
 
 +
 
@@ -147,7 +173,34 @@
 
  
 
-@@ -57,13 +50,12 @@
+-
+
+-contract Log 
+
+-{
+
+-    struct Message
+
+-    {
+
++contract Log {
+
++    struct Message {
+
+         address Sender;
+
+-        string  Data;
+
++        string Data;
+
+         uint Val;
+
+-        uint  Time;
+
++        uint Time;
+
+     }
+
  
 
      Message[] public History;
@@ -158,7 +211,11 @@
 
 -
 
-     function AddMessage(address _adr, uint _val, string _data) public {
+-    function AddMessage(address _adr,uint _val,string _data)
+
+-    public
+
+-    {
 
 -        LastMsg.Sender = _adr;
 
@@ -169,6 +226,8 @@
 -        LastMsg.Data = _data;
 
 -        History.push(LastMsg);
+
++    function AddMessage(address _adr, uint _val, string _data) public {
 
 +        Message memory newMessage;
 

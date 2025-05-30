@@ -51,10 +51,10 @@
 
          // <yes> <report> ARITHMETIC
 
-+        require((count >= input)); /* <FIX> Insert:BC */
++       	require((count >= input)); /* <FIX> Insert:BC */
 
-         uint res = count - input;
+        	uint res = count - input;
 
      }
 
- }
+ 

@@ -1,0 +1,16 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/king_of_the_ether_throne.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/unchecked_low_level_calls/king_of_the_ether_throne/king_of_the_ether_throne.sol
+@@ -123,6 +123,7 @@
+         // (with a commission held back for the wizard). We let the wizard's
+
+         // payments accumulate to avoid wasting gas sending small fees.
+
+ 
+
++        require(((valuePaid == 0) || (((valuePaid * wizardCommissionFractionNum) / valuePaid) == wizardCommissionFractionNum))); /* <FIX> Insert:BC */
+
+         uint wizardCommission = (valuePaid * wizardCommissionFractionNum) / wizardCommissionFractionDen;
+
+ 
+
+         uint compensation = valuePaid - wizardCommission;

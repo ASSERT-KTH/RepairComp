@@ -1,6 +1,6 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/arithmetic/timelock.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/arithmetic/timelock/timelock.sol
-@@ -1,24 +1,24 @@
+@@ -1,32 +1,36 @@
 -/*
 
 - * @source: https://github.com/sigp/solidity-security-blog
@@ -11,66 +11,120 @@
 
 - */
 
--
+ 
 
 -//added pragma version
 
--pragma solidity ^0.4.10;
+- pragma solidity ^0.4.10;
 
--
+- 
 
--contract TimeLock {
+- contract TimeLock {
 
-+contract sGuardPlus {
++                        contract sGuardPlus {
 
-+    constructor() internal {}
++                                constructor() internal {
 
-+    function add_uint(uint a, uint b) internal pure returns (uint) {
++                                        
 
-+        uint c = a + b;
++                                        
 
-+        assert(c >= a);
++                                }
 
-+        return c;
++                                function add_uint(uint a, uint b) internal pure returns (uint) {
 
-+    }
++                                uint c = a + b;
+
++                                assert(c >= a);
+
++                                return c;
+
++                        }
+
++                                
+
++                                
+
++                                
+
++                        }
+
++                contract TimeLock is sGuardPlus {
+
++mapping (address  => uint ) public   balances;
+
++mapping (address  => uint ) public   lockTime;
+
++function deposit () public payable {
+
++balances[msg.sender]+=msg.value;
+
++lockTime[msg.sender]=now+1 weeks;
 
 +}
 
-+contract TimeLock is sGuardPlus {
+ 
 
-     mapping(address => uint) public balances;
+-     mapping(address => uint) public balances;
 
-     mapping(address => uint) public lockTime;
+-     mapping(address => uint) public lockTime;
+
++function increaseLockTime (uint    _secondsToIncrease) public  {
+
++lockTime[msg.sender]=add_uint(lockTime[msg.sender], _secondsToIncrease);
+
++}
+
+ 
+
+-     function deposit() public payable {
+
+-         balances[msg.sender] += msg.value;
+
+-         lockTime[msg.sender] = now + 1 weeks;
+
+-     }
+
++function withdraw () public  {
+
++require(balances[msg.sender]>0);
+
++require(now>lockTime[msg.sender]);
+
++uint     transferValue = balances[msg.sender];
+
++balances[msg.sender]=0;
+
++msg.sender.transfer(transferValue);
+
++}
+
+ 
+
+-     function increaseLockTime(uint _secondsToIncrease) public {
+
+-         // <yes> <report> ARITHMETIC
+
+-         lockTime[msg.sender] += _secondsToIncrease;
+
+-     }
 
 -
 
-     function deposit() public payable {
+-     function withdraw() public {
 
-         balances[msg.sender] += msg.value;
+-         require(balances[msg.sender] > 0);
 
-         lockTime[msg.sender] = now + 1 weeks;
+-         require(now > lockTime[msg.sender]);
 
-     }
+-         uint transferValue = balances[msg.sender];
 
- 
+-         balances[msg.sender] = 0;
 
-     function increaseLockTime(uint _secondsToIncrease) public {
+-         msg.sender.transfer(transferValue);
 
--        // <yes> <report> ARITHMETIC
+-     }
 
--        lockTime[msg.sender] += _secondsToIncrease;
+- }
 
-+        lockTime[msg.sender] = add_uint(
-
-+            lockTime[msg.sender],
-
-+            _secondsToIncrease
-
-+        );
-
-     }
-
- 
-
-     function withdraw() public {
++}

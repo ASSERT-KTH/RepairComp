@@ -1,49 +1,49 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/reentrance.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/reentrancy/reentrance/reentrance.sol
-@@ -1,29 +1,50 @@
-+contract sGuard {
+@@ -1,30 +1,52 @@
++contract sGuard{
 
-+    function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
++  function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
 
-+        assert(b <= a);
++    assert(b <= a);
 
-+        return a - b;
++    return a - b;
 
-+    }
++  }
 
-+
++  
 
-+    bool internal locked_;
++  bool internal locked_;
 
-+    constructor() internal {
++  constructor() internal {
 
-+        locked_ = false;
++    locked_ = false;
 
-+    }
++  }
 
-+    modifier nonReentrant_() {
++  modifier nonReentrant_() {
 
-+        require(!locked_);
++    require(!locked_);
 
-+        locked_ = true;
++    locked_ = true;
 
-+        _;
++    _;
 
-+        locked_ = false;
++    locked_ = false;
 
-+    }
++  }
 
-+
++  
 
-+    function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
++  function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
 
-+        uint256 c = a + b;
++    uint256 c = a + b;
 
-+        assert(c >= a);
++    assert(c >= a);
 
-+        return c;
++    return c;
 
-+    }
++  }
 
 +}
 
@@ -61,56 +61,58 @@
 
 -pragma solidity ^0.4.18;
 
--
+ 
 
 -contract Reentrance {
 
-+contract Reentrance is sGuard {
-
-     mapping(address => uint) public balances;
++contract Reentrance  is sGuard {
 
  
 
--    function donate(address _to) public payable {
-
--        balances[_to] += msg.value;
-
-+    function donate(address _to) public payable nonReentrant_ {
-
-+        balances[_to] = add_uint256(balances[_to], msg.value);
-
-     }
+   mapping(address => uint) public balances;
 
  
 
-     function balanceOf(address _who) public view returns (uint balance) {
+-  function donate(address _to) public payable {
 
-         return balances[_who];
+-    balances[_to] += msg.value;
 
-     }
++   function donate(address _to) nonReentrant_  public payable {
+
++    balances[_to] = add_uint256(balances[_to], msg.value);
+
+   }
 
  
 
--    function withdraw(uint _amount) public {
+   function balanceOf(address _who) public view returns (uint balance) {
 
-+    function withdraw(uint _amount) public nonReentrant_ {
+     return balances[_who];
 
-         if (balances[msg.sender] >= _amount) {
+   }
 
-             // <yes> <report> REENTRANCY
+ 
 
-             if (msg.sender.call.value(_amount)()) {
+-  function withdraw(uint _amount) public {
 
-                 _amount;
++   function withdraw(uint _amount) nonReentrant_  public {
 
-             }
+     if(balances[msg.sender] >= _amount) {
 
--            balances[msg.sender] -= _amount;
+       // <yes> <report> REENTRANCY
 
-+            balances[msg.sender] = sub_uint256(balances[msg.sender], _amount);
+       if(msg.sender.call.value(_amount)()) {
 
-         }
+         _amount;
+
+       }
+
+-      balances[msg.sender] -= _amount;
+
++      balances[msg.sender] = sub_uint256(balances[msg.sender], _amount);
 
      }
+
+   }
 
  

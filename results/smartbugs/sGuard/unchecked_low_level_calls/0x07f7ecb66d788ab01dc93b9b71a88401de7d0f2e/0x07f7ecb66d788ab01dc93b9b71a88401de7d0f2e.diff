@@ -1,0 +1,144 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0x07f7ecb66d788ab01dc93b9b71a88401de7d0f2e.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/unchecked_low_level_calls/0x07f7ecb66d788ab01dc93b9b71a88401de7d0f2e/0x07f7ecb66d788ab01dc93b9b71a88401de7d0f2e.sol
+@@ -1,13 +1,24 @@
++contract sGuard{
+
++  function div_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    uint256 c = a / b;
+
++    return c;
+
++  }
+
++  
+
++  function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    uint256 c = a + b;
+
++    assert(c >= a);
+
++    return c;
+
++  }
+
++}
+
+ /*
+
+  * @source: etherscan.io 
+
+  * @author: -
+
+  * @vulnerable_at_lines: 201,213
+
+  */
+
+ 
+
+-pragma solidity ^0.4.24;
+
+ 
+
+ contract PoCGame
+
+-{
+
++ is sGuard {
+
+     
+
+     /**
+
+      * Modifiers
+
+@@ -27,7 +38,7 @@
+ 
+
+     modifier onlyRealPeople()
+
+     {
+
+-          require (msg.sender == tx.origin);
+
++          require (msg.sender == msg.sender);
+
+         _;
+
+     }
+
+ 
+
+@@ -150,16 +161,16 @@
+             timestamps[msg.sender] = 0;
+
+             wagers[msg.sender] = 0;
+
+     
+
+-            uint256 winningNumber = uint256(keccak256(abi.encodePacked(blockhash(blockNumber),  msg.sender)))%difficulty +1;
+
+-    
+
+-            if(winningNumber == difficulty / 2)
+
++            uint256 winningNumber = add_uint256(uint256(keccak256(abi.encodePacked(blockhash(blockNumber),  msg.sender)))%difficulty, 1);
+
++    
+
++            if(winningNumber == div_uint256(difficulty, 2))
+
+             {
+
+                 payout(msg.sender);
+
+             }
+
+             else 
+
+             {
+
+                 //player loses
+
+-                loseWager(betLimit / 2);
+
++                loseWager(div_uint256(betLimit, 2));
+
+             }    
+
+         }
+
+         else
+
+@@ -185,7 +196,7 @@
+     function payout(address winner) 
+
+     internal 
+
+     {
+
+-        uint256 ethToTransfer = address(this).balance / 2;
+
++        uint256 ethToTransfer = div_uint256(address(this).balance, 2);
+
+         
+
+         winner.transfer(ethToTransfer);
+
+         emit Win(ethToTransfer, winner);
+
+@@ -292,6 +303,6 @@
+ 
+
+ //Define ERC20Interface.transfer, so PoCWHALE can transfer tokens accidently sent to it.
+
+ contract ERC20Interface 
+
+-{
+
++ is sGuard {
+
+     function transfer(address to, uint256 tokens) public returns (bool success);
+
+ }

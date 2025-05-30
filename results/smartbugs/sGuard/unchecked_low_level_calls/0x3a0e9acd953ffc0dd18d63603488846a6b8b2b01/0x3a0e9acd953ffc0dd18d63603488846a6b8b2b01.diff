@@ -1,0 +1,16 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0x3a0e9acd953ffc0dd18d63603488846a6b8b2b01.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/unchecked_low_level_calls/0x3a0e9acd953ffc0dd18d63603488846a6b8b2b01/0x3a0e9acd953ffc0dd18d63603488846a6b8b2b01.sol
+@@ -4,7 +4,6 @@
+  * @vulnerable_at_lines: 44,97
+
+  */
+
+ 
+
+-pragma solidity ^0.4.18;
+
+ 
+
+ contract Ownable
+
+ {

@@ -1,6 +1,6 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/other/name_registrar.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/other/name_registrar/name_registrar_3round.sol
-@@ -1,32 +1,24 @@
+@@ -1,32 +1,26 @@
 -/*
 
 - * @source: https://github.com/sigp/solidity-security-blog#storage-example
@@ -19,15 +19,17 @@
 
  contract NameRegistrar {
 
--    bool public unlocked = false; // registrar locked, no name updates
+ 
 
-+    bool public unlocked = false;
+-    bool public unlocked = false;  // registrar locked, no name updates
+
++    bool public unlocked = false;  
 
  
 
-     struct NameRecord {
+-    struct NameRecord { // map hashes to addresses
 
--        // map hashes to addresses
++    struct NameRecord { 
 
          bytes32 name;
 
@@ -41,9 +43,9 @@
 
 -    mapping(bytes32 => address) public resolve; // resolves hashes to addresses
 
-+    mapping(address => NameRecord) public registeredNameRecord;
++    mapping(address => NameRecord) public registeredNameRecord; 
 
-+    mapping(bytes32 => address) public resolve;
++    mapping(bytes32 => address) public resolve; 
 
  
 
@@ -54,6 +56,8 @@
 -        // <yes> <report> OTHER - uninitialized storage
 
 -        NameRecord newRecord;
+
++
 
 +        NameRecord memory newRecord;
 
@@ -71,8 +75,10 @@
 
 -        require(unlocked); // only allow registrations if contract is unlocked
 
-+        require(unlocked);
++        require(unlocked); 
 
      }
 
- }
+-}
+
++}

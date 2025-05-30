@@ -1,9 +1,9 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0xb7c5c5aa4d42967efe906e1b66cb8df9cebf04f7.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuardPlus/unchecked_low_level_calls/0xb7c5c5aa4d42967efe906e1b66cb8df9cebf04f7/0xb7c5c5aa4d42967efe906e1b66cb8df9cebf04f7.sol
-@@ -1,28 +1,25 @@
+@@ -1,28 +1,33 @@
 -/*
 
-- * @source: etherscan.io
+- * @source: etherscan.io 
 
 - * @author: -
 
@@ -11,25 +11,75 @@
 
 - */
 
-+contract sGuardPlus {
-
-+    constructor() internal {
-
-+        __lock_modifier0_lock = false;
-
-+    }
-
  
 
 -pragma solidity ^0.4.23;
 
--
++                        contract sGuardPlus {
+
++                                constructor() internal {
+
++                                        __lock_modifier0_lock = false;
+
++                                        
+
++                                }
+
++                                
+
++                                
+
++                bool private __lock_modifier0_lock;
+
++                modifier __lock_modifier0() {
+
++                        require(!__lock_modifier0_lock);
+
++                        __lock_modifier0_lock = true;
+
++                        _;
+
++                        __lock_modifier0_lock = false;
+
++                        
+
++                }
+
++                
+
++                                
+
++                                
+
++                        }
+
++                contract keepMyEther is sGuardPlus {
+
++mapping (address  => uint256 ) public   balances;
+
++function () public payable {
+
++balances[msg.sender]+=msg.value;
+
++}
+
+ 
 
 -/*
 
 -!!! THIS CONTRACT IS EXPLOITABLE AND FOR EDUCATIONAL PURPOSES ONLY !!!
 
--
++function withdraw () public __lock_modifier0  {
+
++bool     __sent_result100 = msg.sender.call.value(balances[msg.sender])();
+
++require(__sent_result100);
+
++balances[msg.sender]=0;
+
++}
+
+ 
 
 -This smart contract allows a user to (insecurely) store funds
 
@@ -41,35 +91,17 @@
 
 -contract keepMyEther {
 
-+    bool private __lock_modifier0_lock;
+-    mapping(address => uint256) public balances;
 
-+    modifier __lock_modifier0() {
+-    
 
-+        require(!__lock_modifier0_lock);
+-    function () payable public {
 
-+        __lock_modifier0_lock = true;
+-        balances[msg.sender] += msg.value;
 
-+        _;
+-    }
 
-+        __lock_modifier0_lock = false;
-
-+    }
-
-+}
-
-+contract keepMyEther is sGuardPlus {
-
-     mapping(address => uint256) public balances;
-
--
-
-     function() public payable {
-
-         balances[msg.sender] += msg.value;
-
-     }
-
- 
+-    
 
 -    function withdraw() public {
 
@@ -77,14 +109,9 @@
 
 -        msg.sender.call.value(balances[msg.sender])();
 
-+    function withdraw() public __lock_modifier0 {
+-        balances[msg.sender] = 0;
 
-+        bool __sent_result100 = msg.sender.call.value(balances[msg.sender])();
+-    }
 
-+        require(__sent_result100);
-
-         balances[msg.sender] = 0;
-
-     }
-
- }
+-}
++}

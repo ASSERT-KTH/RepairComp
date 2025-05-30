@@ -1,0 +1,26 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0xe09b1ab8111c2729a76f16de96bc86a7af837928.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/unchecked_low_level_calls/0xe09b1ab8111c2729a76f16de96bc86a7af837928/0xe09b1ab8111c2729a76f16de96bc86a7af837928.sol
+@@ -142,6 +142,7 @@
+         require (secretSigner == ecrecover(signatureHash, v, r, s), "web3 vrs signature is not valid.");
+
+ 
+
+         jackpotSize += amount * JACKPOT_FEE / 1000;
+
++        require(((amount == 0) || (((amount * DEV_FEE) / amount) == DEV_FEE))); /* <FIX> Insert:BC */
+
+         devFeeSize += amount * DEV_FEE / 1000;
+
+         lockedInBets += amount * WIN_X / 1000;
+
+ 
+
+@@ -374,4 +375,4 @@
+ contract ERC20Interface 
+
+ {
+
+     function transfer(address to, uint256 tokens) public returns (bool success);
+
+-}
++}

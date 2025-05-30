@@ -1,0 +1,86 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/access_control/incorrect_constructor_name3.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SolGPT/access_control/incorrect_constructor_name3/incorrect_constructor_name3_3round.sol
+@@ -1,32 +1,21 @@
+-/*
+
+- * @source: https://smartcontractsecurity.github.io/SWC-registry/docs/SWC-118#incorrect-constructor-name2sol
+
+- * @author: Ben Perez
+
+- * @vulnerable_at_lines: 17
+
+- */
+
+-
+
+ pragma solidity ^0.4.24;
+
+ 
+
+-contract Missing{
+
+-    address private owner;
+
++contract Missing {
+
++    address payable private owner;
+
+ 
+
+     modifier onlyowner {
+
+-        require(msg.sender==owner);
+
++        require(msg.sender == owner);
+
+         _;
+
+     }
+
+-    // <yes> <report> ACCESS_CONTROL
+
+-    function Constructor()
+
+-        public
+
+-    {
+
++
+
++    constructor() public {
+
+         owner = msg.sender;
+
+     }
+
+ 
+
+-    function () payable {}
+
+-
+
+-    function withdraw()
+
+-        public
+
+-        onlyowner
+
+-    {
+
+-       owner.transfer(this.balance);
+
++    function () external payable {
+
+     }
+
+ 
+
+-}
+
++    function withdraw() public onlyowner {
+
++        owner.transfer(address(this).balance);
+
++    }
+
++}

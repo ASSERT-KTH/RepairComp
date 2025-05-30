@@ -1,0 +1,41 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/unchecked_low_level_calls/0x07f7ecb66d788ab01dc93b9b71a88401de7d0f2e.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/unchecked_low_level_calls/0x07f7ecb66d788ab01dc93b9b71a88401de7d0f2e/0x07f7ecb66d788ab01dc93b9b71a88401de7d0f2e.sol
+@@ -199,6 +199,7 @@
+     {
+
+         // <yes> <report> UNCHECKED_LL_CALLS
+
+         whale.call.value(amount)(bytes4(keccak256("donate()")));
+
++        require(((totalDonated + amount) >= totalDonated)); /* <FIX> Insert:BC */
+
+         totalDonated += amount;
+
+         emit Donate(amount, whale, msg.sender);
+
+     }
+
+@@ -211,6 +212,7 @@
+     {
+
+         // <yes> <report> UNCHECKED_LL_CALLS
+
+         whale.call.value(amount)(bytes4(keccak256("donate()")));
+
++        require(((totalDonated + amount) >= totalDonated)); /* <FIX> Insert:BC */
+
+         totalDonated += amount;
+
+         emit Lose(amount, msg.sender);
+
+     }
+
+@@ -294,4 +296,4 @@
+ contract ERC20Interface 
+
+ {
+
+     function transfer(address to, uint256 tokens) public returns (bool success);
+
+-}
++}

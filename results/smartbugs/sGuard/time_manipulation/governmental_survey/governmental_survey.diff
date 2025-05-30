@@ -1,0 +1,155 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/time_manipulation/governmental_survey.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/time_manipulation/governmental_survey/governmental_survey.sol
+@@ -1,3 +1,31 @@
++contract sGuard{
+
++  function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    assert(b <= a);
+
++    return a - b;
+
++  }
+
++  
+
++  function div_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    uint256 c = a / b;
+
++    return c;
+
++  }
+
++  
+
++  bool internal locked_;
+
++  constructor() internal {
+
++    locked_ = false;
+
++  }
+
++  modifier nonReentrant_() {
+
++    require(!locked_);
+
++    locked_ = true;
+
++    _;
+
++    locked_ = false;
+
++  }
+
++  
+
++  function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    uint256 c = a + b;
+
++    assert(c >= a);
+
++    return c;
+
++  }
+
++}
+
+ /*
+
+  * @source: http://blockchain.unica.it/projects/ethereum-survey/attacks.html#governmental
+
+  * @author: -
+
+@@ -5,9 +33,8 @@
+  */
+
+ 
+
+ //added pragma version
+
+-pragma solidity ^0.4.0;
+
+ 
+
+-contract Governmental {
+
++contract Governmental  is sGuard {
+
+   address public owner;
+
+   address public lastInvestor;
+
+   uint public jackpot = 1 ether;
+
+@@ -19,20 +46,20 @@
+     if (msg.value<1 ether) throw;
+
+   }
+
+ 
+
+-  function invest() {
+
+-    if (msg.value<jackpot/2) throw;
+
++   function invest() nonReentrant_  {
+
++    if (msg.value<div_uint256(jackpot, 2)) throw;
+
+     lastInvestor = msg.sender;
+
+-    jackpot += msg.value/2;
+
++    jackpot = add_uint256(jackpot, div_uint256(msg.value, 2));
+
+     // <yes> <report> TIME_MANIPULATION
+
+     lastInvestmentTimestamp = block.timestamp;
+
+   }
+
+ 
+
+-  function resetInvestment() {
+
+-    if (block.timestamp < lastInvestmentTimestamp+ONE_MINUTE)
+
++   function resetInvestment() nonReentrant_  {
+
++    if (block.timestamp < add_uint256(lastInvestmentTimestamp, ONE_MINUTE))
+
+       throw;
+
+ 
+
+     lastInvestor.send(jackpot);
+
+-    owner.send(this.balance-1 ether);
+
++    owner.send(sub_uint256(this.balance, 1 ether));
+
+ 
+
+     lastInvestor = 0;
+
+     jackpot = 1 ether;
+
+@@ -40,7 +67,7 @@
+   }
+
+ }
+
+ 
+
+-contract Attacker {
+
++contract Attacker  is sGuard {
+
+ 
+
+   function attack(address target, uint count) {
+
+     if (0<=count && count<1023) {

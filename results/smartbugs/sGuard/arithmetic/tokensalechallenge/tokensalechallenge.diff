@@ -1,45 +1,45 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/arithmetic/tokensalechallenge.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/arithmetic/tokensalechallenge/tokensalechallenge.sol
-@@ -1,12 +1,31 @@
-+contract sGuard {
+@@ -1,12 +1,32 @@
++contract sGuard{
 
-+    function mul_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
++  function mul_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
 
-+        if (a == 0) {
++    if (a == 0) {
 
-+            return 0;
-
-+        }
-
-+        uint256 c = a * b;
-
-+        assert(c / a == b);
-
-+        return c;
++      return 0;
 
 +    }
 
-+
++    uint256 c = a * b;
 
-+    function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
++    assert(c / a == b);
 
-+        uint256 c = a + b;
++    return c;
 
-+        assert(c >= a);
++  }
 
-+        return c;
++  
 
-+    }
++  function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
 
-+
++    uint256 c = a + b;
 
-+    function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
++    assert(c >= a);
 
-+        assert(b <= a);
++    return c;
 
-+        return a - b;
++  }
 
-+    }
++  
+
++  function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
+
++    assert(b <= a);
+
++    return a - b;
+
++  }
 
 +}
 
@@ -57,11 +57,11 @@
 
 -pragma solidity ^0.4.21;
 
--
+ 
 
 -contract TokenSaleChallenge {
 
-+contract TokenSaleChallenge is sGuard {
++contract TokenSaleChallenge  is sGuard {
 
      mapping(address => uint256) public balanceOf;
 
@@ -69,7 +69,7 @@
 
  
 
-@@ -20,16 +39,16 @@
+@@ -20,16 +40,16 @@
  
 
      function buy(uint256 numTokens) public payable {

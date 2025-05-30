@@ -1,49 +1,49 @@
 --- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/access_control/wallet_04_confused_sign.sol
 +++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/access_control/wallet_04_confused_sign/wallet_04_confused_sign.sol
-@@ -1,17 +1,38 @@
-+contract sGuard {
+@@ -1,17 +1,39 @@
++contract sGuard{
 
-+    function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
++  function sub_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
 
-+        assert(b <= a);
++    assert(b <= a);
 
-+        return a - b;
++    return a - b;
 
-+    }
++  }
 
-+
++  
 
-+    function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
++  function add_uint256(uint256 a, uint256 b) internal pure returns (uint256) {
 
-+        uint256 c = a + b;
++    uint256 c = a + b;
 
-+        assert(c >= a);
++    assert(c >= a);
 
-+        return c;
++    return c;
 
-+    }
++  }
 
-+
++  
 
-+    bool internal locked_;
++  bool internal locked_;
 
-+    constructor() internal {
++  constructor() internal {
 
-+        locked_ = false;
++    locked_ = false;
 
-+    }
++  }
 
-+    modifier nonReentrant_() {
++  modifier nonReentrant_() {
 
-+        require(!locked_);
++    require(!locked_);
 
-+        locked_ = true;
++    locked_ = true;
 
-+        _;
++    _;
 
-+        locked_ = false;
++    locked_ = false;
 
-+    }
++  }
 
 +}
 
@@ -59,11 +59,11 @@
 
  
 
--pragma solidity ^0.4.24;
+- pragma solidity ^0.4.24;
 
--
+ 
 
- /* User can add pay in and withdraw Ether.
+  /* User can add pay in and withdraw Ether.
 
      Unfortunatelty, the developer was drunk and used the wrong comparison operator in "withdraw()"
 
@@ -73,59 +73,55 @@
 
  
 
--contract Wallet {
+- contract Wallet {
 
-+contract Wallet is sGuard {
++ contract Wallet  is sGuard {
 
-     address creator;
-
- 
-
-     mapping(address => uint256) balances;
-
-@@ -20,16 +41,18 @@
-         creator = msg.sender;
-
-     }
+      address creator;
 
  
 
--    function deposit() public payable {
+      mapping(address => uint256) balances;
 
--        assert(balances[msg.sender] + msg.value > balances[msg.sender]);
+@@ -20,16 +42,16 @@
+          creator = msg.sender;
 
--        balances[msg.sender] += msg.value;
-
-+    function deposit() public payable nonReentrant_ {
-
-+        assert(
-
-+            add_uint256(balances[msg.sender], msg.value) > balances[msg.sender]
-
-+        );
-
-+        balances[msg.sender] = add_uint256(balances[msg.sender], msg.value);
-
-     }
+      }
 
  
 
--    function withdraw(uint256 amount) public {
+-     function deposit() public payable {
 
-+    function withdraw(uint256 amount) public nonReentrant_ {
+-         assert(balances[msg.sender] + msg.value > balances[msg.sender]);
 
-         // <yes> <report> ACCESS_CONTROL
+-         balances[msg.sender] += msg.value;
 
-         require(amount >= balances[msg.sender]);
++      function deposit() nonReentrant_  public payable {
 
-         msg.sender.transfer(amount);
++         assert(add_uint256(balances[msg.sender], msg.value) > balances[msg.sender]);
 
--        balances[msg.sender] -= amount;
++         balances[msg.sender] = add_uint256(balances[msg.sender], msg.value);
 
-+        balances[msg.sender] = sub_uint256(balances[msg.sender], amount);
-
-     }
+      }
 
  
 
-     // In an emergency the owner can migrate  allfunds to a different address.
+-     function withdraw(uint256 amount) public {
+
++      function withdraw(uint256 amount) nonReentrant_  public {
+
+          // <yes> <report> ACCESS_CONTROL
+
+          require(amount >= balances[msg.sender]);
+
+          msg.sender.transfer(amount);
+
+-         balances[msg.sender] -= amount;
+
++         balances[msg.sender] = sub_uint256(balances[msg.sender], amount);
+
+      }
+
+ 
+
+      // In an emergency the owner can migrate  allfunds to a different address.

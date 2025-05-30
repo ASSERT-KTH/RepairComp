@@ -1,0 +1,64 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/reentrancy_insecure.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/sGuard/reentrancy/reentrancy_insecure/reentrancy_insecure.sol
+@@ -1,17 +1,28 @@
++contract sGuard{
+
++  bool internal locked_;
+
++  constructor() internal {
+
++    locked_ = false;
+
++  }
+
++  modifier nonReentrant_() {
+
++    require(!locked_);
+
++    locked_ = true;
+
++    _;
+
++    locked_ = false;
+
++  }
+
++}
+
+ /*
+
+  * @source: https://consensys.github.io/smart-contract-best-practices/known_attacks/
+
+  * @author: consensys
+
+  * @vulnerable_at_lines: 17
+
+  */
+
+ 
+
+-pragma solidity ^0.5.0;
+
+ 
+
+-contract Reentrancy_insecure {
+
++contract Reentrancy_insecure  is sGuard {
+
+ 
+
+     // INSECURE
+
+     mapping (address => uint) private userBalances;
+
+ 
+
+-    function withdrawBalance() public {
+
++     function withdrawBalance() nonReentrant_  public {
+
+         uint amountToWithdraw = userBalances[msg.sender];
+
+         // <yes> <report> REENTRANCY
+
+         (bool success, ) = msg.sender.call.value(amountToWithdraw)(""); // At this point, the caller's code is executed, and can call withdrawBalance again

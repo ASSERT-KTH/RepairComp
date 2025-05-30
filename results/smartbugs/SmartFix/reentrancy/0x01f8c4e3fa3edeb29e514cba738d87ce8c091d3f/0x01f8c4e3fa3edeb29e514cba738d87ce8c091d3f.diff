@@ -1,0 +1,55 @@
+--- https://github.com/smartbugs/smartbugs-curated/tree/main/dataset/reentrancy/0x01f8c4e3fa3edeb29e514cba738d87ce8c091d3f.sol
++++ https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs/SmartFix/reentrancy/0x01f8c4e3fa3edeb29e514cba738d87ce8c091d3f/0x01f8c4e3fa3edeb29e514cba738d87ce8c091d3f.sol
+@@ -40,6 +40,7 @@
+     public
+
+     payable
+
+     {
+
++        require(((balances[msg.sender] + msg.value) >= balances[msg.sender])); /* <FIX> Insert:BC */
+
+         balances[msg.sender]+= msg.value;
+
+         Log.AddMessage(msg.sender,msg.value,"Put");
+
+     }
+
+@@ -51,11 +52,12 @@
+         if(balances[msg.sender]>=MinSum && balances[msg.sender]>=_am)
+
+         {
+
+             // <yes> <report> REENTRANCY
+
++            balances[msg.sender] = (balances[msg.sender] - _am); /* <FIX> Move */
+
+             if(msg.sender.call.value(_am)())
+
+             {
+
+-                balances[msg.sender]-=_am;
+
++                /* <FIX> Move: balances[msg.sender]-=_am; */
+
+                 Log.AddMessage(msg.sender,_am,"Collect");
+
+-            }
+
++            } else {revert (); } /* <FIX> add revert */
+
+         }
+
+     }
+
+     
+
+@@ -93,4 +95,4 @@
+         LastMsg.Data = _data;
+
+         History.push(LastMsg);
+
+     }
+
+-}
++}
