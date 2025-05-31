@@ -64,37 +64,28 @@ find Elysium/ -name "*.bin" | wc
 find SmartShield/ -name "*.bin" | wc
 ```
 
-| Tool                  | #outputs | #diff patches | compilable | patches w/o bugs | patches w/ bugs | paches w/ new bugs (detector+manual check) | og contracts w/o bugs |
-|-----------------------|----------|---------------|------------|------------------|-----------------|--------------------|-----------------------|
-| Elysium (binary)      |      121 |            95 |           -|                  |                 |                    |                     26|
-| Smartshield (binary)  |      135 |            135|           -|                  |                 |                    |                     68|
-| sGuard                |      109 |             62|         108|                 2|               56|                    |                      2|
-| sGuardPlus            |       81 |             81|          81|                71|               10|                  10|                     71|
-| SmartFix              |       86 |             86|          86|                66|               20|                   1|                     66|
-| TIPS                  |      242 |            242|         234|               177|               57|                    |                    132|
-| SolGPT                |      552 |            552|         527|               251|              276|                    |                     70|
 
 
 
-
-# Per Contract Overview (Updated on 17th December)
+# Per Contract Overview 
 This table collects the information per contract in the dataset. For tools that generate multiple patches(SolGPT &TIPS) we count if at least 1 patch fulfills the category.
 - Total contracts in the repository: 143
 - 1 duplicate (0x627fa62ccbb1c1b04ffaecd72a53e37fc0e17839.sol)
-- Valid Patches are the amount of contracts per tool that have a different patch and compile
-- Detected means. amount of original files per tool labeled with a (or more) vulnerability from the corresponding dataset label.
-- Fixed means that the number of original contracts per tool that have patches where the corresponding vulnerabilities number was reduced
 
 
-| Tool                  | #generation | compilable | #diff patches | valid patches (Comp&Diff) | Detected | Fixed |
-|-----------------------|-------------|------------|---------------|---------------------------|----------|-------|
-| Elysium (binary)      |         121 |         N/A|             95|                         95|       52 |    52 |
-| Smartshield (binary)  |         135 |         N/A|            135|                        135|       59 |    59 |
-| sGuard                |         109 |         108|             62|                         61|       35 |     3 |
-| sGuardPlus            |          81 |          81|             81|                         81|       70 |    70 |
-| SmartFix              |          86 |          86|             86|                         86|       51 |    50 |
-| SolGPT                |         139 |         138|            139|                        138|       97 |    89 |
-| TIPS                  |         140 |         138|            140|                        138|       82 |    81 |
+
+
+
+| Level | Tool | detected C | generated C | compilable C | different C | consistent C |
+|-------|------|------------|-------------|--------------|-------------|--------------|
+| source code | sGuard | 35 | 109 | 108 | 62 | 2 |
+|       | sGuard+ | 70 | 81 | 81 | 81 | 70 |
+|       | SmartFix | 51 | 86 | 86 | 86 | 48 |
+|       | SolGPT | 97 | 139 | 138 | 139 | 88 |
+|       | TIPS | 82 | 140 | 138 | 140 | 81 |
+| bytecode | Elysium | 52 | 121 | n/a | 95 | 52 |
+|       | SmartShield | 59 | 135 | n/a | 135 | 38 |
+| **Total Contracts** | | **143** | **119** | **142** | **142** | **115** |
 
 
 # Mitigated exploits
