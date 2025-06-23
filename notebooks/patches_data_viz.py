@@ -1,0 +1,82 @@
+import marimo
+
+__generated_with = "0.13.15"
+app = marimo.App(width="medium")
+
+@app.cell
+def _():
+    import marimo as mo
+    import pandas as pd
+    import polars as pl
+    import os
+    import matplotlib.pyplot as plt
+    return mo, pd, pl, os, plt
+
+@app.cell
+def _(mo, pl):
+    inv_df = pl.read_csv(str(mo.notebook_location() / ".." / "results" / "smartbugs" / "data_analysis" / "patches_w_require.csv"))
+    return inv_df
+
+@app.cell
+def _(inv_df):
+    inv_df
+    return inv_df
+
+@app.cell
+def _(inv_df, pl):
+    counts = (
+        inv_df
+        .group_by("ChangeType")
+        .agg(pl.len().alias("Count"))  
+    )
+    counts
+    return counts
+
+@app.cell
+def _(inv_df, pl):
+    tool_counts = (
+        inv_df
+        .group_by("Tool")
+        .agg(pl.len().alias("PatchCount")) 
+        .sort("PatchCount", descending=True)
+    )
+    tool_counts
+    return tool_counts
+
+@app.cell
+def _(inv_df, pl):
+    tool_change = (
+        inv_df
+        .group_by(["Tool", "ChangeType"])
+        .agg(pl.len().alias("Count"))  
+        .pivot(values="Count", index="Tool", on="ChangeType")
+        .fill_null(0)
+    )
+    tool_change
+    return tool_change
+
+@app.cell
+def _(inv_df, pl):
+    category_counts = (
+        inv_df
+        .group_by("Category")
+        .agg(pl.len().alias("Count")) 
+        .sort("Count", descending=True)
+    )
+    category_counts
+    return category_counts
+
+@app.cell
+def _(inv_df, pl):
+    req_cat = (
+        inv_df
+        .group_by(["RequireType", "Category"])
+        .agg(pl.len().alias("Count"))  # and here
+        .pivot(values="Count", index="RequireType", on="Category") 
+        .fill_null(0)
+    )
+    req_cat
+    return req_cat
+
+if __name__ == "__main__":
+    app.run()
