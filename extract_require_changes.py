@@ -4,9 +4,13 @@ import pandas as pd
 from tabulate import tabulate
 
 
-BASE_DIR      = "/Users/mac/Desktop/RepairComp/results/smartbugs"
+import os
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.join(SCRIPT_DIR, "results", "smartbugs")
+
 OUTPUT_CSV    = os.path.join(BASE_DIR, "data_analysis", "patches_w_require.csv")
-OUTPUT_TABLE  = os.path.join(BASE_DIR, "data_analysis", "pretty_table2.txt")
+
 GITHUB_BASE   = (
     "https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs"
 )
