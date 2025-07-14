@@ -10,6 +10,8 @@ OUTPUT_CSV = os.path.join(BASE_DIR, "data_analysis", "patches_w_require.csv")
 GITHUB_BASE = (
     "https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs"
 )
+MITIGATION_CSV = os.path.join(BASE_DIR, "data_analysis", "mitigated_exploits_contract_per_tool.csv")  
+
 
 def clean_keys(df: pd.DataFrame) -> pd.DataFrame:
     for col in ("Tool", "Category", "Patch"):
@@ -38,8 +40,8 @@ def classify_require_type(line: str, inside_modifier: bool = False) -> str:
             return "runtime check"
         if any(x in lower for x in ["balances", "limit", ">=", "<=", ">", "<", "!=", "=="]):
             return "invariant"
-        return "unknown"
-    return "unknown"
+        return "invariant"
+    return "invariant"
 
 def flush_changes(
     added: list[str],
