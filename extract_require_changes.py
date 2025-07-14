@@ -10,7 +10,6 @@ OUTPUT_CSV = os.path.join(BASE_DIR, "data_analysis", "patches_w_require.csv")
 GITHUB_BASE = (
     "https://github.com/ASSERT-KTH/RepairComp/blob/main/results/smartbugs"
 )
-MITIGATION_CSV = os.path.join(BASE_DIR, "data_analysis", "mitigated_exploits_contract_per_tool.csv")  
 
 
 def clean_keys(df: pd.DataFrame) -> pd.DataFrame:
