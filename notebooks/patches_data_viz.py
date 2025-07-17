@@ -68,7 +68,7 @@ def _():
 
 @app.cell
 def _(mo, pl):
-    inv_df = pl.read_csv(str(mo.notebook_location() / ".." / "results" / "smartbugs" / "data_analysis" / "patches_w_require.csv"))
+    inv_df = pl.read_csv(str(mo.notebook_location() / ".." / "notebooks" / "public"/"patches_w_require.csv"))
     return inv_df
 
 @app.cell
