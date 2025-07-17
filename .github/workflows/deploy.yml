@@ -34,6 +34,7 @@ jobs:
         run: |
            mkdir -p notebooks/public
            cp results/smartbugs/data_analysis/all_patches_stats.csv notebooks/public/
+           cp results/smartbugs/data_analysis/patches_w_require.csv notebooks/public/
            ls -la notebooks/public/  # Verify the copy worked
           
 
